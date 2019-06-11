@@ -29,7 +29,7 @@ public class appGlobals extends Application {
 		}
 	}
 
-	
+
 	public void restoreInstance(Bundle savedInstanceState) {
 		try {
 			userid=savedInstanceState.getInt("userid");
