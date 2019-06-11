@@ -1,10 +1,12 @@
-package com.dts.proyectovacio;
+package com.dts.base;
 
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
+
+import com.dts.tomweb.R;
 
 public class BaseDatosScript {
 	

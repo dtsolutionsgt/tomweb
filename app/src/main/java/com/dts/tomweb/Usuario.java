@@ -1,4 +1,4 @@
-package com.dts.proyectovacio;
+package com.dts.tomweb;
 
 import android.graphics.Color;
 import android.os.Bundle;
@@ -8,6 +8,10 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
+
+import com.dts.base.clsClasses;
+import com.dts.classes.clsRolObj;
+import com.dts.classes.clsUsuarioObj;
 
 import java.util.ArrayList;
 

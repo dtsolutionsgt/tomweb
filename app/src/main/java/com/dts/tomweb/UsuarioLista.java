@@ -1,4 +1,4 @@
-package com.dts.proyectovacio;
+package com.dts.tomweb;
 
 import android.content.Intent;
 import android.view.View;
@@ -8,6 +8,10 @@ import android.widget.ListView;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+
+import com.dts.base.clsClasses;
+import com.dts.classes.clsUsuarioObj;
+import com.dts.listadapt.LA_Usuario;
 
 public class UsuarioLista extends PBase {
 

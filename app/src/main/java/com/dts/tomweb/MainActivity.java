@@ -1,4 +1,4 @@
-package com.dts.proyectovacio;
+package com.dts.tomweb;
 
 import android.Manifest;
 import android.app.AlertDialog;
@@ -13,6 +13,8 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.dts.classes.clsUsuarioObj;
 
 public class MainActivity extends PBase {
 

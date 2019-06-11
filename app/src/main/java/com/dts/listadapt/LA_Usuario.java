@@ -1,4 +1,4 @@
-package com.dts.proyectovacio;
+package com.dts.listadapt;
 
 import android.content.Context;
 
@@ -9,20 +9,26 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.ImageView;
 import android.widget.TextView;
 
-public class LA_Menu extends BaseAdapter {
+import com.dts.base.AppMethods;
+import com.dts.base.DateUtils;
+import com.dts.base.MiscUtils;
+import com.dts.base.clsClasses;
+import com.dts.tomweb.PBase;
+import com.dts.tomweb.R;
+
+public class LA_Usuario extends BaseAdapter {
 
     private MiscUtils mu;
     private DateUtils du;
     private AppMethods app;
 
-    private ArrayList<clsClasses.clsMenu> items = new ArrayList<clsClasses.clsMenu>();
+    private ArrayList<clsClasses.clsUsuario> items = new ArrayList<clsClasses.clsUsuario>();
     private int selectedIndex;
     private LayoutInflater l_Inflater;
 
-    public LA_Menu(Context context, PBase owner, ArrayList<clsClasses.clsMenu> results) {
+    public LA_Usuario(Context context, PBase owner, ArrayList<clsClasses.clsUsuario> results) {
         items = results;
         l_Inflater = LayoutInflater.from(context);
         selectedIndex = -1;
@@ -58,12 +64,12 @@ public class LA_Menu extends BaseAdapter {
 
         if (convertView == null) {
 
-            convertView = l_Inflater.inflate(R.layout.lv_menu, null);
+            convertView = l_Inflater.inflate(R.layout.lv_usuario, null);
             holder = new ViewHolder();
 
             holder.lbl1 = (TextView) convertView.findViewById(R.id.lblV1);
-            holder.lbl2 = (TextView) convertView.findViewById(R.id.lblV2);
-            holder.img1 = (ImageView) convertView.findViewById(R.id.imageView5);
+            holder.lbl2 = (TextView) convertView.findViewById(R.id.lblV4);
+            holder.lbl3 = (TextView) convertView.findViewById(R.id.lblV5);
 
             convertView.setTag(holder);
         } else {
@@ -71,17 +77,8 @@ public class LA_Menu extends BaseAdapter {
         }
 
         holder.lbl1.setText("" + items.get(position).nombre);
-        holder.lbl2.setText("" + items.get(position).id);
-
-        switch (items.get(position).id) {
-            case 1:
-                holder.img1.setImageResource(R.drawable.users);break;
-            case 2:
-                holder.img1.setImageResource(R.drawable.update);break;
-            case 3:
-                holder.img1.setImageResource(R.drawable.btn_exit);break;
-        }
-
+        holder.lbl2.setText("" + items.get(position).login);
+        holder.lbl3.setText("" + items.get(position).clave);
 
         if (selectedIndex != -1 && position == selectedIndex) {
             convertView.setBackgroundColor(Color.rgb(26, 138, 198));
@@ -93,8 +90,7 @@ public class LA_Menu extends BaseAdapter {
     }
 
     static class ViewHolder {
-        TextView lbl1, lbl2;
-        ImageView img1;
+        TextView lbl1, lbl2, lbl3;
     }
 
 }

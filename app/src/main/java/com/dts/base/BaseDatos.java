@@ -1,4 +1,4 @@
-package com.dts.proyectovacio;
+package com.dts.base;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -8,6 +8,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Environment;
 import android.widget.Toast;
+
+import com.dts.tomweb.R;
 
 import java.util.ArrayList;
 import java.util.List;

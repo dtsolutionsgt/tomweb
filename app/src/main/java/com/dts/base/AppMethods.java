@@ -1,16 +1,10 @@
-package com.dts.proyectovacio;
+package com.dts.base;
 
 import android.content.Context;
-import android.database.Cursor;
-import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
-import android.net.wifi.WifiManager;
-import android.os.Environment;
 import android.view.Gravity;
 import android.widget.Toast;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.util.Calendar;
 
 public class AppMethods {

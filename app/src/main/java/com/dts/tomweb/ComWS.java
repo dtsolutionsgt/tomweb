@@ -1,4 +1,4 @@
-package com.dts.proyectovacio;
+package com.dts.tomweb;
 
 
 import android.app.AlertDialog;
@@ -11,6 +11,11 @@ import android.os.Looper;
 import android.os.SystemClock;
 import android.util.Log;
 import android.view.View;
+
+import com.dts.base.BaseDatos;
+import com.dts.base.DateUtils;
+import com.dts.base.clsDataBuilder;
+
 import org.ksoap2.SoapEnvelope;
 import org.ksoap2.serialization.PropertyInfo;
 import org.ksoap2.serialization.SoapObject;

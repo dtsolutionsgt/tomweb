@@ -1,4 +1,4 @@
-package com.dts.proyectovacio;
+package com.dts.base;
 
 public class clsClasses {
 

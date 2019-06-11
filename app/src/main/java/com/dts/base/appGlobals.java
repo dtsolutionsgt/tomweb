@@ -1,4 +1,4 @@
-package com.dts.proyectovacio;
+package com.dts.base;
 
 import android.app.Application;
 import android.content.Context;
@@ -8,7 +8,7 @@ import android.widget.Toast;
 
 public class appGlobals extends Application {
 
-	protected Context context;
+	public Context context;
 
 	// Variables publicas
 

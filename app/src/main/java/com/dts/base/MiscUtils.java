@@ -1,10 +1,13 @@
-package com.dts.proyectovacio;
+package com.dts.base;
 
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.widget.Toast;
+
+import com.dts.base.appGlobals;
+import com.dts.tomweb.R;
 
 import java.io.File;
 import java.text.DecimalFormat;

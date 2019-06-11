@@ -1,9 +1,12 @@
-package com.dts.proyectovacio;
+package com.dts.classes;
 
 import java.util.ArrayList;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+
+import com.dts.base.BaseDatos;
+import com.dts.base.clsClasses;
 
 public class clsUsuarioObj {
 
