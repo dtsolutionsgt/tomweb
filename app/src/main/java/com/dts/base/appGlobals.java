@@ -12,7 +12,7 @@ public class appGlobals extends Application {
 
 	// Variables publicas
 
-	
+
 	public String nombreusuario;
 	public boolean exitapp;
 
