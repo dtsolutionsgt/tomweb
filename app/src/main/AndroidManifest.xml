@@ -6,15 +6,16 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
-        android:name="com.dts.tomweb.com.dts.base.appGlobals"
+        android:name="com.dts.base.appGlobals"
         android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
+        android:icon="@drawable/tomweb_logo"
+        android:label="Tomweb"
+        android:roundIcon="@drawable/tomweb_logo"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity android:name=".Licencia"></activity>
         <activity
-            android:name="com.dts.tomweb.MainActivity"
+            android:name=".MainActivity"
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.Holo.Light.NoActionBar"
             android:windowSoftInputMode="stateHidden">
@@ -24,23 +25,24 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="com.dts.tomweb.PBase" />
+        <activity android:name=".PBase" />
         <activity
-            android:name="com.dts.tomweb.MenuPrincipal"
+            android:name=".MenuPrincipal"
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.Holo.Light.NoActionBar"
             android:windowSoftInputMode="stateHidden" />
         <activity
-            android:name="com.dts.tomweb.UsuarioLista"
+            android:name=".UsuarioLista"
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.Holo.Light.NoActionBar"
             android:windowSoftInputMode="stateHidden" />
         <activity
-            android:name="com.dts.tomweb.Usuario"
+            android:name=".Usuario"
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.Holo.Light.NoActionBar"
             android:windowSoftInputMode="stateHidden" />
-        <activity android:name="com.dts.tomweb.ComWS"
+        <activity
+            android:name=".ComWS"
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.Holo.Light.NoActionBar"
             android:windowSoftInputMode="stateHidden" />

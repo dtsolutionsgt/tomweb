@@ -30,31 +30,134 @@ public class BaseDatosScript {
 
 		try {
 
-			sql = "CREATE TABLE [Usuario] (" +
-					"[ID] INTEGER NOT NULL," +
-					"[Nombre] TEXT NOT NULL," +
-					"[Activo] TEXT NOT NULL," +
-					"[Login] TEXT NOT NULL," +
-					"[Clave] TEXT NOT NULL," +
-					"[Rol] INTEGER NOT NULL," +
-					"PRIMARY KEY ([ID])" +
+			sql = "CREATE TABLE [Articulo] (" +
+					"id_articulo TEXT NOT NULL," +
+					"id_empresa INTEGER NOT NULL," +
+					"codigo_barra TEXT NOT NULL," +
+					"descripcion TEXT NOT NULL," +
+					"costo REAL NOT NULL," +
+					"tipo_conteo TEXT NOT NULL," +
+					"PRIMARY KEY ([id_articulo])" +
 					");";
 			db.execSQL(sql);
 
-			sql = "CREATE INDEX Usuario_idx1 ON Usuario(Nombre)";
+			sql = "CREATE INDEX Articulo_idx1 ON Articulo(codigo_barra)";
+			db.execSQL(sql);
+			sql = "CREATE INDEX Articulo_idx2 ON Articulo(descripcion)";
 			db.execSQL(sql);
 
-
-			sql="CREATE TABLE [Rol] ("+
-					"ID INTEGER NOT NULL,"+
-					"Nombre TEXT NOT NULL,"+
-					"PRIMARY KEY ([ID])"+
+			sql = "CREATE TABLE [Articulo_codigo_barra] (" +
+					"id_empresa INTEGER NOT NULL," +
+					"id_articulo TEXT NOT NULL," +
+					"codigo_barra TEXT NOT NULL," +
+					"PRIMARY KEY ([id_empresa])" +
 					");";
 			db.execSQL(sql);
 
-			sql="CREATE INDEX Rol_idx1 ON Rol(Nombre)";
+			sql = "CREATE TABLE [Estado_inventario] (" +
+					"Id_estado INTEGER NOT NULL," +
+					"nombre TEXT NOT NULL," +
+					"PRIMARY KEY ([Id_estado])" +
+					");";
 			db.execSQL(sql);
 
+			sql = "CREATE TABLE [Estatus_handheld] (" +
+					"id INTEGER NOT NULL," +
+					"nombre TEXT NOT NULL," +
+					"PRIMARY KEY ([id])" +
+					");";
+			db.execSQL(sql);
+
+			sql = "CREATE TABLE [Inventario_ciego] (" +
+					"id_inventario_enc INTEGER NOT NULL," +
+					"codigo_barra TEXT NOT NULL," +
+					"cantidad REAL NOT NULL," +
+					"id INTEGER NOT NULL," +
+					"comunicado TEXT NOT NULL," +
+					"ubicacion TEXT NOT NULL," +
+					"id_operador INTEGER NOT NULL," +
+					"fecha INTEGER NOT NULL," +
+					"Id_registro TEXT NOT NULL," +
+					"eliminado INTEGER NOT NULL," +
+					"PRIMARY KEY ([id])" +
+					");";
+			db.execSQL(sql);
+
+			sql = "CREATE TABLE [Inventario_detalle] (" +
+					"id_inventario_det INTEGER NOT NULL," +
+					"id_inventario_enc INTEGER NOT NULL," +
+					"id_articulo TEXT NOT NULL," +
+					"ubicacion TEXT NOT NULL," +
+					"cantidad REAL NOT NULL," +
+					"codigo_barra TEXT NOT NULL," +
+					"comunicado TEXT NOT NULL," +
+					"id_operador INTEGER NOT NULL," +
+					"fecha INTEGER NOT NULL," +
+					"Id_registro TEXT NOT NULL," +
+					"eliminado INTEGER NOT NULL," +
+					"PRIMARY KEY ([id_inventario_det])" +
+					");";
+			db.execSQL(sql);
+
+			sql = "CREATE TABLE [Inventario_encabezado] (" +
+					"id_inventario_enc INTEGER NOT NULL," +
+					"id_estado TEXT NOT NULL," +
+					"id_empresa INTEGER NOT NULL," +
+					"fecha_inicio INTEGER NOT NULL," +
+					"fecha_final INTEGER NOT NULL," +
+					"nombre TEXT NOT NULL," +
+					"id_usuario INTEGER NOT NULL," +
+					"tipo_inventario INTEGER NOT NULL," +
+					"PRIMARY KEY ([id_inventario_enc])" +
+					");";
+			db.execSQL(sql);
+
+			sql = "CREATE TABLE [Inventario_operador] (" +
+					"id_inventario_enc INTEGER NOT NULL," +
+					"id_operador INTEGER NOT NULL," +
+					"PRIMARY KEY ([id_inventario_enc],[id_operador])" +
+					");";
+			db.execSQL(sql);
+
+			sql = "CREATE TABLE [Inventario_teorico] (" +
+					"id_inventario_teorico INTEGER NOT NULL," +
+					"id_empresa INTEGER NOT NULL," +
+					"id_articulo TEXT NOT NULL," +
+					"descripcion TEXT NOT NULL," +
+					"cantidad REAL NOT NULL," +
+					"codigo_barra TEXT NOT NULL," +
+					"costo REAL NOT NULL," +
+					"tipo_conteo TEXT NOT NULL," +
+					"id_inventario_enc INTEGER NOT NULL," +
+					"comunicado TEXT NOT NULL," +
+					"PRIMARY KEY ([id_inventario_teorico],[id_empresa],[id_articulo],[codigo_barra])" +
+					");";
+			db.execSQL(sql);
+
+			sql = "CREATE TABLE [Operadores] (" +
+					"id_operador INTEGER NOT NULL," +
+					"id_empresa INTEGER NOT NULL," +
+					"codigo TEXT NOT NULL," +
+					"clave TEXT NOT NULL," +
+					"nombre REAL NOT NULL," +
+					"PRIMARY KEY ([id_operador])" +
+					");";
+			db.execSQL(sql);
+
+			sql = "CREATE TABLE [Registro_handheld] (" +
+					"id_registro INTEGER NOT NULL," +
+					"id_empresa INTEGER NOT NULL," +
+					"fecha_registro INTEGER NOT NULL," +
+					"serie_dispositivo TEXT NOT NULL," +
+					"id_estatus TEXT NOT NULL," +
+					"id_pais TEXT NOT NULL," +
+					"descripcion TEXT NOT NULL," +
+					"PRIMARY KEY ([id_empresa],[serie_dispositivo])" +
+					");";
+			db.execSQL(sql);
+
+
+			//*******************************************
 
 			sql = "CREATE TABLE [Params] (" +
 					"ID integer NOT NULL," +
@@ -64,7 +167,7 @@ public class BaseDatosScript {
 					"param3 INTEGER  NOT NULL," +
 					"param4 INTEGER  NOT NULL," +
 					"lic1 TEXT  NOT NULL," +
-					"lic2 INTEGER  NOT NULL," +
+					"lic2 TEXT  NOT NULL," +
 					"PRIMARY KEY ([ID])" +
 					");";
 			db.execSQL(sql);
@@ -80,14 +183,7 @@ public class BaseDatosScript {
 	public int scriptData(SQLiteDatabase db) {
 
 		try {
-			db.execSQL("INSERT INTO Params VALUES (0,0,'','',0,0,'',0);");
-
-			db.execSQL("INSERT INTO Rol VALUES (1,'Operador');");
-			db.execSQL("INSERT INTO Rol VALUES (2,'Supervisor');");
-			db.execSQL("INSERT INTO Rol VALUES (3,'Administrador');");
-			db.execSQL("INSERT INTO Rol VALUES (4,'Gerente');");
-
-			db.execSQL("INSERT INTO Usuario VALUES (1,'Desarrollo',1,'1','1',0);");
+			db.execSQL("INSERT INTO Params VALUES (0,0,'','',0,0,'','');");
 
 			return 1;
 		} catch (SQLiteException e) {

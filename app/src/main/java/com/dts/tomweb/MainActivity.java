@@ -13,7 +13,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-
+import android.support.v4.app.ActivityCompat;
 import com.dts.classes.clsUsuarioObj;
 
 public class MainActivity extends PBase {
@@ -34,8 +34,7 @@ public class MainActivity extends PBase {
 
         instanceState=savedInstanceState;
 
-        startApplication();
-        //grantPermissions();
+        grantPermissions();
     }
 
     // Manejo de permisos de la aplicacion - solo en MainActivity
@@ -49,7 +48,6 @@ public class MainActivity extends PBase {
             txtPass = (EditText) findViewById(R.id.editText3);
             lblTitle = (TextView) findViewById(R.id.textView2);
 
-            lblTitle.setText("Nombre de aplicación");
             txtUser.setText("1");txtPass.setText("1");
 
             setHandlers();
@@ -64,37 +62,30 @@ public class MainActivity extends PBase {
         try {
             if (Build.VERSION.SDK_INT >= 23) {
 
-                if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
-                        && checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-                        && checkSelfPermission(Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED
-                        && checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+                if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
                     startApplication();
                 } else {
-                    /*ActivityCompat.requestPermissions(this,
-                            new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                                    Manifest.permission.ACCESS_FINE_LOCATION,
-                                    Manifest.permission.CALL_PHONE,
-                                    Manifest.permission.CAMERA}, 1);*/
+                    ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
                 }
+            } else {
+                startApplication();
             }
 
         } catch (Exception e) {
-            msgbox(new Object() {
-            }.getClass().getEnclosingMethod().getName() + " . " + e.getMessage());
         }
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-        if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
-                && checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-                && checkSelfPermission(Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED
-                && checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
-            Toast.makeText(this, "Permisos aplicados.", Toast.LENGTH_SHORT).show();
-            startApplication();
-        } else {
-            Toast.makeText(this, "Permisos incompletos.", Toast.LENGTH_LONG).show();
-            super.finish();
+        try {
+            if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED ) {
+                Toast.makeText(this, "Permisos aplicados.", Toast.LENGTH_SHORT).show();
+                startApplication();
+            } else {
+                Toast.makeText(this, "Permisos incompletos.", Toast.LENGTH_LONG).show();
+                super.finish();
+            }
+        }catch (Exception e){
         }
     }
 
