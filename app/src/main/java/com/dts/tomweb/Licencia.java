@@ -11,7 +11,6 @@ public class Licencia extends PBase {
 
         super.InitBase(savedInstanceState);
     }
-
-
     
+
 }
