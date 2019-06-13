@@ -34,59 +34,25 @@ public class MenuPrincipal extends PBase {
         listView = (ListView) findViewById(R.id.listView1);
         lblTitle = (TextView) findViewById(R.id.textView3);lblTitle.setText(gl.nombreusuario);
 
-        rolid=gl.rolid;
-
-        setHandlers();
-
-        buildMenuItems();
-        listItems();
-
     }
 
+    //region Events
 
-    // Events
-
-    private void setHandlers() {
-
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Object lvObj = listView.getItemAtPosition(position);
-                clsClasses.clsMenu item = (clsClasses.clsMenu)lvObj;
-
-                adapter.setSelectedIndex(position);
-
-                menuOption(position);
-            };
-        });
+    public void doInventario(View view) {
+        //startActivity(new Intent(this,XYZ.class));
     }
 
-    // Main
-
-    private void listItems() {
-        try {
-             adapter=new LA_Menu(this,this, menuitems);
-            listView.setAdapter(adapter);
-        } catch (Exception e) {
-            mu.msgbox(e.getMessage());
-        }
+    public void doCom(View view) {
+        startActivity(new Intent(this,ComWS.class));
     }
 
-    private void menuOption(int midx) {
-        switch (midx) {
-            case 0:
-                callback =1;
-                startActivity(new Intent(this,UsuarioLista.class));break;
-            case 1:
-                startActivity(new Intent(this,ComWS.class));break;
-            case 2:
-                msgAskExit("Salir de aplicación");break;
-        }
-
+    public void doExit(View view) {
+        msgAskExit("Salir de aplicación");
     }
 
+    //endregion
 
-    // Dialogs
+    //region Dialogs
 
     private void msgAskExit(String msg) {
         AlertDialog.Builder dialog = new AlertDialog.Builder(this);
@@ -109,35 +75,15 @@ public class MenuPrincipal extends PBase {
 
     }
 
-
-    // Aux
-
-    private void buildMenuItems() {
-        clsClasses.clsMenu item;
-
-        menuitems.clear();
-
-        item=clsCls.new clsMenu();
-        item.id=1;item.nombre="Usuarios";
-        menuitems.add(item);
-
-        item=clsCls.new clsMenu();
-        item.id=2;item.nombre="Comunicación";
-        menuitems.add(item);
-
-        item=clsCls.new clsMenu();
-        item.id=3;item.nombre="Salir";
-        menuitems.add(item);
-
-    }
+    //endregion
 
 
-    // Activity Events
+    //region Activity Events
 
     @Override
     public void onBackPressed() {
         msgAskExit("Salir de aplicación");
     }
 
-
+    //endregion
 }

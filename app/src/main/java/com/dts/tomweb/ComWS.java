@@ -72,7 +72,7 @@ public class ComWS extends PBase {
 
         isbusy=0;
 
-        URL="http://192.168.1.51/wsAndrBase/wsandr.asmx";
+        URL="http://192.168.1.137/wsTomWeb/wsTom.asmx";
 
     }
 
@@ -123,6 +123,14 @@ public class ComWS extends PBase {
 
         dialog.show();
 
+    }
+
+    public void doHelp(View view) {
+
+    }
+
+    public void doExit(View view) {
+        finish();
     }
 
 

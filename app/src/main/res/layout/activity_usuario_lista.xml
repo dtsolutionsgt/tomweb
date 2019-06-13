@@ -14,14 +14,14 @@
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
         android:layout_marginTop="30dp"
-        app:layout_constraintBottom_toTopOf="@+id/relBottom"
+        app:layout_constraintBottom_toTopOf="@+id/relTop"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView7" />
 
     <RelativeLayout
-        android:id="@+id/relBottom"
+        android:id="@+id/relTop"
         android:layout_width="match_parent"
         android:layout_height="48dp"
         android:background="@drawable/color_medium"
@@ -78,7 +78,7 @@
     </RelativeLayout>
 
     <RelativeLayout
-        android:id="@+id/relTop"
+        android:id="@+id/relBot"
         android:layout_width="match_parent"
         android:layout_height="48dp"
         android:background="@drawable/color_dark"
@@ -109,7 +109,7 @@
         android:paddingLeft="20dp"
         android:paddingTop="5dp"
         android:text="Nombre"
-        app:layout_constraintTop_toBottomOf="@+id/relTop"
+        app:layout_constraintTop_toBottomOf="@+id/relBot"
         tools:layout_editor_absoluteX="0dp" />
 
     <TextView
@@ -121,5 +121,5 @@
         android:paddingTop="5dp"
         android:text="Login"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/relTop" />
+        app:layout_constraintTop_toBottomOf="@+id/relBot" />
 </android.support.constraint.ConstraintLayout>
