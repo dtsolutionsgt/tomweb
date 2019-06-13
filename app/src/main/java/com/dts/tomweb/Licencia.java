@@ -10,7 +10,9 @@ public class Licencia extends PBase {
         setContentView(R.layout.activity_licencia);
 
         super.InitBase(savedInstanceState);
+
+        int i=1;
     }
-    
+
 
 }
