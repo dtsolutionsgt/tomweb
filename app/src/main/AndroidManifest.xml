@@ -13,6 +13,7 @@
         android:roundIcon="@drawable/tomweb_logo"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
         <activity
             android:name=".MainActivity"
             android:screenOrientation="portrait"
@@ -47,6 +48,26 @@
             android:windowSoftInputMode="stateHidden" />
         <activity
             android:name=".Licencia"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden" />
+        <activity
+            android:name=".ListaConteos"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden" />
+        <activity
+            android:name=".TipoConteo"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden" />
+        <activity
+            android:name=".Productos"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden" />
+        <activity
+            android:name=".Conteo"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden" />
+        <activity
+            android:name=".Inventario"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="stateHidden" />
     </application>

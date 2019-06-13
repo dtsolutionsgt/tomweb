@@ -3,27 +3,24 @@ package com.dts.tomweb;
 import android.os.Bundle;
 import android.view.View;
 
-public class Licencia extends PBase {
+public class Conteo extends PBase {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_licencia);
+        setContentView(R.layout.activity_conteo);
 
         super.InitBase(savedInstanceState);
-
     }
-
-
 
     //region Events
 
-    public void doActivate(View view) {
-
-    }
-
     public void doExit(View view) {
         finish();
+    }
+
+    public void doHelp(View view) {
+
     }
 
     //endregion
@@ -47,7 +44,5 @@ public class Licencia extends PBase {
 
 
     //endregion
-
-
 
 }
