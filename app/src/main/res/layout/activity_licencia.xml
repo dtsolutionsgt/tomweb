@@ -113,7 +113,7 @@
     </RelativeLayout>
 
     <EditText
-        android:id="@+id/editText"
+        android:id="@+id/txtLic"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/relTop"
@@ -129,9 +129,9 @@
         android:id="@+id/textView4"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/editText"
-        android:layout_alignStart="@+id/editText"
-        android:layout_alignEnd="@+id/editText"
+        android:layout_below="@+id/txtLic"
+        android:layout_alignStart="@+id/txtLic"
+        android:layout_alignEnd="@+id/txtLic"
         android:layout_marginTop="10dp"
         android:gravity="center_horizontal"
         android:text="Ingrese clave de activación" />

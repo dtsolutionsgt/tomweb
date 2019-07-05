@@ -35,8 +35,8 @@ public class clsClasses {
         public String comunicado;
         public String ubicacion;
         public int id_operador;
-        public int fecha;
-        public String id_registro;
+        public String fecha;
+        public int id_registro;
         public int eliminado;
     }
 
@@ -88,7 +88,7 @@ public class clsClasses {
         public int id_empresa;
         public String codigo;
         public String clave;
-        public double nombre;
+        public String nombre;
     }
 
     public class clsRegistro_handheld {

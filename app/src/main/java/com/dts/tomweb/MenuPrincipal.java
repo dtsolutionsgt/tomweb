@@ -39,10 +39,11 @@ public class MenuPrincipal extends PBase {
     //region Events
 
     public void doInventario(View view) {
-        //startActivity(new Intent(this,XYZ.class));
+        startActivity(new Intent(this,Inventario.class));
     }
 
     public void doCom(View view) {
+        gl.validaLicDB=10;
         startActivity(new Intent(this,ComWS.class));
     }
 
@@ -57,7 +58,7 @@ public class MenuPrincipal extends PBase {
     private void msgAskExit(String msg) {
         AlertDialog.Builder dialog = new AlertDialog.Builder(this);
 
-        dialog.setTitle("Proyecto Vacío");
+        dialog.setTitle("Tom");
         dialog.setMessage("¿" + msg + "?");
 
         dialog.setPositiveButton("Si", new DialogInterface.OnClickListener() {

@@ -72,15 +72,14 @@ public class BaseDatosScript {
 					"id_inventario_enc INTEGER NOT NULL," +
 					"codigo_barra TEXT NOT NULL," +
 					"cantidad REAL NOT NULL," +
-					"id INTEGER NOT NULL," +
+					"id INTEGER PRIMARY KEY AUTOINCREMENT," +
 					"comunicado TEXT NOT NULL," +
 					"ubicacion TEXT NOT NULL," +
 					"id_operador INTEGER NOT NULL," +
-					"fecha INTEGER NOT NULL," +
-					"Id_registro TEXT NOT NULL," +
-					"eliminado INTEGER NOT NULL," +
-					"PRIMARY KEY ([id])" +
-					");";
+					"fecha TEXT NOT NULL," +
+					"Id_registro INTEGER NOT NULL," +
+					"eliminado INTEGER NOT NULL" +
+					")";
 			db.execSQL(sql);
 
 			sql = "CREATE TABLE [Inventario_detalle] (" +

@@ -11,8 +11,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ProgressBar;
@@ -24,15 +22,13 @@ import com.dts.listadapt.LA_Tablas2;
 
 import java.util.ArrayList;
 
-public class ListaConteos extends PBase {
+
+public class Tablas extends PBase {
 
     private GridView grid,dgrid;
     private Spinner spin,spinf;
     private ProgressBar pbar;
-    private EditText txtBarra;
-    private EditText txtUbic;
-    private TextView regs;
-    private CheckBox cb;
+    private EditText txt1;
 
     private ArrayList<String> spinlist = new ArrayList<String>();
     private ArrayList<String> values=new ArrayList<String>();
@@ -42,56 +38,79 @@ public class ListaConteos extends PBase {
 
     private int cw;
     private String scod;
-    private boolean consol;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_lista_conteos);
+        setContentView(R.layout.activity_tablas);
 
         super.InitBase(savedInstanceState);
 
         grid = (GridView) findViewById(R.id.gridview1);
         dgrid = (GridView) findViewById(R.id.gridview2);
-        pbar=(ProgressBar) findViewById(R.id.progressBar);pbar.setVisibility(View.INVISIBLE);
-        txtBarra = (EditText) findViewById(R.id.txtBarra);
-        txtUbic = (EditText) findViewById(R.id.txtUbic);
-        regs = (TextView) findViewById(R.id.txtRegs);
-        cb = (CheckBox) findViewById(R.id.cbConsolidar);
+        spin = (Spinner) findViewById(R.id.spinner);
+        pbar = (ProgressBar) findViewById(R.id.progressBar3);
+        pbar.setVisibility(View.INVISIBLE);
+        txt1 = (EditText) findViewById(R.id.editText1);
 
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        cw = (int) ((displayMetrics.widthPixels-22)/5)-1;
-
-        cb.setChecked(false);
-        consol=false;
+        cw = (int) ((displayMetrics.widthPixels - 22) / 5) - 1;
 
         setHandlers();
 
-        processTable();
+        fillSpinner();
+
 
     }
 
     //region Events
 
+    public void doClear(View view) {
+        try {
+            txt1.setText("");
+            txt1.requestFocus();
+        } catch (Exception e) {
+        }
+    }
+
     public void doExit(View view) {
         finish();
     }
 
-    public void doHelp(View view) {
+    public void doHelp(View view) { }
 
-    }
+    private void setHandlers() {
 
-    private void setHandlers(){
-
-        try{
-
-            cb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        try {
+            spin.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    if (cb.isChecked()==true) consol = true; processTable();
-                    if (cb.isChecked()==false) consol = false; processTable();
+                public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+                    TextView spinlabel;
+
+                    try {
+                        spinlabel = (TextView) parentView.getChildAt(0);
+                        spinlabel.setTextColor(Color.BLACK);
+                        spinlabel.setPadding(5, 0, 0, 0);
+                        spinlabel.setTextSize(18);
+                        spinlabel.setTypeface(spinlabel.getTypeface(), Typeface.BOLD);
+
+                        scod = spinlist.get(position);
+                        if (!scod.equalsIgnoreCase(" ")) {
+                            txt1.setText("");
+                            processTable();
+                        }
+                    } catch (Exception e) {
+                        mu.msgbox(e.getMessage());
+                    }
+
                 }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> parentView) {
+                    return;
+                }
+
             });
 
             grid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -105,9 +124,7 @@ public class ListaConteos extends PBase {
                         adapter.setSelectedIndex(position);
                         toast(item);
                     } catch (Exception e) {
-                        //addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"");
-                        msgbox("Error setHandler: "+e);
-                        //mu.msgbox(e.getMessage());
+                        mu.msgbox(e.getMessage());
                     }
                 }
 
@@ -125,9 +142,7 @@ public class ListaConteos extends PBase {
                         dadapter.setSelectedIndex(position);
                         toast(item);
                     } catch (Exception e) {
-                        //addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"");
-                        msgbox("Error setHandler: "+e);
-                        //mu.msgbox(e.getMessage());
+                        mu.msgbox(e.getMessage());
                     }
                 }
 
@@ -145,14 +160,12 @@ public class ListaConteos extends PBase {
                         adapter.setSelectedIndex(position);
                         msgbox(item);
                     } catch (Exception e) {
-                        //addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"");
-                        msgbox("Error setHandler: "+e);
                     }
                     return true;
                 }
             });
 
-            txtBarra.setOnKeyListener(new View.OnKeyListener() {
+            txt1.setOnKeyListener(new View.OnKeyListener() {
                 @Override
                 public boolean onKey(View arg0, int arg1, KeyEvent arg2) {
                     if (arg2.getAction() == KeyEvent.ACTION_DOWN) {
@@ -165,34 +178,18 @@ public class ListaConteos extends PBase {
                     return false;
                 }
             });
-
-            txtUbic.setOnKeyListener(new View.OnKeyListener() {
-                @Override
-                public boolean onKey(View arg0, int arg1, KeyEvent arg2) {
-                    if (arg2.getAction() == KeyEvent.ACTION_DOWN) {
-                        switch (arg1) {
-                            case KeyEvent.KEYCODE_ENTER:
-                                processTable();
-                                return true;
-                        }
-                    }
-                    return false;
-                }
-            });
-        }catch (Exception e){
-            //addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"");
-            msgbox("Error setHandler: "+e);
+        } catch (Exception e) {
         }
 
     }
 
     //endregion
 
+
     //region Main
 
     private void processTable() {
-        try{
-
+        try {
             pbar.setVisibility(View.VISIBLE);
 
             Handler mmtimer = new Handler();
@@ -204,10 +201,10 @@ public class ListaConteos extends PBase {
                     values.clear();
                     dvalues.clear();
 
-                    adapter = new LA_Tablas(ListaConteos.this, values);
+                    adapter = new LA_Tablas(Tablas.this, values);
                     grid.setAdapter(adapter);
 
-                    dadapter = new LA_Tablas2(ListaConteos.this, dvalues);
+                    dadapter = new LA_Tablas2(Tablas.this, dvalues);
                     dgrid.setAdapter(dadapter);
                 }
             };
@@ -217,88 +214,98 @@ public class ListaConteos extends PBase {
             Runnable mrunner = new Runnable() {
                 @Override
                 public void run() {
-                    scod = "INVENTARIO_CIEGO";
                     showData(scod);
                 }
             };
             mtimer.postDelayed(mrunner, 1000);
-        }catch (Exception e){
-            //addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"");
-            msgbox("processTable: "+e);
+        } catch (Exception e) {
         }
 
     }
 
     private void showData(String tn) {
-        Cursor dt;
-        String ss = "",barra,ubic;
-        int cc,rg;
+        Cursor PRG, dt;
+        String n, flt, ss = "";
+        int cc = 1, j;
 
         try {
+            try {
+                ss = "SELECT ";
 
-            barra = txtBarra.getText().toString();
-            ubic = txtUbic.getText().toString();
+                sql = "PRAGMA table_info('" + tn + "')";
+                PRG = db.rawQuery(sql, null);
+                cc = PRG.getCount();
 
-            if(barra.isEmpty()) barra = "WHERE CODIGO_BARRA = "+barra;
-            if(ubic.isEmpty()) ubic = "WHERE UBICACION = "+ubic;
+                PRG.moveToFirst();
+                j = 0;
 
-            ss="SELECT ID, UBICACION, CANTIDAD FROM "+tn;
+                while (!PRG.isAfterLast()) {
+                    n = PRG.getString(PRG.getColumnIndex("name"));
+                    // t=PRG.getString(PRG.getColumnIndex("type"));// INTEGER , TEXT , REAL
 
-            dt=Con.OpenDT(ss);
-            if (dt.getCount()==0) {
-                pbar.setVisibility(View.INVISIBLE);return;
-            }
-
-            cc = dt.getColumnCount();
-            rg = dt.getCount();
-            if(rg>0){
-                regs.setText(""+rg);
-            }
-
-            dt.moveToFirst();
-            while (!dt.isAfterLast()) {
-
-                for (int i = 0; i < cc; i++) {
-                    try {
-                        ss=dt.getString(i);
-                    } catch (Exception e) {
-                        ss="?";
-                    }
-                    dvalues.add(ss);
+                    values.add(n);
+                    ss = ss + n;
+                    if (j < cc - 1) ss = ss + ",";
+                    PRG.moveToNext();
+                    j++;
                 }
-                dt.moveToNext();
+
+                ss = ss + " FROM " + tn;
+
+                flt = txt1.getText().toString();
+                if (!mu.emptystr(flt)) ss = ss + " WHERE " + flt;
+
+            } catch (Exception e) {
             }
-
-            values.add("CODIGO");
-            values.add("UBICACION");
-            values.add("CANTIDAD");
-
-            ViewGroup.LayoutParams dlayoutParams = dgrid.getLayoutParams();
-            dlayoutParams.width =((int) (cw*cc))+25;
-            dgrid.setLayoutParams(dlayoutParams);
-
-            dgrid.setColumnWidth(cw);
-            dgrid.setStretchMode(GridView.NO_STRETCH);
-            dgrid.setNumColumns(cc);
-
-            dadapter=new LA_Tablas2(this,dvalues);
-            dgrid.setAdapter(dadapter);
-
 
             ViewGroup.LayoutParams layoutParams = grid.getLayoutParams();
-            layoutParams.width =((int) (cw*cc))+25;
+            layoutParams.width = ((int) (cw * cc)) + 25;
             grid.setLayoutParams(layoutParams);
 
             grid.setColumnWidth(cw);
             grid.setStretchMode(GridView.NO_STRETCH);
             grid.setNumColumns(cc);
 
-            adapter=new LA_Tablas(this,values);
+            adapter = new LA_Tablas(this, values);
             grid.setAdapter(adapter);
 
+
+            ViewGroup.LayoutParams dlayoutParams = dgrid.getLayoutParams();
+            dlayoutParams.width = ((int) (cw * cc)) + 25;
+            dgrid.setLayoutParams(dlayoutParams);
+
+            dgrid.setColumnWidth(cw);
+            dgrid.setStretchMode(GridView.NO_STRETCH);
+            dgrid.setNumColumns(cc);
+
+            try {
+                dt = Con.OpenDT(ss);
+                if (dt.getCount() == 0) {
+                    pbar.setVisibility(View.INVISIBLE);
+                    return;
+                }
+
+                dt.moveToFirst();
+                while (!dt.isAfterLast()) {
+
+                    for (int i = 0; i < cc; i++) {
+                        try {
+                            ss = dt.getString(i);
+                        } catch (Exception e) {
+                            ss = "?";
+                        }
+                        dvalues.add(ss);
+                    }
+                    dt.moveToNext();
+                }
+            } catch (Exception e) {
+            }
+
+            dadapter = new LA_Tablas2(this, dvalues);
+            dgrid.setAdapter(dadapter);
+
             pbar.setVisibility(View.INVISIBLE);
-        } catch (Exception e) {
-            msgbox("showData2: "+e);
+        }catch (Exception e){
         }
 
 
@@ -308,16 +315,34 @@ public class ListaConteos extends PBase {
 
     //region Aux
 
+    private void fillSpinner() {
+        Cursor DT;
 
-    //endregion
+        spinlist.clear();
+        spinlist.add(" ");
 
-    //region Dialogs
+        try {
+            try {
+                sql = "SELECT name FROM sqlite_master WHERE type='table' AND name<>'android_metadata' order by name";
+                DT = Con.OpenDT(sql);
 
+                DT.moveToFirst();
+                while (!DT.isAfterLast()) {
+                    spinlist.add(DT.getString(0));
+                    DT.moveToNext();
+                }
+            } catch (Exception e) {
+                mu.msgbox(e.getMessage());
+            }
 
-    //endregion
+            ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, spinlist);
+            dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
-    //region Activity Events
+            spin.setAdapter(dataAdapter);
+        }catch (Exception e){
+        }
 
+    }
 
     //endregion
 

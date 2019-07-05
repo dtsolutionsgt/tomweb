@@ -134,7 +134,7 @@ public class clsOperadoresObj {
             item.id_empresa = dt.getInt(1);
             item.codigo = dt.getString(2);
             item.clave = dt.getString(3);
-            item.nombre = dt.getDouble(4);
+            item.nombre = dt.getString(4);
 
             items.add(item);
 

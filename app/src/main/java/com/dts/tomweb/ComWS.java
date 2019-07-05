@@ -1,8 +1,10 @@
 package com.dts.tomweb;
 
 
+import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
@@ -11,10 +13,15 @@ import android.os.Looper;
 import android.os.SystemClock;
 import android.util.Log;
 import android.view.View;
+import android.widget.RelativeLayout;
 
 import com.dts.base.BaseDatos;
 import com.dts.base.DateUtils;
+import com.dts.base.clsClasses;
 import com.dts.base.clsDataBuilder;
+import com.dts.classes.clsInventario_ciegoObj;
+import com.dts.classes.clsRegistro_handheldObj;
+import com.dts.classes.clsInventario_encabezadoObj;
 
 import org.ksoap2.SoapEnvelope;
 import org.ksoap2.serialization.PropertyInfo;
@@ -27,8 +34,9 @@ import java.util.ArrayList;
 public class ComWS extends PBase {
 
 
-    private int isbusy;
+    private int isbusy,regHH;
     private String sp;
+    private int Com_IdEmpresa,Com_Id_Inventario;
     private boolean errflag;
 
     private SQLiteDatabase dbT;
@@ -51,9 +59,11 @@ public class ComWS extends PBase {
     public AsyncCallSend wsStask;
 
     private static String sstr,fstr,ferr,fterr,idbg,dbg,ftmsg;
-    private int scon,stockflag,reccnt;
+    private int scon,stockflag,reccnt,count;
     private String senv,gEmpresa,ActRuta;
     private boolean ftflag,esvacio;
+
+    private RelativeLayout relEnv, relRec;
 
     private final String NAMESPACE ="http://tempuri.org/";
     private String METHOD_NAME,URL;
@@ -70,10 +80,25 @@ public class ComWS extends PBase {
 
         dbld=new clsDataBuilder(this);
 
+        relEnv = (RelativeLayout) findViewById(R.id.relEnv);
+        relRec = (RelativeLayout) findViewById(R.id.relRec);
+
         isbusy=0;
+        count=0;
 
-        URL="http://192.168.1.137/wsTomWeb/wsTom.asmx";
+        URL="http://192.168.1.52/wsTom2/wstomwebws.asmx";
 
+        if(gl.validaLicDB==0){
+            msgbox("Base de datos vacia, recibir datos");
+            relEnv.setVisibility(View.INVISIBLE);
+            gl.validaLicDB=2;
+        }
+
+        if(gl.validaLicDB==10){
+            //msgbox("Base de datos vacia, recibir datos");
+            relRec.setVisibility(View.INVISIBLE);
+            //gl.validaLicDB=2;
+        }
     }
 
 
@@ -131,6 +156,10 @@ public class ComWS extends PBase {
 
     public void doExit(View view) {
         finish();
+    }
+
+    public void tablas(View view){
+        startActivity(new Intent(this, Tablas.class));
     }
 
 
@@ -240,6 +269,52 @@ public class ComWS extends PBase {
             }
 
             return 1;
+        } catch (Exception e) {
+
+            idbg=idbg+" ERR "+e.getMessage();
+            return 0;
+        }
+    }
+
+    public int Procesar_Inventario_Ciego(Integer Id_Inventario_Enc,Integer Id_Registro) {
+        int rc;
+        String s,ss;
+
+        METHOD_NAME = "Procesar_Inventario_Ciego";
+        sstr="OK";
+
+        try {
+
+            idbg=idbg+" Procesar_Inventario_Ciego ";
+
+            SoapObject request = new SoapObject(NAMESPACE, METHOD_NAME);
+            SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);
+            envelope.dotNet = true;
+
+            PropertyInfo param = new PropertyInfo();
+            param.setType(String.class);
+            param.setName("Id_Inventario_Enc");param.setValue(Id_Inventario_Enc);
+
+
+            PropertyInfo param2 = new PropertyInfo();
+            param2.setType(String.class);
+            param2.setName("Id_Registro");param2.setValue(Id_Registro);
+
+            request.addProperty(param);
+            request.addProperty(param2);
+            envelope.setOutputSoapObject(request);
+
+            HttpTransportSE transport = new HttpTransportSE(URL);
+            transport.call(NAMESPACE+METHOD_NAME, envelope);
+
+            SoapPrimitive resSoap =(SoapPrimitive) envelope.getResponse();
+            s = resSoap.toString();
+
+            sstr = "#";
+            if (s.equalsIgnoreCase("#")) return 1;
+
+            sstr = s;
+            return 0;
         } catch (Exception e) {
 
             idbg=idbg+" ERR "+e.getMessage();
@@ -384,7 +459,6 @@ public class ComWS extends PBase {
 
     private boolean getData(){
         Cursor DT;
-        int rc;
         String val="";
 
 
@@ -394,17 +468,50 @@ public class ComWS extends PBase {
         ftmsg="";ftflag=false;
 
         try {
-            if (!AddTable("USUARIO")) return false;
+            if (!AddTable("REGISTRO_HANDHELD")) return false;
+            saveData();
+            if(gl.licExist==0) return false;
+            if (!AddTable("ESTADO_INVENTARIO")) return false;
+            if (!AddTable("INVENTARIO_ENCABEZADO")) return false;
+            saveData();
+            if (!AddTable("OPERADORES")) return false;
+            saveData();
+
+            if(gl.tipoInv==1) {
+                //Nada que recibir, inventario ciego
+            }else if(gl.tipoInv==2){
+                while (count!=2){
+                    count++;
+                    if (!AddTable("INVENTARIO_MAESTRO")) return false;
+                }
+
+            }else if(gl.tipoInv==3){
+                if (!AddTable("INVENTARIO_TEORICO")) return false;
+            }
+
+
+            saveData();
         } catch (Exception e) {
             return false;
         }
 
-        ferr="";
 
+        try {
+            ConT.close();
+        } catch (Exception e) { return false; }
+
+        return true;
+    }
+
+    private void saveData(){
+        int rc;
+        ferr="";
+        clsRegistro_handheldObj registroHH =new clsRegistro_handheldObj(this,Con,db);
+        clsInventario_ciegoObj invC =new clsInventario_ciegoObj(this,Con,db);
         try {
 
             rc=listItems.size();reccnt=rc;
-            if (rc==0) return true;
+            if (rc==0) return;
 
             ConT = new BaseDatos(this);
             dbT = ConT.getWritableDatabase();
@@ -425,11 +532,22 @@ public class ComWS extends PBase {
             dbT.setTransactionSuccessful();
             dbT.endTransaction();
 
-            try {
-                ConT.close();
-            } catch (Exception e) { }
+            if(regHH==1){
 
-            return true;
+                registroHH.fill();
+
+                gl.licExist=registroHH.count;
+                gl.empresa = registroHH.first().id_empresa;
+
+                regHH=0;
+            }else if(regHH==2){
+                invC.fill();
+
+                if(invC.count==0){
+                    regHH=0;
+                }
+
+            }
 
         } catch (Exception e) {
             Log.e("Error",e.getMessage());
@@ -440,9 +558,8 @@ public class ComWS extends PBase {
 
             sstr=e.getMessage();
             ferr=sstr+"\n"+sql;
-            return false;
+            return;
         }
-
     }
 
     private boolean AddTable(String TN) {
@@ -450,10 +567,9 @@ public class ComWS extends PBase {
 
         try {
 
-             SQL=getTableSQL(TN);
+            SQL=getTableSQL(TN);
 
             if (fillTable(SQL,"DELETE FROM "+TN)==1) {
-                if (TN.equalsIgnoreCase("P_STOCK")) dbg=dbg+" ok ";
                 idbg=idbg +SQL+"#"+"PASS OK";
                 return true;
             } else {
@@ -470,9 +586,57 @@ public class ComWS extends PBase {
 
     private String getTableSQL(String TN) {
         String SQL = "";
+        clsRegistro_handheldObj registroHH =new clsRegistro_handheldObj(this,Con,db);
+        clsInventario_encabezadoObj invEnc =new clsInventario_encabezadoObj(this,Con,db);
 
-        if (TN.equalsIgnoreCase("Usuario")) {
-            SQL = "SELECT * FROM Usuario";
+        if (TN.equalsIgnoreCase("REGISTRO_HANDHELD")) {
+            regHH=1;
+            SQL = "SELECT * FROM REGISTRO_HANDHELD WHERE SERIE_DISPOSITIVO= '"+ gl.NoSerieHH +"' AND ID_ESTATUS =1";
+            return SQL;
+        }
+
+        if (TN.equalsIgnoreCase("ESTADO_INVENTARIO")) {
+            SQL = "SELECT * FROM ESTADO_INVENTARIO";
+            return SQL;
+        }
+
+        if (TN.equalsIgnoreCase("INVENTARIO_ENCABEZADO")) {
+            registroHH.fill();
+            Com_IdEmpresa = registroHH.first().id_empresa;
+
+            SQL = "SELECT * FROM INVENTARIO_ENCABEZADO WHERE ID_EMPRESA = " + Com_IdEmpresa + " AND ID_ESTADO = 1";
+            return SQL;
+        }
+
+        if (TN.equalsIgnoreCase("OPERADORES")) {
+
+            invEnc.fill();
+            Com_Id_Inventario = invEnc.first().id_inventario_enc;
+            gl.tipoInv =  invEnc.first().tipo_inventario;
+
+            SQL = "SELECT A.* FROM OPERADORES A, INVENTARIO_OPERADOR B  WHERE A.ID_OPERADOR = B.ID_OPERADOR AND A.ID_EMPRESA ='" + Com_IdEmpresa +"' AND B.ID_INVENTARIO_ENC='" + Com_Id_Inventario +"'";
+            return SQL;
+        }
+
+        if (TN.equalsIgnoreCase("ARTICULO")) {
+            SQL = "SELECT * FROM ARTICULO WHERE ID_EMPRESA ='" + Com_IdEmpresa +"'";
+            return SQL;
+        }
+
+        if (TN.equalsIgnoreCase("INVENTARIO_MAESTRO")) {
+
+            if(count==1){
+                SQL = "SELECT * FROM ARTICULO WHERE ID_EMPRESA ='" + Com_IdEmpresa + "'";
+                return SQL;
+            }else if(count==2){
+                SQL = "SELECT * FROM ARTICULO_CODIGO_BARRA WHERE ID_EMPRESA ='" + Com_IdEmpresa + "'";
+                return SQL;
+            }
+
+        }
+
+        if (TN.equalsIgnoreCase("INVENTARIO_TEORICO")) {
+            SQL = "SELECT * FROM Inventario_Teorico WHERE ID_EMPRESA ='"+ Com_IdEmpresa +"' AND ID_INVENTARIO_ENC ='"+ Com_Id_Inventario +"'";
             return SQL;
         }
 
@@ -491,7 +655,13 @@ public class ComWS extends PBase {
             idbg=idbg + sstr;
             if (scon==1) {
                 fstr="Sync OK";
-                if (!getData()) fstr="Recepcion incompleta : "+fstr;
+                if (!getData()) {
+                    if(gl.licExist==0){
+                        fstr="El dispositivo no tiene licencia";
+                    }else {
+                        fstr="Recepcion incompleta : "+fstr;
+                    }
+                }
             } else {
                 fstr="No se puede conectar al web service : "+sstr;
             }
@@ -507,9 +677,16 @@ public class ComWS extends PBase {
         if (fstr.equalsIgnoreCase("Sync OK")) {
             msgAskExit("Recepción completa.");
         } else {
-             mu.msgbox("Ocurrió error : \n"+fstr+" ("+reccnt+") " + ferr);
-            isbusy=0;
-            return;
+
+            if(gl.licExist==0){
+                isbusy=0;
+                super.finish();
+                startActivity(new Intent(this, Licencia.class));
+            }else {
+                mu.msgbox("Ocurrió error : \n"+fstr+" ("+reccnt+") " + ferr);
+                isbusy=0;
+                return;
+            }
         }
 
         isbusy=0;
@@ -554,7 +731,21 @@ public class ComWS extends PBase {
 
         senv = "Envío terminado \n \n";
 
-        if (!envioUsuarios()) return false;
+        //if (!envioUsuarios()) return false;
+
+        if(gl.tipoInv==1) {
+
+            if (!envioInvCiego()) return false;
+
+        }else if(gl.tipoInv==2){
+
+            //if (!envioInvMaestro()) return false;
+
+        }else if(gl.tipoInv==3){
+
+            //if (!envioInvTeorico()) return false;
+
+        }
 
         return true;
     }
@@ -596,6 +787,31 @@ public class ComWS extends PBase {
         return true;
     }
 
+    public boolean envioInvCiego() {
+        String ss;
+
+        fterr = "";
+        try {
+            dbld.clear();
+            dbld.insert("temp_inventario_ciego", "WHERE ELIMINADO=0");
+
+            try {
+                if (commitSQL() == 1) {
+                    //
+                } else {
+                    fterr += sstr;dbg +=" , ***";
+                }
+            } catch (Exception e) {
+                errflag=true;fterr += "\n" + e.getMessage();dbg = e.getMessage();
+            }
+
+            Procesar_Inventario_Ciego(gl.idInvEnc, gl.IDregistro);
+        } catch (Exception e) {
+            errflag=true;fstr = e.getMessage();dbg = fstr;
+        }
+
+        return true;
+    }
 
     // Web Service handling Methods
 
@@ -668,6 +884,9 @@ public class ComWS extends PBase {
 
         dialog.setPositiveButton("Confirmar", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
+
+                if(gl.validaLicDB==2) gl.validaLicDB=4;
+
                 finish();
             }
         });
@@ -676,13 +895,13 @@ public class ComWS extends PBase {
 
     }
 
-
     // Activity Events
 
     @Override
     public void onBackPressed() {
+        if(gl.validaLicDB==2) super.finish();
         if (isbusy==0) super.onBackPressed();
-     }
+    }
 
 
 }

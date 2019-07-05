@@ -13,8 +13,9 @@ public class appGlobals extends Application {
 	// Variables publicas
 
 
-	public String nombreusuario;
+	public String nombreusuario, NoSerieHH, codBarra, ubicacion;
 	public boolean exitapp;
+	public int validaLicDB, licExist, empresa, IDregistro, tipoInv,idInvEnc;
 
 	// Variables guardados al momento de botar la aplicacion
 

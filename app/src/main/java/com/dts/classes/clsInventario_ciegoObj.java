@@ -79,7 +79,7 @@ public class clsInventario_ciegoObj {
         ins.add("id_inventario_enc",item.id_inventario_enc);
         ins.add("codigo_barra",item.codigo_barra);
         ins.add("cantidad",item.cantidad);
-        ins.add("id",item.id);
+        //ins.add("id",item.id);
         ins.add("comunicado",item.comunicado);
         ins.add("ubicacion",item.ubicacion);
         ins.add("id_operador",item.id_operador);
@@ -144,8 +144,8 @@ public class clsInventario_ciegoObj {
             item.comunicado=dt.getString(4);
             item.ubicacion=dt.getString(5);
             item.id_operador=dt.getInt(6);
-            item.fecha=dt.getInt(7);
-            item.id_registro=dt.getString(8);
+            item.fecha=dt.getString(7);
+            item.id_registro=dt.getInt(8);
             item.eliminado=dt.getInt(9);
 
             items.add(item);
