@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,6 +30,7 @@ public class Conteo extends PBase {
     private String Ubic, Cod, tipoArt, barra, desc;
     private Double canti;
     private Integer result;
+    private ImageView eliminar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,7 +47,11 @@ public class Conteo extends PBase {
         Codigo2 = (TextView) findViewById(R.id.txtCodigo2);
         Cant2 = (TextView) findViewById(R.id.txtCantidad2);
         Desc = (TextView) findViewById(R.id.txtDesc);
+        eliminar = (ImageView) findViewById(R.id.imageView17);
 
+        eliminar.setVisibility(View.INVISIBLE);
+
+        Ubicacion.setFocusable(true);
         Barra.setFocusable(false);
 
         setHandlers();
@@ -77,10 +83,8 @@ public class Conteo extends PBase {
                     switch (arg1) {
                         case KeyEvent.KEYCODE_ENTER:
 
-                            insertaConteo();
-                            limpiaCampos();
+                            Cantidad.requestFocus();
                             mostrarConteo();
-                            //inventario();
 
                             return true;
                     }
@@ -158,109 +162,6 @@ public class Conteo extends PBase {
 
     //region Main
 
-    private boolean guardaTrans() {
-        clsInventario_ciegoObj InvCiego = new clsInventario_ciegoObj(this, Con, db);
-        clsRegistro_handheldObj regHH = new clsRegistro_handheldObj(this, Con, db);
-        clsClasses.clsInventario_ciego item=clsCls.new clsInventario_ciego();
-        Long sfecha;
-        String codBarra, ubicacion;
-        Integer cantidad,fecha;
-
-        try {
-            regHH.fill();
-            gl.IDregistro = regHH.first().id_empresa;
-
-            codBarra = Barra.getText().toString();
-            sfecha=du.getActDate();
-            fecha = sfecha.intValue();
-
-            item.id_inventario_enc = gl.idInvEnc;
-            item.codigo_barra = codBarra;
-            ubicacion = Ubicacion.getText().toString();
-
-            if(tipoArt.equals("F")){
-                cantidad = Integer.parseInt(Cantidad.getText().toString());
-                item.cantidad = cantidad;
-            }else if(tipoArt.equals("S")){
-                item.cantidad = 1;
-            }
-
-            item.comunicado = "";
-            item.ubicacion = ubicacion;
-            item.id_operador = gl.userid;
-            item.id_registro = gl.IDregistro;
-
-            InvCiego.add(item);
-
-            db.execSQL(sql);
-
-            return true;
-
-        } catch (Exception e) {
-            msgbox(new Object(){}.getClass().getEnclosingMethod().getName()+" . "+e.getMessage());
-            return false;
-        }
-    }
-
-    public boolean inventario(){
-        clsInventario_ciegoObj invCiego = new clsInventario_ciegoObj(this, Con, db);
-        clsClasses.clsInventario_ciego item=clsCls.new clsInventario_ciego();
-        clsArticuloObj art = new clsArticuloObj(this, Con, db);
-
-        try{
-            Ubic = Ubicacion.getText().toString();
-            Cod = Codigo.getText().toString();
-
-            if(!Cod.isEmpty()) {
-
-                art.fill("WHERE CODIGO_BARRA ='" + Cod + "'");
-
-                if (art.count == 0) {
-                    gl.codBarra = Cod;
-                    msgAskExit("Agregar como no encontrado");
-                    return false;
-                } else {
-
-                    if (Ubic.isEmpty() && !Cod.isEmpty()) {
-                        invCiego.fill("WHERE CODIGO_BARRA ='" + Cod + "'");
-                        Ubicacion.setText("1");
-                    } else if (!Cod.isEmpty() && !Ubic.isEmpty()) {
-                        invCiego.fill("WHERE CODIGO_BARRA ='" + Cod + "' AND UBICACION ='" + Ubic + "'");
-                    }
-
-                    barra = art.first().codigo_barra;
-                    desc = art.first().descripcion;
-
-                    Barra.setText(barra);
-                    Codigo2.setText(Cod);
-                    Desc.setText(desc);
-
-                    if (invCiego.count == 0) {
-
-                        tipoArt = art.first().tipo_conteo;
-                        Toast.makeText(this, "articulo sin incluir en el inventario", Toast.LENGTH_LONG).show();
-
-                        //guardaTrans();
-
-                    } else {
-                        canti = invCiego.first().cantidad;
-                        Cant2.setText(Double.toString(canti));
-                        Toast.makeText(this, "articulo ya incluido en el inventario", Toast.LENGTH_LONG).show();
-                        //guardaTrans();
-                    }
-
-                }
-
-            }
-
-
-        }catch (Exception e){
-            msgbox(""+e);
-        }
-
-        return true;
-    }
-
     public void insertaConteo(){
         clsInventario_ciegoObj InvCiego = new clsInventario_ciegoObj(this, Con, db);
         clsClasses.clsInventario_ciego item=clsCls.new clsInventario_ciego();
@@ -291,7 +192,17 @@ public class Conteo extends PBase {
                 return;
             }
 
+            if(Codigo.getText().toString().isEmpty()){
+                msgbox("Ingrese el codigo");
+                return;
+            }
+
             canti = Double.parseDouble(Cantidad.getText().toString());
+
+            if(canti==0){
+                msgbox("Ingrese una cantidad mayor a 0");
+                return;
+                            }
 
             if(gl.tipoInv==1) {
                 Barra.setText(Codigo.getText().toString());
@@ -353,7 +264,16 @@ public class Conteo extends PBase {
 
         try{
 
-            sql="SELECT SUM(CANTIDAD) FROM INVENTARIO_CIEGO WHERE ID_INVENTARIO_ENC ="+ gl.idInvEnc +" AND CODIGO_BARRA ='"+ barra +"'";
+            barra = Barra.getText().toString();
+            Ubic = Ubicacion.getText().toString();
+
+            if(!barra.isEmpty()){
+                if(!Ubic.isEmpty()){
+                    sql="SELECT SUM(CANTIDAD) FROM INVENTARIO_CIEGO WHERE UBICACION ="+ Ubic +" AND CODIGO_BARRA ='"+ barra +"'";
+                }else {
+                    sql="SELECT SUM(CANTIDAD) FROM INVENTARIO_CIEGO WHERE ID_INVENTARIO_ENC ="+ gl.idInvEnc +" AND CODIGO_BARRA ='"+ barra +"'";
+                }
+            }
             dt = Con.OpenDT(sql);
             dt.moveToFirst();
 

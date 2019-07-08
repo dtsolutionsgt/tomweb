@@ -1,7 +1,6 @@
 package com.dts.tomweb;
 
 
-import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -13,11 +12,12 @@ import android.os.Looper;
 import android.os.SystemClock;
 import android.util.Log;
 import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.dts.base.BaseDatos;
 import com.dts.base.DateUtils;
-import com.dts.base.clsClasses;
 import com.dts.base.clsDataBuilder;
 import com.dts.classes.clsInventario_ciegoObj;
 import com.dts.classes.clsRegistro_handheldObj;
@@ -58,12 +58,14 @@ public class ComWS extends PBase {
     public AsyncCallRec wsRtask;
     public AsyncCallSend wsStask;
 
-    private static String sstr,fstr,ferr,fterr,idbg,dbg,ftmsg;
+    private static String sstr,fstr,ferr,fterr,idbg,dbg,ftmsg,sprog;
     private int scon,stockflag,reccnt,count;
     private String senv,gEmpresa,ActRuta;
     private boolean ftflag,esvacio;
 
     private RelativeLayout relEnv, relRec;
+    private TextView Prg;
+    private ProgressBar prgBar;
 
     private final String NAMESPACE ="http://tempuri.org/";
     private String METHOD_NAME,URL;
@@ -82,9 +84,14 @@ public class ComWS extends PBase {
 
         relEnv = (RelativeLayout) findViewById(R.id.relEnv);
         relRec = (RelativeLayout) findViewById(R.id.relRec);
+        Prg = (TextView) findViewById(R.id.lblProgress);
+        prgBar = (ProgressBar) findViewById(R.id.progressBar2);
 
         isbusy=0;
         count=0;
+
+        Prg.setText("");
+        prgBar.setVisibility(View.INVISIBLE);
 
         URL="http://192.168.1.52/wsTom2/wstomwebws.asmx";
 
@@ -110,6 +117,7 @@ public class ComWS extends PBase {
             toast("Por favor, espere que se termine la tarea actual.");return;
         }
 
+
         AlertDialog.Builder dialog = new AlertDialog.Builder(this);
 
         dialog.setTitle("Recepción");
@@ -118,6 +126,7 @@ public class ComWS extends PBase {
         dialog.setPositiveButton("Recibir", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 runRecep();
+                prgBar.setVisibility(View.VISIBLE);
             }
         });
 
@@ -132,6 +141,8 @@ public class ComWS extends PBase {
         if (isbusy==1) {
             toast("Por favor, espere que se termine la tarea actual.");return;
         }
+
+        prgBar.setVisibility(View.VISIBLE);
 
         AlertDialog.Builder dialog = new AlertDialog.Builder(this);
 
@@ -569,6 +580,8 @@ public class ComWS extends PBase {
 
             SQL=getTableSQL(TN);
 
+            sprog = TN;wsRtask.onProgressUpdate();
+
             if (fillTable(SQL,"DELETE FROM "+TN)==1) {
                 idbg=idbg +SQL+"#"+"PASS OK";
                 return true;
@@ -650,6 +663,10 @@ public class ComWS extends PBase {
 
         fstr="No connect";scon=0;
 
+        sprog = "Conectando ...";
+
+        wsRtask.onProgressUpdate();
+
         try {
             if (getTest()==1) scon=1;
             idbg=idbg + sstr;
@@ -674,15 +691,18 @@ public class ComWS extends PBase {
 
     public void wsFinished(){
 
+        Prg.setVisibility(View.INVISIBLE);
+        prgBar.setVisibility(View.INVISIBLE);
+
         if (fstr.equalsIgnoreCase("Sync OK")) {
             msgAskExit("Recepción completa.");
         } else {
 
-            if(gl.licExist==0){
+            if(gl.licExist==0 && scon==1){
                 isbusy=0;
                 super.finish();
                 startActivity(new Intent(this, Licencia.class));
-            }else {
+            }else{
                 mu.msgbox("Ocurrió error : \n"+fstr+" ("+reccnt+") " + ferr);
                 isbusy=0;
                 return;
@@ -717,7 +737,12 @@ public class ComWS extends PBase {
         }
 
         @Override
-        protected void onProgressUpdate(Void... values) {}
+        protected void onProgressUpdate(Void... values) {
+            try {
+                Prg.setText(sprog);
+            } catch (Exception e) {
+            }
+        }
 
     }
 
@@ -792,6 +817,8 @@ public class ComWS extends PBase {
 
         fterr = "";
         try {
+            sprog = "Inventario Ciego...";wsStask.onProgressUpdate();
+
             dbld.clear();
             dbld.insert("temp_inventario_ciego", "WHERE ELIMINADO=0");
 
@@ -841,6 +868,9 @@ public class ComWS extends PBase {
     }
 
     public void wsSendFinished(){
+        Prg.setVisibility(View.INVISIBLE);
+        prgBar.setVisibility(View.INVISIBLE);
+
         if (errflag) mu.msgbox(fterr);
         mu.msgbox("Envio completo");
         isbusy=0;
@@ -869,7 +899,12 @@ public class ComWS extends PBase {
         protected void onPreExecute() {  }
 
         @Override
-        protected void onProgressUpdate(Void... values) {  }
+        protected void onProgressUpdate(Void... values) {
+            try {
+                Prg.setText(sprog);
+            } catch (Exception e) {
+            }
+        }
 
     }
 

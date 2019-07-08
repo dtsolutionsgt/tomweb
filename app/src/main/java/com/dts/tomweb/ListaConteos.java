@@ -192,6 +192,8 @@ public class ListaConteos extends PBase {
 
     private void processTable() {
         try{
+            values.clear();
+            dvalues.clear();
 
             pbar.setVisibility(View.VISIBLE);
 
@@ -239,10 +241,20 @@ public class ListaConteos extends PBase {
             barra = txtBarra.getText().toString();
             ubic = txtUbic.getText().toString();
 
-            if(barra.isEmpty()) barra = "WHERE CODIGO_BARRA = "+barra;
-            if(ubic.isEmpty()) ubic = "WHERE UBICACION = "+ubic;
+            if(!ubic.isEmpty() && !barra.isEmpty()){
+                tn = tn +" WHERE CODIGO_BARRA = "+ barra + " AND UBICACION ="+ ubic;
+            }else if(!barra.isEmpty()){
+                tn = tn +" WHERE CODIGO_BARRA = "+barra;
+            }else if(!ubic.isEmpty()) {
+                tn = tn+ " WHERE UBICACION = "+ubic;
+            }
 
-            ss="SELECT ID, UBICACION, CANTIDAD FROM "+tn;
+            /*if(consol=true){
+                ss="SELECT ID, UBICACION, SUM(CASE WHEN ID=ID THEN CANTIDAD) FROM "+tn ;
+            }else {*/
+                ss="SELECT CODIGO_BARRA, UBICACION, CANTIDAD FROM "+tn;
+            //}
+
 
             dt=Con.OpenDT(ss);
             if (dt.getCount()==0) {

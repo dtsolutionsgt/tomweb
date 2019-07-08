@@ -92,24 +92,14 @@
         android:layout_marginTop="48dp"
         android:layout_marginBottom="48dp">
 
-        <TextView
-            android:id="@+id/textView17"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentStart="false"
-            android:layout_alignParentBottom="false"
-            android:layout_centerInParent="true"
-            android:text="TextView"
-            android:visibility="invisible" />
-
         <RelativeLayout
-            android:layout_width="411dp"
-            android:layout_height="240dp"
-            android:layout_above="@id/textView17"
+            android:id="@+id/relRecibo"
+            android:layout_width="401dp"
+            android:layout_height="223dp"
             android:layout_alignParentStart="true"
             android:layout_alignParentTop="true"
             android:layout_marginStart="-2dp"
-            android:layout_marginTop="0dp">
+            android:layout_marginTop="5dp">
 
             <RelativeLayout
                 android:id="@+id/relRec"
@@ -148,9 +138,9 @@
         </RelativeLayout>
 
         <RelativeLayout
+            android:id="@+id/relEnvio"
             android:layout_width="match_parent"
-            android:layout_height="80dp"
-            android:layout_below="@id/textView17"
+            android:layout_height="218dp"
             android:layout_alignParentStart="false"
             android:layout_alignParentBottom="true">
 
@@ -189,6 +179,28 @@
                     android:src="@drawable/upload" />
             </RelativeLayout>
         </RelativeLayout>
+
+        <TextView
+            android:id="@+id/lblProgress"
+            android:layout_width="156dp"
+            android:layout_height="44dp"
+            android:layout_above="@+id/relEnvio"
+            android:layout_marginStart="2dp"
+            android:layout_marginTop="135dp"
+            android:layout_marginBottom="0dp"
+            android:layout_toEndOf="@+id/progressBar2"
+            android:textSize="24sp" />
+
+        <ProgressBar
+            android:id="@+id/progressBar2"
+            style="?android:attr/progressBarStyle"
+            android:layout_width="74dp"
+            android:layout_height="62dp"
+            android:layout_above="@+id/relEnvio"
+            android:layout_alignParentStart="true"
+            android:layout_marginStart="68dp"
+            android:layout_marginBottom="-3dp" />
+
     </RelativeLayout>
 
 </RelativeLayout>
