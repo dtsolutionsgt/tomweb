@@ -5,7 +5,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -32,7 +31,7 @@ public class MenuPrincipal extends PBase {
         super.InitBase(savedInstanceState);
 
         listView = (ListView) findViewById(R.id.listView1);
-        lblTitle = (TextView) findViewById(R.id.textView3);lblTitle.setText(gl.nombreusuario);
+        lblTitle = (TextView) findViewById(R.id.Productos);lblTitle.setText(gl.nombreusuario);
 
     }
 

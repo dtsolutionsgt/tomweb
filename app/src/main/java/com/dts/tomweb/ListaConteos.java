@@ -1,8 +1,6 @@
 package com.dts.tomweb;
 
 import android.database.Cursor;
-import android.graphics.Color;
-import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.DisplayMetrics;
@@ -10,7 +8,6 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
@@ -51,11 +48,13 @@ public class ListaConteos extends PBase {
 
         super.InitBase(savedInstanceState);
 
+        addlog("ListaConteos",""+du.getActDateTime(),gl.nombreusuario);
+
         grid = (GridView) findViewById(R.id.gridview1);
         dgrid = (GridView) findViewById(R.id.gridview2);
         pbar=(ProgressBar) findViewById(R.id.progressBar);pbar.setVisibility(View.INVISIBLE);
         txtBarra = (EditText) findViewById(R.id.txtBarra);
-        txtUbic = (EditText) findViewById(R.id.txtUbic);
+        txtUbic = (EditText) findViewById(R.id.txtNombre);
         regs = (TextView) findViewById(R.id.txtRegs);
         cb = (CheckBox) findViewById(R.id.cbConsolidar);
 
@@ -66,9 +65,12 @@ public class ListaConteos extends PBase {
         cb.setChecked(false);
         consol=false;
 
+        if(gl.tipoInv==1) scod = " INVENTARIO_CIEGO";
+        if(gl.tipoInv==2 || gl.tipoInv==3) scod = " INVENTARIO_DETALLE";
+
         setHandlers();
 
-        processTable();
+        showData(scod);
 
     }
 
@@ -89,8 +91,8 @@ public class ListaConteos extends PBase {
             cb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    if (cb.isChecked()==true) consol = true; processTable();
-                    if (cb.isChecked()==false) consol = false; processTable();
+                    if (cb.isChecked()==true) consol = true; showData(scod);
+                    if (cb.isChecked()==false) consol = false; showData(scod);
                 }
             });
 
@@ -105,9 +107,8 @@ public class ListaConteos extends PBase {
                         adapter.setSelectedIndex(position);
                         toast(item);
                     } catch (Exception e) {
-                        //addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"");
+                        addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"");
                         msgbox("Error setHandler: "+e);
-                        //mu.msgbox(e.getMessage());
                     }
                 }
 
@@ -125,9 +126,8 @@ public class ListaConteos extends PBase {
                         dadapter.setSelectedIndex(position);
                         toast(item);
                     } catch (Exception e) {
-                        //addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"");
+                        addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"");
                         msgbox("Error setHandler: "+e);
-                        //mu.msgbox(e.getMessage());
                     }
                 }
 
@@ -145,7 +145,7 @@ public class ListaConteos extends PBase {
                         adapter.setSelectedIndex(position);
                         msgbox(item);
                     } catch (Exception e) {
-                        //addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"");
+                        addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"");
                         msgbox("Error setHandler: "+e);
                     }
                     return true;
@@ -158,7 +158,7 @@ public class ListaConteos extends PBase {
                     if (arg2.getAction() == KeyEvent.ACTION_DOWN) {
                         switch (arg1) {
                             case KeyEvent.KEYCODE_ENTER:
-                                processTable();
+                                showData(scod);
                                 return true;
                         }
                     }
@@ -172,7 +172,7 @@ public class ListaConteos extends PBase {
                     if (arg2.getAction() == KeyEvent.ACTION_DOWN) {
                         switch (arg1) {
                             case KeyEvent.KEYCODE_ENTER:
-                                processTable();
+                                showData(scod);
                                 return true;
                         }
                     }
@@ -180,7 +180,7 @@ public class ListaConteos extends PBase {
                 }
             });
         }catch (Exception e){
-            //addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"");
+            addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"");
             msgbox("Error setHandler: "+e);
         }
 
@@ -190,70 +190,33 @@ public class ListaConteos extends PBase {
 
     //region Main
 
-    private void processTable() {
-        try{
-            values.clear();
-            dvalues.clear();
-
-            pbar.setVisibility(View.VISIBLE);
-
-            Handler mmtimer = new Handler();
-            Runnable mmrunner = new Runnable() {
-                @Override
-                public void run() {
-                    pbar.setVisibility(View.VISIBLE);
-
-                    values.clear();
-                    dvalues.clear();
-
-                    adapter = new LA_Tablas(ListaConteos.this, values);
-                    grid.setAdapter(adapter);
-
-                    dadapter = new LA_Tablas2(ListaConteos.this, dvalues);
-                    dgrid.setAdapter(dadapter);
-                }
-            };
-            mmtimer.postDelayed(mmrunner, 50);
-
-            Handler mtimer = new Handler();
-            Runnable mrunner = new Runnable() {
-                @Override
-                public void run() {
-                    scod = "INVENTARIO_CIEGO";
-                    showData(scod);
-                }
-            };
-            mtimer.postDelayed(mrunner, 1000);
-        }catch (Exception e){
-            //addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"");
-            msgbox("processTable: "+e);
-        }
-
-    }
-
     private void showData(String tn) {
         Cursor dt;
         String ss = "",barra,ubic;
         int cc,rg;
 
         try {
+            dvalues.clear();
+            values.clear();
 
             barra = txtBarra.getText().toString();
             ubic = txtUbic.getText().toString();
 
             if(!ubic.isEmpty() && !barra.isEmpty()){
-                tn = tn +" WHERE CODIGO_BARRA = "+ barra + " AND UBICACION ="+ ubic;
+                tn = tn +" WHERE CODIGO_BARRA = "+ barra + " AND ELIMINADO = 0";
             }else if(!barra.isEmpty()){
-                tn = tn +" WHERE CODIGO_BARRA = "+barra;
+                tn = tn +" WHERE CODIGO_BARRA = "+ barra + " AND ELIMINADO = 0";
             }else if(!ubic.isEmpty()) {
-                tn = tn+ " WHERE UBICACION = "+ubic;
+                tn = tn+ " WHERE UBICACION = " + ubic + " AND ELIMINADO = 0";
+            }else {
+                tn = tn + " WHERE ELIMINADO = 0";
             }
 
-            /*if(consol=true){
-                ss="SELECT ID, UBICACION, SUM(CASE WHEN ID=ID THEN CANTIDAD) FROM "+tn ;
-            }else {*/
-                ss="SELECT CODIGO_BARRA, UBICACION, CANTIDAD FROM "+tn;
-            //}
+            if(consol==true){
+                ss="SELECT CODIGO_BARRA, UBICACION, SUM(CANTIDAD) FROM "+ tn +" GROUP BY CODIGO_BARRA";
+            }else {
+                ss="SELECT CODIGO_BARRA, UBICACION, CANTIDAD FROM "+ tn;
+            }
 
 
             dt=Con.OpenDT(ss);
@@ -274,6 +237,7 @@ public class ListaConteos extends PBase {
                     try {
                         ss=dt.getString(i);
                     } catch (Exception e) {
+                        addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"");
                         ss="?";
                     }
                     dvalues.add(ss);
@@ -310,6 +274,7 @@ public class ListaConteos extends PBase {
 
             pbar.setVisibility(View.INVISIBLE);
         } catch (Exception e) {
+            addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"");
             msgbox("showData2: "+e);
         }
 

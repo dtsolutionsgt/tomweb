@@ -21,6 +21,8 @@ public class Inventario extends PBase {
 
         super.InitBase(savedInstanceState);
 
+        addlog("Inventario",""+du.getActDateTime(),gl.nombreusuario);
+
         Correlativo = (TextView) findViewById(R.id.txtCorrel);
         Empresa = (TextView) findViewById(R.id.txtEmpresa);
         Estado = (TextView) findViewById(R.id.txtEstado);
@@ -44,6 +46,11 @@ public class Inventario extends PBase {
     public void doNext(View view) {
         startActivity(new Intent(this, Conteo.class));
     }
+
+
+    //endregion
+
+    //region Main
 
     public void Filltxt(){
         clsInventario_encabezadoObj invEnc = new clsInventario_encabezadoObj(this, Con, db);
@@ -109,14 +116,10 @@ public class Inventario extends PBase {
 
 
         }catch (Exception e){
+            addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
             msgbox(""+e);
         }
     }
-
-    //endregion
-
-    //region Main
-
 
     //endregion
 

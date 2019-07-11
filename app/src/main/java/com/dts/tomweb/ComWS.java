@@ -79,6 +79,7 @@ public class ComWS extends PBase {
         super.InitBase(savedInstanceState);
 
         System.setProperty("line.separator","\r\n");
+        addlog("ComWs",""+du.getActDateTime(),gl.nombreusuario);
 
         dbld=new clsDataBuilder(this);
 
@@ -95,17 +96,7 @@ public class ComWS extends PBase {
 
         URL="http://192.168.1.52/wsTom2/wstomwebws.asmx";
 
-        if(gl.validaLicDB==0){
-            msgbox("Base de datos vacia, recibir datos");
-            relEnv.setVisibility(View.INVISIBLE);
-            gl.validaLicDB=2;
-        }
-
-        if(gl.validaLicDB==10){
-            //msgbox("Base de datos vacia, recibir datos");
-            relRec.setVisibility(View.INVISIBLE);
-            //gl.validaLicDB=2;
-        }
+        envCompleto();
     }
 
 
@@ -255,6 +246,7 @@ public class ComWS extends PBase {
                     //s=s+str+"\n";
                 }catch (Exception e){
                     mu.msgbox("error: " + e.getMessage());
+                    addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
                 }
 
                 if (i==0) {
@@ -275,6 +267,7 @@ public class ComWS extends PBase {
                         sstr=str;
                     } catch (Exception e) {
                         sstr=e.getMessage();
+                        addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), sql);
                     }
                 }
             }
@@ -283,11 +276,12 @@ public class ComWS extends PBase {
         } catch (Exception e) {
 
             idbg=idbg+" ERR "+e.getMessage();
+            addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
             return 0;
         }
     }
 
-    public int Procesar_Inventario_Ciego(Integer Id_Inventario_Enc,Integer Id_Registro) {
+    public boolean Procesar_Inventario_Ciego(Integer Id_Inventario_Enc,Integer Id_Registro) {
         int rc;
         String s,ss;
 
@@ -322,14 +316,14 @@ public class ComWS extends PBase {
             s = resSoap.toString();
 
             sstr = "#";
-            if (s.equalsIgnoreCase("#")) return 1;
+            if (s.equalsIgnoreCase("#")) return true;
 
             sstr = s;
-            return 0;
+            return false;
         } catch (Exception e) {
-
+            addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"");
             idbg=idbg+" ERR "+e.getMessage();
-            return 0;
+            return false;
         }
     }
 
@@ -374,6 +368,7 @@ public class ComWS extends PBase {
             sstr = s;
             return 0;
         } catch (Exception e) {
+            addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"");
             sstr=e.getMessage();
         }
 
@@ -425,6 +420,7 @@ public class ComWS extends PBase {
 
             return 1;
         } catch (Exception e) {
+            addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"");
             sstr=e.getMessage();
         }
 
@@ -459,6 +455,7 @@ public class ComWS extends PBase {
 
             return 1;
         } catch (Exception e) {
+            addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"");
             sstr=e.getMessage();
         }
 
@@ -503,13 +500,17 @@ public class ComWS extends PBase {
 
             saveData();
         } catch (Exception e) {
+            addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"");
             return false;
         }
 
 
         try {
             ConT.close();
-        } catch (Exception e) { return false; }
+        } catch (Exception e) {
+            addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"");
+            return false;
+        }
 
         return true;
     }
@@ -536,6 +537,7 @@ public class ComWS extends PBase {
                     dbT.execSQL(sql);
                     if (i % 10==0) SystemClock.sleep(20);
                 } catch (Exception e) {
+                    addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), sql);
                     Log.e("z", e.getMessage());
                 }
             }
@@ -562,9 +564,11 @@ public class ComWS extends PBase {
 
         } catch (Exception e) {
             Log.e("Error",e.getMessage());
+            addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"");
             try {
                 ConT.close();
             } catch (Exception ee) {
+                addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"");
             }
 
             sstr=e.getMessage();
@@ -592,6 +596,7 @@ public class ComWS extends PBase {
             }
 
         } catch (Exception e) {
+            addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
             fstr="Tab:"+TN+", "+ e.getMessage();idbg=idbg + e.getMessage();
             return false;
         }
@@ -683,6 +688,7 @@ public class ComWS extends PBase {
                 fstr="No se puede conectar al web service : "+sstr;
             }
         } catch (Exception e) {
+            addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
             scon=0;
             fstr="No se puede conectar al web service. "+e.getMessage();
         }
@@ -694,22 +700,28 @@ public class ComWS extends PBase {
         Prg.setVisibility(View.INVISIBLE);
         prgBar.setVisibility(View.INVISIBLE);
 
-        if (fstr.equalsIgnoreCase("Sync OK")) {
-            msgAskExit("Recepción completa.");
-        } else {
+        try{
+            if (fstr.equalsIgnoreCase("Sync OK")) {
+                msgAskExit("Recepción completa.");
+            } else {
 
-            if(gl.licExist==0 && scon==1){
-                isbusy=0;
-                super.finish();
-                startActivity(new Intent(this, Licencia.class));
-            }else{
-                mu.msgbox("Ocurrió error : \n"+fstr+" ("+reccnt+") " + ferr);
-                isbusy=0;
-                return;
+                if(gl.licExist==0 && scon==1){
+                    isbusy=0;
+                    super.finish();
+                    startActivity(new Intent(this, Licencia.class));
+                }else{
+                    mu.msgbox("Ocurrió error : \n"+fstr+" ("+reccnt+") " + ferr);
+                    isbusy=0;
+                    return;
+                }
             }
+
+            isbusy=0;
+        }catch (Exception e){
+            addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
         }
 
-        isbusy=0;
+
     }
 
     private class AsyncCallRec extends AsyncTask<String, Void, Void> {
@@ -775,6 +787,31 @@ public class ComWS extends PBase {
         return true;
     }
 
+    public boolean envCompleto(){
+        clsInventario_ciegoObj InvCiego = new clsInventario_ciegoObj(this, Con, db);
+
+        if(gl.validaLicDB==0){
+            msgbox("Base de datos vacia, recibir datos");
+            relEnv.setVisibility(View.INVISIBLE);
+            gl.validaLicDB=2;
+        }else if(gl.validaLicDB==10){
+
+            InvCiego.fill(" WHERE COMUNICADO = 'N'");
+
+            if(InvCiego.count==0) ftflag = true;
+
+            if(!ftflag){
+                relRec.setVisibility(View.INVISIBLE);
+                relEnv.setVisibility(View.VISIBLE);
+            }else {
+                relRec.setVisibility(View.VISIBLE);
+                relEnv.setVisibility(View.INVISIBLE);
+            }
+
+        }
+        return true;
+    }
+
     public boolean envioUsuarios() {
         String ss;
 
@@ -801,12 +838,14 @@ public class ComWS extends PBase {
                         fterr += sstr;dbg +=ss +" , ***";
                     }
                 } catch (Exception e) {
+                    addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
                     errflag=true;fterr += "\n" + e.getMessage();dbg = e.getMessage();
                 }
 
             }
         } catch (Exception e) {
-            errflag=true;fstr = e.getMessage();dbg = fstr;
+            addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
+            errflag=true;fterr = e.getMessage();dbg = fterr;
         }
 
         return true;
@@ -829,12 +868,21 @@ public class ComWS extends PBase {
                     fterr += sstr;dbg +=" , ***";
                 }
             } catch (Exception e) {
+                addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
                 errflag=true;fterr += "\n" + e.getMessage();dbg = e.getMessage();
             }
 
-            Procesar_Inventario_Ciego(gl.idInvEnc, gl.IDregistro);
+            if(Procesar_Inventario_Ciego(gl.idInvEnc, gl.IDregistro)){
+                ss = "UPDATE INVENTARIO_CIEGO SET COMUNICADO = 'S'";
+                db.execSQL(ss);
+
+            }else{
+                return false;
+            }
+
         } catch (Exception e) {
-            errflag=true;fstr = e.getMessage();dbg = fstr;
+            addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
+            errflag=true;fterr = e.getMessage();dbg = fterr;
         }
 
         return true;
@@ -844,26 +892,28 @@ public class ComWS extends PBase {
 
     public void wsSendExecute(){
 
-       fstr="No connect";scon=0;
+        fterr="No connect";scon=0;
 
         try {
 
             if (getTest()==1) scon=1;
 
             if (scon==1) {
-                fstr="Sync OK";
+                fterr="Sync OK";
 
                 if (!sendData()) {
-                    fstr="Envio incompleto : "+sstr;
+                    fterr="Envio incompleto : "+sstr;
                 } else {
                 }
             } else {
-                fstr="No se puede conectar al web service : "+sstr;
+                fterr="No se puede conectar al web service : "+sstr;
+                errflag=true;
             }
 
         } catch (Exception e) {
+            addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
             scon=0;
-            fstr="No se puede conectar al web service. "+e.getMessage();
+            fterr="No se puede conectar al web service. "+e.getMessage();
         }
     }
 
@@ -871,8 +921,12 @@ public class ComWS extends PBase {
         Prg.setVisibility(View.INVISIBLE);
         prgBar.setVisibility(View.INVISIBLE);
 
-        if (errflag) mu.msgbox(fterr);
-        mu.msgbox("Envio completo");
+        if (errflag) {
+            mu.msgbox(fterr);
+        }else{
+            msgAskExit("Envio completo");
+        }
+
         isbusy=0;
     }
 

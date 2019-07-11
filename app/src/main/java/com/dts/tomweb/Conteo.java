@@ -39,6 +39,8 @@ public class Conteo extends PBase {
 
         super.InitBase(savedInstanceState);
 
+        addlog("Conteo",""+du.getActDateTime(),gl.nombreusuario);
+
         Codigo = (EditText) findViewById(R.id.txtCodigo);
         Barra = (EditText) findViewById(R.id.txtBarra);
         Cantidad = (EditText) findViewById(R.id.txtCantidad);
@@ -49,11 +51,12 @@ public class Conteo extends PBase {
         Desc = (TextView) findViewById(R.id.txtDesc);
         eliminar = (ImageView) findViewById(R.id.imageView17);
 
-        eliminar.setVisibility(View.INVISIBLE);
+        //eliminar.setVisibility(View.INVISIBLE);
 
-        Ubicacion.setFocusable(true);
+        Ubicacion.requestFocus();
         Barra.setFocusable(false);
 
+        limpiaCampos();
         setHandlers();
     }
 
@@ -68,7 +71,7 @@ public class Conteo extends PBase {
                 if (arg2.getAction() == KeyEvent.ACTION_DOWN) {
                     switch (arg1) {
                         case KeyEvent.KEYCODE_ENTER:
-                            Codigo.requestFocus();
+                            //Codigo.requestFocus();
                             return true;
                     }
                 }
@@ -101,8 +104,8 @@ public class Conteo extends PBase {
                         case KeyEvent.KEYCODE_ENTER:
 
                             insertaConteo();
-                            limpiaCampos();
                             mostrarConteo();
+                            limpiaCampos2();
                             //inventario();
 
                             return true;
@@ -126,8 +129,12 @@ public class Conteo extends PBase {
         startActivity(new Intent(this, Productos.class));
     }
 
-    public void doHelp(View view) {
+    public void doHelp(View view) {  }
 
+    public void doDelete (View view){
+        barra = Codigo.getText().toString();
+        Ubic = Ubicacion.getText().toString();
+        msgAskDelete("Seguro que desea eliminar el conteo de el producto: "+ barra);
     }
 
     public void doNext(View view) {
@@ -229,20 +236,36 @@ public class Conteo extends PBase {
             }
 
         }catch (Exception e){
+            addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
             msgbox("Error: "+e);
         }
     }
 
     public void Eliminar(){
+        clsInventario_ciegoObj InvCiego = new clsInventario_ciegoObj(this, Con, db);
+
         try{
 
-            if(!Codigo.getText().toString().isEmpty()){
-                msgbox("");
-            }else{
-                msgbox("Ingrese el codigo del producto a eliminar");
+            if(barra.isEmpty()){
+                msgbox("Ingrese el código del producto a eliminar");return;
             }
 
+            if(Ubic.isEmpty()){
+                msgbox("Ingrese la ubicación del producto a eliminar");return;
+            }
+
+            InvCiego.fill("WHERE CODIGO_BARRA = "+ barra + " AND UBICACION = "+ Ubic);
+
+            if(InvCiego.count==0){
+                msgbox("Este producto no exite en la ubicación descrita, o algunos de los dos no exite");
+                return;
+            }
+
+            sql = "UPDATE INVENTARIO_CIEGO SET ELIMINADO = 1 WHERE CODIGO_BARRA = "+ barra + " AND UBICACION = "+ Ubic;
+            db.execSQL(sql);
+
         }catch (Exception e){
+            addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), sql);
             msgbox("Error Eliminar" + e);
         }
     }
@@ -258,36 +281,46 @@ public class Conteo extends PBase {
         Cantidad.setText("");
     }
 
+    public void limpiaCampos2(){
+        Ubicacion.setText(Ubic);
+        Codigo.setText("");
+        Barra.setText("");
+        Cantidad.setText("");
+    }
+
     public void mostrarConteo(){
         Cursor dt;
         Double cant2;
 
         try{
 
-            barra = Barra.getText().toString();
+            Cod = Codigo.getText().toString();
             Ubic = Ubicacion.getText().toString();
 
-            if(!barra.isEmpty()){
+            if(!Cod.isEmpty()){
                 if(!Ubic.isEmpty()){
-                    sql="SELECT SUM(CANTIDAD) FROM INVENTARIO_CIEGO WHERE UBICACION ="+ Ubic +" AND CODIGO_BARRA ='"+ barra +"'";
+                    sql="SELECT SUM(CANTIDAD) FROM INVENTARIO_CIEGO WHERE UBICACION ="+ Ubic +" AND CODIGO_BARRA ='"+ Cod +"' AND ELIMINADO = 0";
                 }else {
-                    sql="SELECT SUM(CANTIDAD) FROM INVENTARIO_CIEGO WHERE ID_INVENTARIO_ENC ="+ gl.idInvEnc +" AND CODIGO_BARRA ='"+ barra +"'";
+                    sql="SELECT SUM(CANTIDAD) FROM INVENTARIO_CIEGO WHERE CODIGO_BARRA ='"+ Cod +"' AND ELIMINADO = 0";
                 }
-            }
+            }else return;
             dt = Con.OpenDT(sql);
             dt.moveToFirst();
 
             cant2 = dt.getDouble(0);
 
-            Codigo2.setText(barra);
+            Codigo2.setText(Cod);
             Cant2.setText(Double.toString(cant2));
-            Desc.setText("NO ENCONTRADO");
+            if(gl.tipoInv==1){
+                Desc.setText("NO ENCONTRADO");
+            }
 
             if(result==1){
                 msgAskContinue("Comunicar los datos?");
             }
 
         }catch (Exception e){
+            addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), sql);
 
         }
     }
@@ -316,6 +349,7 @@ public class Conteo extends PBase {
             }
 
         }catch (Exception e){
+            addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
             msgbox("Error getCampos: "+e);
         }
     }
@@ -368,6 +402,28 @@ public class Conteo extends PBase {
 
     }
 
+    private void msgAskDelete(String msg) {
+        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+
+        dialog.setTitle("Tom");
+        dialog.setMessage("¿"+msg+"?");
+
+        dialog.setPositiveButton("Si", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                Eliminar();
+                limpiaCampos();
+            }
+        });
+
+        dialog.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+
+            }
+        });
+
+        dialog.show();
+
+    }
     //endregion
 
     //region Activity Events

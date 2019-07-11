@@ -1,19 +1,11 @@
 package com.dts.tomweb;
 
-import android.Manifest;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
-import android.text.InputType;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.dts.classes.clsInventario_encabezadoObj;
 import com.dts.classes.clsRegistro_handheldObj;
@@ -35,10 +27,12 @@ public class Ingreso extends PBase {
         try {
             super.InitBase(savedInstanceState);
 
+            addlog("Ingreso",""+du.getActDateTime(),gl.nombreusuario);
+
             txtUser = (EditText) findViewById(R.id.editText2);txtUser.requestFocus();
             txtPass = (EditText) findViewById(R.id.editText3);
             lblTitle = (TextView) findViewById(R.id.textView2);
-            lblVer = (TextView) findViewById(R.id.textView3);lblVer.setText(version);
+            lblVer = (TextView) findViewById(R.id.Productos);lblVer.setText(version);
 
             txtUser.setText("1");txtPass.setText("1");txtPass.requestFocus();
 
@@ -48,6 +42,7 @@ public class Ingreso extends PBase {
 
         } catch (Exception e) {
             msgbox(new Object() {}.getClass().getEnclosingMethod().getName() + " . " + e.getMessage());
+            addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
         }
 
     }
@@ -111,7 +106,7 @@ public class Ingreso extends PBase {
 
 
         }catch (Exception e){
-
+            addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
         }
     }
 
@@ -132,6 +127,7 @@ public class Ingreso extends PBase {
                 }
             }
         }catch (Exception e){
+            addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
 
         }
     }
@@ -183,6 +179,7 @@ public class Ingreso extends PBase {
             startActivity(new Intent(this,MenuPrincipal.class));
 
         } catch (Exception e) {
+            addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
             msgbox(new Object() {}.getClass().getEnclosingMethod().getName() + " . " + e.getMessage());
         }
 
@@ -203,18 +200,26 @@ public class Ingreso extends PBase {
     @Override
     protected void onResume() {
         super.onResume();
-        if (callback ==1) {
-            callback =0;
-            if (gl.exitapp) finish();
+
+        try{
+
+            if (callback ==1) {
+                callback =0;
+                if (gl.exitapp) finish();
+            }
+
+            if(gl.validaLicDB==2){
+                super.finish();
+            }
+
+            if(gl.validaLicDB==4){
+                getDB();
+            }
+
+        }catch (Exception e){
+            addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
         }
 
-        if(gl.validaLicDB==2){
-            super.finish();
-        }
-
-        if(gl.validaLicDB==4){
-            getDB();
-        }
     }
 
 }
