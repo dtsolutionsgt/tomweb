@@ -9,6 +9,7 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,9 +28,11 @@ public class Conteo extends PBase {
 
     private EditText Barra, Cantidad, Ubicacion, Codigo;
     private TextView Codigo2, Cant2, Desc;
+
     private String Ubic, Cod, tipoArt, barra, desc;
     private Double canti;
     private Integer result;
+
     private ImageView eliminar;
 
     @Override
@@ -218,7 +221,7 @@ public class Conteo extends PBase {
                 item.id_inventario_enc =  gl.idInvEnc;
                 item.codigo_barra = barra;
                 item.cantidad = canti;
-                item.comunicado = "";
+                item.comunicado = "N";
                 item.ubicacion = Ubic;
                 item.id_operador = gl.userid;
                 item.fecha = ffe;
@@ -228,6 +231,8 @@ public class Conteo extends PBase {
                 InvCiego.add(item);
 
                 Toast.makeText(this, "Agregado Correctamente", Toast.LENGTH_LONG).show();
+
+                Codigo.requestFocus();
 
             }else if(gl.tipoInv==2){
 
@@ -263,6 +268,8 @@ public class Conteo extends PBase {
 
             sql = "UPDATE INVENTARIO_CIEGO SET ELIMINADO = 1 WHERE CODIGO_BARRA = "+ barra + " AND UBICACION = "+ Ubic;
             db.execSQL(sql);
+
+            gl.eliminar=true;
 
         }catch (Exception e){
             addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), sql);

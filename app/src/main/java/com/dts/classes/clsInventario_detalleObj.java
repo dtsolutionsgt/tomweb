@@ -148,7 +148,7 @@ public class clsInventario_detalleObj {
             item.codigo_barra=dt.getString(5);
             item.comunicado=dt.getString(6);
             item.id_operador=dt.getInt(7);
-            item.fecha=dt.getInt(8);
+            item.fecha=dt.getString(8);
             item.id_registro=dt.getString(9);
             item.eliminado=dt.getInt(10);
 

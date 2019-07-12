@@ -221,6 +221,7 @@
         android:ems="10"
         android:imeOptions="actionGo"
         android:inputType="textPersonName"
+        android:nextFocusUp="@id/txtCodigo"
         android:singleLine="true" />
 
     <EditText

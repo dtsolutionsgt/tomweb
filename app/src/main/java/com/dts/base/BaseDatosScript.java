@@ -91,7 +91,7 @@ public class BaseDatosScript {
 					"codigo_barra TEXT NOT NULL," +
 					"comunicado TEXT NOT NULL," +
 					"id_operador INTEGER NOT NULL," +
-					"fecha INTEGER NOT NULL," +
+					"fecha TEXT NOT NULL," +
 					"Id_registro TEXT NOT NULL," +
 					"eliminado INTEGER NOT NULL," +
 					"PRIMARY KEY ([id_inventario_det])" +
@@ -102,8 +102,8 @@ public class BaseDatosScript {
 					"id_inventario_enc INTEGER NOT NULL," +
 					"id_estado TEXT NOT NULL," +
 					"id_empresa INTEGER NOT NULL," +
-					"fecha_inicio INTEGER NOT NULL," +
-					"fecha_final INTEGER NOT NULL," +
+					"fecha_inicio TEXT NOT NULL," +
+					"fecha_final TEXT NOT NULL," +
 					"nombre TEXT NOT NULL," +
 					"id_usuario INTEGER NOT NULL," +
 					"tipo_inventario INTEGER NOT NULL," +
@@ -146,7 +146,7 @@ public class BaseDatosScript {
 			sql = "CREATE TABLE [Registro_handheld] (" +
 					"id_registro INTEGER NOT NULL," +
 					"id_empresa INTEGER NOT NULL," +
-					"fecha_registro INTEGER NOT NULL," +
+					"fecha_registro TEXT NOT NULL," +
 					"serie_dispositivo TEXT NOT NULL," +
 					"id_estatus TEXT NOT NULL," +
 					"id_pais TEXT NOT NULL," +

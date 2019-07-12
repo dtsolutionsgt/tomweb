@@ -12,7 +12,6 @@ public class Inventario extends PBase {
 
     private TextView Correlativo, Empresa, Estado, FechaInv, Descrip, TipoInv;
     private String estado, tipoinv;
-    private Long fecha;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,7 +56,6 @@ public class Inventario extends PBase {
         clsClasses.clsInventario_encabezado item=clsCls.new clsInventario_encabezado();
 
         String sfecha;
-        Integer test;
 
         try{
             invEnc.fill();
@@ -80,8 +78,7 @@ public class Inventario extends PBase {
 
             }
 
-            fecha = Long.valueOf(item.fecha_inicio);
-            sfecha=du.sfecha(fecha);
+            sfecha = item.fecha_inicio;
 
             if(item.tipo_inventario == 4){
 

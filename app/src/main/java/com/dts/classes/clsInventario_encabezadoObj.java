@@ -136,8 +136,8 @@ public class clsInventario_encabezadoObj {
             item.id_inventario_enc=dt.getInt(0);
             item.id_estado=dt.getString(1);
             item.id_empresa=dt.getInt(2);
-            item.fecha_inicio=dt.getInt(3);
-            item.fecha_final=dt.getInt(4);
+            item.fecha_inicio=dt.getString(3);
+            item.fecha_final=dt.getString(4);
             item.nombre=dt.getString(5);
             item.id_usuario=dt.getInt(6);
             item.tipo_inventario=dt.getInt(7);

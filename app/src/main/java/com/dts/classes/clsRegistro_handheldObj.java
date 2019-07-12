@@ -134,7 +134,7 @@ public class clsRegistro_handheldObj {
 
             item.id_registro = dt.getInt(0);
             item.id_empresa = dt.getInt(1);
-            item.fecha_registro = dt.getInt(2);
+            item.fecha_registro = dt.getString(2);
             item.serie_dispositivo = dt.getString(3);
             item.id_estatus = dt.getString(4);
             item.id_pais = dt.getString(5);

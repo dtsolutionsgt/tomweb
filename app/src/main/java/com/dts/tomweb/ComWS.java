@@ -20,6 +20,7 @@ import com.dts.base.BaseDatos;
 import com.dts.base.DateUtils;
 import com.dts.base.clsDataBuilder;
 import com.dts.classes.clsInventario_ciegoObj;
+import com.dts.classes.clsInventario_detalleObj;
 import com.dts.classes.clsRegistro_handheldObj;
 import com.dts.classes.clsInventario_encabezadoObj;
 
@@ -226,24 +227,12 @@ public class ComWS extends PBase {
             idbg=idbg+" rec " +rc +"  ";
 
             s="";
-            if (delcmd.equalsIgnoreCase("DELETE FROM P_STOCK")) {
-                if (rc==1) {
-                    stockflag=0;//return 1;
-                } else {
-                    stockflag=1;
-                }
-            }
-
-            // if (delcmd.equalsIgnoreCase("DELETE FROM P_COBRO")) {
-            // 	idbg=idbg+" RC ="+rc+"---";
-            //}
-
 
             for (int i = 0; i < rc; i++) {
                 String str = "";
                 try {
                     str = ((SoapObject) result.getProperty(0)).getPropertyAsString(i);
-                    //s=s+str+"\n";
+
                 }catch (Exception e){
                     mu.msgbox("error: " + e.getMessage());
                     addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
@@ -258,6 +247,7 @@ public class ComWS extends PBase {
                     } else {
                         idbg=idbg+str;
                         ftmsg=ftmsg+"\n"+str;ftflag=true;
+                        gl.licExist=1;
                         sstr=str;return 0;
                     }
                 } else {
@@ -642,11 +632,14 @@ public class ComWS extends PBase {
         }
 
         if (TN.equalsIgnoreCase("INVENTARIO_MAESTRO")) {
+            String ss;
 
             if(count==1){
+                TN = "ARTICULO";
                 SQL = "SELECT * FROM ARTICULO WHERE ID_EMPRESA ='" + Com_IdEmpresa + "'";
                 return SQL;
             }else if(count==2){
+                TN = "ARTICULO_CODIGO_BARRA";
                 SQL = "SELECT * FROM ARTICULO_CODIGO_BARRA WHERE ID_EMPRESA ='" + Com_IdEmpresa + "'";
                 return SQL;
             }
@@ -711,6 +704,7 @@ public class ComWS extends PBase {
                     startActivity(new Intent(this, Licencia.class));
                 }else{
                     mu.msgbox("Ocurrió error : \n"+fstr+" ("+reccnt+") " + ferr);
+                    gl.licExist=0;
                     isbusy=0;
                     return;
                 }
@@ -787,8 +781,13 @@ public class ComWS extends PBase {
         return true;
     }
 
-    public boolean envCompleto(){
-        clsInventario_ciegoObj InvCiego = new clsInventario_ciegoObj(this, Con, db);
+    public void envCompleto(){
+        clsInventario_encabezadoObj invEnc = new clsInventario_encabezadoObj(this, Con, db);
+        clsInventario_ciegoObj invCiego = new clsInventario_ciegoObj(this, Con, db);
+        clsInventario_detalleObj invDet = new clsInventario_detalleObj(this, Con, db);
+        Cursor dt;
+        String ss;
+        Integer count;
 
         if(gl.validaLicDB==0){
             msgbox("Base de datos vacia, recibir datos");
@@ -796,9 +795,32 @@ public class ComWS extends PBase {
             gl.validaLicDB=2;
         }else if(gl.validaLicDB==10){
 
-            InvCiego.fill(" WHERE COMUNICADO = 'N'");
+            if(gl.eliminar){
+                relRec.setVisibility(View.INVISIBLE);
+                relEnv.setVisibility(View.VISIBLE);
+                gl.eliminar = false;
+                return;
+            }
 
-            if(InvCiego.count==0) ftflag = true;
+            invEnc.fill();
+            gl.tipoInv =  invEnc.first().tipo_inventario;
+
+            count = 0;
+
+            if(gl.tipoInv==1){
+
+                invCiego.fill("WHERE ID_INVENTARIO_ENC = "+ gl.idInvEnc +" AND COMUNICADO = 'N'");
+                count = invCiego.count;
+
+            }else if(gl.tipoInv>1){
+
+                invDet.fill("WHERE ID_INVENTARIO_ENC = "+ gl.idInvEnc +" AND COMUNICADO = 'N'");
+                count = invDet.count;
+
+            }
+
+
+            if(count==0) ftflag = true;
 
             if(!ftflag){
                 relRec.setVisibility(View.INVISIBLE);
@@ -809,7 +831,6 @@ public class ComWS extends PBase {
             }
 
         }
-        return true;
     }
 
     public boolean envioUsuarios() {

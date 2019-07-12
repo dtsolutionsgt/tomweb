@@ -49,7 +49,7 @@ public class clsClasses {
         public String codigo_barra;
         public String comunicado;
         public int id_operador;
-        public int fecha;
+        public String fecha;
         public String id_registro;
         public int eliminado;
     }
@@ -58,8 +58,8 @@ public class clsClasses {
         public int id_inventario_enc;
         public String id_estado;
         public int id_empresa;
-        public int fecha_inicio;
-        public int fecha_final;
+        public String fecha_inicio;
+        public String fecha_final;
         public String nombre;
         public int id_usuario;
         public int tipo_inventario;
@@ -94,7 +94,7 @@ public class clsClasses {
     public class clsRegistro_handheld {
         public int id_registro;
         public int id_empresa;
-        public int fecha_registro;
+        public String fecha_registro;
         public String serie_dispositivo;
         public String id_estatus;
         public String id_pais;
