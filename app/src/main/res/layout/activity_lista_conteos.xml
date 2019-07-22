@@ -213,16 +213,6 @@ tools:context="com.dts.tomweb.ListaConteos">
         android:textSize="24sp"
         android:textStyle="bold" />
 
-    <Spinner
-        android:id="@+id/spinner3"
-        android:layout_width="164dp"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/textView31"
-        android:layout_alignParentEnd="true"
-        android:layout_marginTop="10dp"
-        android:layout_marginEnd="6dp"
-        android:background="@drawable/spinnerstyle" />
-
 </RelativeLayout>
 
 

@@ -3,6 +3,8 @@ package com.dts.tomweb;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.DisplayMetrics;
 import android.view.KeyEvent;
 import android.view.View;
@@ -40,7 +42,6 @@ public class ListaConteos extends PBase {
     private int cw;
     private String scod;
     private boolean consol;
-    private Spinner spinnCon;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,7 +59,6 @@ public class ListaConteos extends PBase {
         txtUbic = (EditText) findViewById(R.id.txtNombre);
         regs = (TextView) findViewById(R.id.txtRegs);
         cb = (CheckBox) findViewById(R.id.cbConsolidar);
-        spinnCon = (Spinner) findViewById(R.id.spinner3);
 
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
@@ -67,7 +67,7 @@ public class ListaConteos extends PBase {
         cb.setChecked(false);
         consol=false;
 
-        if(gl.tipoInv==1) scod = " INVENTARIO_CIEGO"; spinnCon.setVisibility(View.INVISIBLE);
+        if(gl.tipoInv==1) scod = " INVENTARIO_CIEGO";
         if(gl.tipoInv==2 || gl.tipoInv==3) scod = " INVENTARIO_DETALLE";
 
         setHandlers();
@@ -154,32 +154,32 @@ public class ListaConteos extends PBase {
                 }
             });
 
-            txtBarra.setOnKeyListener(new View.OnKeyListener() {
-                @Override
-                public boolean onKey(View arg0, int arg1, KeyEvent arg2) {
-                    if (arg2.getAction() == KeyEvent.ACTION_DOWN) {
-                        switch (arg1) {
-                            case KeyEvent.KEYCODE_ENTER:
-                                showData(scod);
-                                return true;
-                        }
-                    }
-                    return false;
+            txtBarra.addTextChangedListener(new TextWatcher() {
+
+                public void afterTextChanged(Editable s) {
                 }
+
+                public void beforeTextChanged(CharSequence s, int start,int count, int after) {
+                }
+
+                public void onTextChanged(CharSequence s, int start,int before, int count) {
+                    showData(scod);
+                }
+
             });
 
-            txtUbic.setOnKeyListener(new View.OnKeyListener() {
-                @Override
-                public boolean onKey(View arg0, int arg1, KeyEvent arg2) {
-                    if (arg2.getAction() == KeyEvent.ACTION_DOWN) {
-                        switch (arg1) {
-                            case KeyEvent.KEYCODE_ENTER:
-                                showData(scod);
-                                return true;
-                        }
-                    }
-                    return false;
+            txtUbic.addTextChangedListener(new TextWatcher() {
+
+                public void afterTextChanged(Editable s) {
                 }
+
+                public void beforeTextChanged(CharSequence s, int start,int count, int after) {
+                }
+
+                public void onTextChanged(CharSequence s, int start,int before, int count) {
+                    showData(scod);
+                }
+
             });
         }catch (Exception e){
             addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"");

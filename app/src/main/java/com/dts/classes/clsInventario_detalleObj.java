@@ -77,7 +77,7 @@ public class clsInventario_detalleObj {
 
         ins.init("Inventario_detalle");
 
-        ins.add("id_inventario_det",item.id_inventario_det);
+        //ins.add("id_inventario_det",item.id_inventario_det);
         ins.add("id_inventario_enc",item.id_inventario_enc);
         ins.add("id_articulo",item.id_articulo);
         ins.add("ubicacion",item.ubicacion);
@@ -149,7 +149,7 @@ public class clsInventario_detalleObj {
             item.comunicado=dt.getString(6);
             item.id_operador=dt.getInt(7);
             item.fecha=dt.getString(8);
-            item.id_registro=dt.getString(9);
+            item.id_registro=dt.getInt(9);
             item.eliminado=dt.getInt(10);
 
             items.add(item);

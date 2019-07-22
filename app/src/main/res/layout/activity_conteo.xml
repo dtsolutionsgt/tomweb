@@ -234,7 +234,7 @@
         android:layout_marginBottom="359dp"
         android:layout_toEndOf="@+id/txt1"
         android:ems="10"
-        android:imeOptions="actionNext"
+        android:imeOptions="actionGo"
         android:inputType="textPersonName"
         android:singleLine="true" />
 

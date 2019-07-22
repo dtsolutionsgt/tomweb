@@ -62,7 +62,7 @@ public class clsDataBuilder {
 
 		Cursor PRG,DT;
 		String s,n,t,si;
-		int j,cc,ct,dd;
+		int j,cc,ct,dd,ee;
 		
 		tcol.clear();
 		String SQL_="INSERT INTO "+tn+" VALUES(";
@@ -73,9 +73,13 @@ public class clsDataBuilder {
 		try {
 
 			dd=0;
+			ee=0;
 			if(tn.equals("temp_inventario_ciego")){
 				tn="inventario_ciego";
-				dd=1;
+				dd=1;ee=1;
+			} else if(tn.equals("temp_inventario_detalle")){
+				tn="inventario_detalle";
+				dd=1;ee=2;
 			}
 
 			String vSQL = "PRAGMA table_info('"+tn+"')"; 
@@ -89,12 +93,22 @@ public class clsDataBuilder {
 				n=PRG.getString(PRG.getColumnIndex("name"));
 				t=PRG.getString(PRG.getColumnIndex("type"));
 
-				ct=getCType(n,t);
-				tcol.add(ct);
-				s=s+n+"  "+ct+"\n";
-				
-				SS=SS+n;
-				if (j<cc-1) SS=SS+",";
+				if(tn.equals("inventario_detalle")){
+					if(n.equals("comunicado")) dd=2;
+				}
+
+				if(n.equals("eliminado")) dd=2;
+
+				if(dd!=2){
+					ct=getCType(n,t);
+					tcol.add(ct);
+					s=s+n+"  "+ct+"\n";
+
+					SS=SS+n;
+					if (j<cc-ee) SS=SS+",";
+				}
+
+				dd=1;
 				  
 			    PRG.moveToNext();j+=1;
 			}
@@ -115,7 +129,7 @@ public class clsDataBuilder {
 				  
 				si=SQL_;
 				
-				for (int i = 0; i < cc-dd; i++)
+				for (int i = 0; i < cc-ee; i++)
 				{
 
 					ct=tcol.get(i);
@@ -125,7 +139,7 @@ public class clsDataBuilder {
 					//if (ct==2) s="'"+DU.univfechaext(DT.getInt(i))+"'";
 					//if (ct==3) s="'"+DU.univfechaext(DT.getInt(i))+"'";
 					
-					if (i<cc-1-dd) s=s+",";
+					if (i<cc-1-ee) s=s+",";
 					si=si+s;
 			    }
 				

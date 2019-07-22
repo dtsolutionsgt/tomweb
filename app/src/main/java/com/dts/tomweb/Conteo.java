@@ -3,6 +3,7 @@ package com.dts.tomweb;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.RestrictionEntry;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -16,6 +17,7 @@ import android.widget.Toast;
 import com.dts.base.clsClasses;
 import com.dts.classes.clsArticuloObj;
 import com.dts.classes.clsInventario_ciegoObj;
+import com.dts.classes.clsInventario_detalleObj;
 import com.dts.classes.clsRegistro_handheldObj;
 
 import org.w3c.dom.Text;
@@ -31,7 +33,7 @@ public class Conteo extends PBase {
 
     private String Ubic, Cod, tipoArt, barra, desc;
     private Double canti;
-    private Integer result;
+    private Integer result=0;
 
     private ImageView eliminar;
 
@@ -88,9 +90,21 @@ public class Conteo extends PBase {
                 if (arg2.getAction() == KeyEvent.ACTION_DOWN) {
                     switch (arg1) {
                         case KeyEvent.KEYCODE_ENTER:
+                            Barra.setText("");
+                            Cod = Codigo.getText().toString();
+
+                            if(!existencia()) return false;
+
+                            mostrarConteo();
+
+                            if(gl.tipoInv==2 && tipoArt.equals("S")){
+                                insertaConteo();
+                                Ubicacion.requestFocus();
+                                mostrarConteo();
+                                return true;
+                            }
 
                             Cantidad.requestFocus();
-                            mostrarConteo();
 
                             return true;
                     }
@@ -109,7 +123,6 @@ public class Conteo extends PBase {
                             insertaConteo();
                             mostrarConteo();
                             limpiaCampos2();
-                            //inventario();
 
                             return true;
                     }
@@ -132,12 +145,30 @@ public class Conteo extends PBase {
         startActivity(new Intent(this, Productos.class));
     }
 
-    public void doHelp(View view) {  }
+    public void doHelp(View view) {
+        String ss;
+
+        try {
+            ss = "UPDATE INVENTARIO_DETALLE SET COMUNICADO = 'N'";
+            db.execSQL(ss);
+        }catch (Exception  e){
+            addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
+            msgbox("Error: "+e);
+        }
+
+        Toast.makeText(this, "Comunicado = N", Toast.LENGTH_LONG).show();
+
+    }
 
     public void doDelete (View view){
         barra = Codigo.getText().toString();
         Ubic = Ubicacion.getText().toString();
-        msgAskDelete("Seguro que desea eliminar el conteo de el producto: "+ barra);
+
+        if(barra.isEmpty() || Ubic.isEmpty()){
+            msgbox("Ingrese el código y la ubicación del producto a eliminar");return;
+        }
+
+        msgAskDelete("Seguro que desea eliminar el conteo de el producto: "+ barra +" "+desc);
     }
 
     public void doNext(View view) {
@@ -175,6 +206,9 @@ public class Conteo extends PBase {
     public void insertaConteo(){
         clsInventario_ciegoObj InvCiego = new clsInventario_ciegoObj(this, Con, db);
         clsClasses.clsInventario_ciego item=clsCls.new clsInventario_ciego();
+        clsInventario_detalleObj InvDet = new clsInventario_detalleObj(this, Con, db);
+        clsClasses.clsInventario_detalle itemDeta=clsCls.new clsInventario_detalle();
+
         clsRegistro_handheldObj regHH = new clsRegistro_handheldObj(this, Con, db);
 
         Long sfecha;
@@ -185,36 +219,44 @@ public class Conteo extends PBase {
 
             regHH.fill();
             gl.IDregistro = regHH.first().id_registro;
+            Cod = Codigo.getText().toString();
+
 
             if(Ubicacion.getText().toString().isEmpty()){
                 Ubic = "1";
             }else {
                 Ubic = Ubicacion.getText().toString();
             }
-
-
             sfecha=du.getActDate();
             ff = "20"+sfecha;
             ffe= ff.substring(0,8);
 
-            if(Cantidad.getText().toString().isEmpty()){
-                msgbox("Ingrese la cantidad");
-                return;
+
+            if(tipoArt.equals("S")){
+                canti = 1.0;
+            }else {
+                if(Cantidad.getText().toString().isEmpty()){
+                    msgbox("Ingrese la cantidad");
+                    return;
+                }else {
+                    canti = Double.parseDouble(Cantidad.getText().toString());
+                }
             }
+
 
             if(Codigo.getText().toString().isEmpty()){
                 msgbox("Ingrese el codigo");
                 return;
             }
 
-            canti = Double.parseDouble(Cantidad.getText().toString());
-
             if(canti==0){
                 msgbox("Ingrese una cantidad mayor a 0");
                 return;
-                            }
+            }
+
 
             if(gl.tipoInv==1) {
+
                 Barra.setText(Codigo.getText().toString());
                 barra = Barra.getText().toString();
 
@@ -230,16 +272,28 @@ public class Conteo extends PBase {
 
                 InvCiego.add(item);
 
-                Toast.makeText(this, "Agregado Correctamente", Toast.LENGTH_LONG).show();
-
-                Codigo.requestFocus();
-
             }else if(gl.tipoInv==2){
+
+                itemDeta.id_inventario_enc= gl.idInvEnc;
+                itemDeta.id_articulo = Cod;
+                itemDeta.ubicacion = Ubic;
+                itemDeta.cantidad = canti;
+                itemDeta.codigo_barra = barra;
+                itemDeta.comunicado = "N";
+                itemDeta.id_operador = gl.userid;
+                itemDeta.fecha = ffe;
+                itemDeta.id_registro = gl.IDregistro;
+                item.eliminado = 0;
+
+                InvDet.add(itemDeta);
 
             }else if(gl.tipoInv==3){
 
             }
 
+            Toast.makeText(this, "Agregado Correctamente", Toast.LENGTH_LONG).show();
+
+            Codigo.requestFocus();
         }catch (Exception e){
             addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
             msgbox("Error: "+e);
@@ -248,33 +302,62 @@ public class Conteo extends PBase {
 
     public void Eliminar(){
         clsInventario_ciegoObj InvCiego = new clsInventario_ciegoObj(this, Con, db);
+        clsInventario_detalleObj InvDetalle = new clsInventario_detalleObj(this, Con, db);
+        String tabla="";
+        Integer cc=0;
 
         try{
 
-            if(barra.isEmpty()){
-                msgbox("Ingrese el código del producto a eliminar");return;
+            if(gl.tipoInv==1){
+                tabla = "INVENTARIO_CIEGO";
+
+                InvCiego.fill(" WHERE CODIGO_BARRA = "+ barra + " AND UBICACION = "+ Ubic);
+                cc = InvCiego.count;
+            } else if(gl.tipoInv==2) {
+                tabla = "INVENTARIO_DETALLE";
+
+                InvDetalle.fill(" WHERE CODIGO_BARRA = "+ barra + " AND UBICACION = "+ Ubic);
+                cc = InvDetalle.count;
             }
 
-            if(Ubic.isEmpty()){
-                msgbox("Ingrese la ubicación del producto a eliminar");return;
-            }
-
-            InvCiego.fill("WHERE CODIGO_BARRA = "+ barra + " AND UBICACION = "+ Ubic);
-
-            if(InvCiego.count==0){
-                msgbox("Este producto no exite en la ubicación descrita, o algunos de los dos no exite");
+            if(cc==0){
+                msgbox("Este producto no exite en la ubicación descrita, o algunos de los dos no existe");
                 return;
             }
 
-            sql = "UPDATE INVENTARIO_CIEGO SET ELIMINADO = 1 WHERE CODIGO_BARRA = "+ barra + " AND UBICACION = "+ Ubic;
+            sql = "UPDATE "+ tabla +" SET ELIMINADO = 1, COMUNICADO = 'N' WHERE CODIGO_BARRA = "+ barra + " AND UBICACION = "+ Ubic;
             db.execSQL(sql);
-
-            gl.eliminar=true;
 
         }catch (Exception e){
             addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), sql);
             msgbox("Error Eliminar" + e);
         }
+    }
+
+    public boolean existencia() {
+
+        clsArticuloObj articulo = new clsArticuloObj(this, Con, db);
+
+        try {
+            if(gl.tipoInv==1){
+                return true;
+            }else if(gl.tipoInv==2){
+                articulo.fill( " WHERE ID_ARTICULO = '"+ Cod +"'");
+
+                if(articulo.count==0){
+                    gl.codBarra = Cod;
+                    msgAskArt("Agregar como no encontrado");
+                    return false;
+                }
+            }
+
+
+        }catch (Exception e){
+            addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
+            msgbox("Error: "+e);
+        }
+
+        return true;
     }
 
     //endregion
@@ -296,19 +379,42 @@ public class Conteo extends PBase {
     }
 
     public void mostrarConteo(){
+        clsArticuloObj articulo = new clsArticuloObj(this, Con, db);
         Cursor dt;
         Double cant2;
+        String Tabla="";
 
         try{
 
             Cod = Codigo.getText().toString();
             Ubic = Ubicacion.getText().toString();
 
+            if(gl.tipoInv==1){
+                Tabla = "INVENTARIO_CIEGO";
+                Desc.setText("NO ENCONTRADO");
+            }else if(gl.tipoInv==2){
+                Tabla = "INVENTARIO_DETALLE";
+
+                articulo.fill(" WHERE ID_ARTICULO ='"+ Cod +"'");
+                desc = articulo.first().descripcion;
+                tipoArt =  articulo.first().tipo_conteo;
+                barra = articulo.first().codigo_barra;
+
+                if(desc.isEmpty()){
+                    msgAskArt("Agregar como no encontrado");
+                    return;
+                }else{
+                    Desc.setText(desc);
+                    Barra.setText(barra);
+                }
+
+            }
+
             if(!Cod.isEmpty()){
                 if(!Ubic.isEmpty()){
-                    sql="SELECT SUM(CANTIDAD) FROM INVENTARIO_CIEGO WHERE UBICACION ="+ Ubic +" AND CODIGO_BARRA ='"+ Cod +"' AND ELIMINADO = 0";
+                    sql="SELECT SUM(CANTIDAD) FROM "+ Tabla +" WHERE UBICACION ="+ Ubic +" AND CODIGO_BARRA ='"+ barra +"' AND ELIMINADO = 0";
                 }else {
-                    sql="SELECT SUM(CANTIDAD) FROM INVENTARIO_CIEGO WHERE CODIGO_BARRA ='"+ Cod +"' AND ELIMINADO = 0";
+                    sql="SELECT SUM(CANTIDAD) FROM "+ Tabla +" WHERE CODIGO_BARRA ='"+ barra +"' AND ELIMINADO = 0";
                 }
             }else return;
             dt = Con.OpenDT(sql);
@@ -318,9 +424,6 @@ public class Conteo extends PBase {
 
             Codigo2.setText(Cod);
             Cant2.setText(Double.toString(cant2));
-            if(gl.tipoInv==1){
-                Desc.setText("NO ENCONTRADO");
-            }
 
             if(result==1){
                 msgAskContinue("Comunicar los datos?");
@@ -366,6 +469,28 @@ public class Conteo extends PBase {
     //region Dialogs
 
     private void msgAskExit(String msg) {
+        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+
+        dialog.setTitle("Tom");
+        dialog.setMessage("¿" + msg + "?");
+
+        dialog.setPositiveButton("Si", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                TipoConteo();
+            }
+        });
+
+        dialog.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+
+            }
+        });
+
+        dialog.show();
+
+    }
+
+    private void msgAskArt(String msg) {
         AlertDialog.Builder dialog = new AlertDialog.Builder(this);
 
         dialog.setTitle("Tom");

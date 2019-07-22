@@ -50,7 +50,7 @@ public class clsClasses {
         public String comunicado;
         public int id_operador;
         public String fecha;
-        public String id_registro;
+        public int id_registro;
         public int eliminado;
     }
 

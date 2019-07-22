@@ -147,7 +147,11 @@ public class ComWS extends PBase {
             }
         });
 
-        dialog.setNegativeButton("Cancelar", null);
+        dialog.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                prgBar.setVisibility(View.INVISIBLE);
+            }
+        });
 
         dialog.show();
 
@@ -281,6 +285,52 @@ public class ComWS extends PBase {
         try {
 
             idbg=idbg+" Procesar_Inventario_Ciego ";
+
+            SoapObject request = new SoapObject(NAMESPACE, METHOD_NAME);
+            SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);
+            envelope.dotNet = true;
+
+            PropertyInfo param = new PropertyInfo();
+            param.setType(String.class);
+            param.setName("Id_Inventario_Enc");param.setValue(Id_Inventario_Enc);
+
+
+            PropertyInfo param2 = new PropertyInfo();
+            param2.setType(String.class);
+            param2.setName("Id_Registro");param2.setValue(Id_Registro);
+
+            request.addProperty(param);
+            request.addProperty(param2);
+            envelope.setOutputSoapObject(request);
+
+            HttpTransportSE transport = new HttpTransportSE(URL);
+            transport.call(NAMESPACE+METHOD_NAME, envelope);
+
+            SoapPrimitive resSoap =(SoapPrimitive) envelope.getResponse();
+            s = resSoap.toString();
+
+            sstr = "#";
+            if (s.equalsIgnoreCase("#")) return true;
+
+            sstr = s;
+            return false;
+        } catch (Exception e) {
+            addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"");
+            idbg=idbg+" ERR "+e.getMessage();
+            return false;
+        }
+    }
+
+    public boolean Procesar_Inventario_Detalle(Integer Id_Inventario_Enc,Integer Id_Registro) {
+        int rc;
+        String s,ss;
+
+        METHOD_NAME = "Procesar_Inventario_Detalle";
+        sstr="OK";
+
+        try {
+
+            idbg=idbg+" Procesar_Inventario_Detalle ";
 
             SoapObject request = new SoapObject(NAMESPACE, METHOD_NAME);
             SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);
@@ -576,6 +626,9 @@ public class ComWS extends PBase {
 
             sprog = TN;wsRtask.onProgressUpdate();
 
+            if(count==1){ TN = "ARTICULO"; }
+            else if(count==2){ TN = "ARTICULO_CODIGO_BARRA"; }
+
             if (fillTable(SQL,"DELETE FROM "+TN)==1) {
                 idbg=idbg +SQL+"#"+"PASS OK";
                 return true;
@@ -757,26 +810,35 @@ public class ComWS extends PBase {
     // WEB SERVICE - ENVIO
 
     private boolean sendData() {
+        clsRegistro_handheldObj regHH = new clsRegistro_handheldObj(this, Con, db);
 
         errflag=false;
 
         senv = "Envío terminado \n \n";
 
-        //if (!envioUsuarios()) return false;
+        try {
+            regHH.fill();
+            gl.IDregistro = regHH.first().id_registro;
 
-        if(gl.tipoInv==1) {
+            if(gl.tipoInv==1) {
 
-            if (!envioInvCiego()) return false;
+                if (!envioInvCiego()) return false;
 
-        }else if(gl.tipoInv==2){
+            }else if(gl.tipoInv==2){
 
-            //if (!envioInvMaestro()) return false;
+                if (!envioInvDetalle()) return false;
 
-        }else if(gl.tipoInv==3){
+            }else if(gl.tipoInv==3){
 
-            //if (!envioInvTeorico()) return false;
+                //if (!envioInvTeorico()) return false;
 
+            }
+        }catch (Exception e){
+            addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
+            errflag=true;fterr += "\n" + e.getMessage();dbg = e.getMessage();
         }
+
+
 
         return true;
     }
@@ -794,13 +856,6 @@ public class ComWS extends PBase {
             relEnv.setVisibility(View.INVISIBLE);
             gl.validaLicDB=2;
         }else if(gl.validaLicDB==10){
-
-            if(gl.eliminar){
-                relRec.setVisibility(View.INVISIBLE);
-                relEnv.setVisibility(View.VISIBLE);
-                gl.eliminar = false;
-                return;
-            }
 
             invEnc.fill();
             gl.tipoInv =  invEnc.first().tipo_inventario;
@@ -880,24 +935,64 @@ public class ComWS extends PBase {
             sprog = "Inventario Ciego...";wsStask.onProgressUpdate();
 
             dbld.clear();
-            dbld.insert("temp_inventario_ciego", "WHERE ELIMINADO=0");
+            if(dbld.insert("temp_inventario_ciego", "WHERE ELIMINADO=0")){
+                try {
+                    if (commitSQL() == 1) {
+                        if(Procesar_Inventario_Ciego(gl.idInvEnc, gl.IDregistro)){
+                            ss = "UPDATE INVENTARIO_CIEGO SET COMUNICADO = 'S'";
+                            db.execSQL(ss);
 
-            try {
-                if (commitSQL() == 1) {
-                    //
-                } else {
-                    fterr += sstr;dbg +=" , ***";
+                        }else{
+                            return false;
+                        }
+
+                    } else {
+                        fterr += sstr;dbg +=" , ***";
+                        return false;
+                    }
+                } catch (Exception e) {
+                    addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
+                    errflag=true;fterr += "\n" + e.getMessage();dbg = e.getMessage();
                 }
-            } catch (Exception e) {
-                addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
-                errflag=true;fterr += "\n" + e.getMessage();dbg = e.getMessage();
+            }else {
+                return false;
             }
 
-            if(Procesar_Inventario_Ciego(gl.idInvEnc, gl.IDregistro)){
-                ss = "UPDATE INVENTARIO_CIEGO SET COMUNICADO = 'S'";
-                db.execSQL(ss);
+        } catch (Exception e) {
+            addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
+            errflag=true;fterr = e.getMessage();dbg = fterr;
+        }
 
-            }else{
+        return true;
+    }
+
+    public boolean envioInvDetalle() {
+        String ss;
+
+        fterr = "";
+        try {
+            sprog = "Inventario Maestro...";wsStask.onProgressUpdate();
+
+            dbld.clear();
+            if(dbld.insert("temp_inventario_detalle", "WHERE ELIMINADO=0")){
+                try {
+                    if (commitSQL() == 1) {
+                        if(Procesar_Inventario_Detalle(gl.idInvEnc, gl.IDregistro)){
+                            ss = "UPDATE INVENTARIO_DETALLE SET COMUNICADO = 'S'";
+                            db.execSQL(ss);
+
+                        }else{
+                            return false;
+                        }
+                    } else {
+                        fterr += sstr;dbg +=" , ***";
+                        return false;
+                    }
+                } catch (Exception e) {
+                    addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
+                    errflag=true;fterr += "\n" + e.getMessage();dbg = e.getMessage();
+                }
+            }else {
                 return false;
             }
 
