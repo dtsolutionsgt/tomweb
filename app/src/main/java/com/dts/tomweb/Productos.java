@@ -64,7 +64,8 @@ public class Productos extends PBase {
         cw = (int) ((displayMetrics.widthPixels-22)/5)-1;
 
         if(gl.tipoInv==1) scod = " INVENTARIO_CIEGO";  spinnCon.setVisibility(View.INVISIBLE);
-        if(gl.tipoInv==2 || gl.tipoInv==3) scod = " ARTICULO";  spinnCon.setVisibility(View.VISIBLE);
+        if(gl.tipoInv==2) scod = " ARTICULO";  spinnCon.setVisibility(View.VISIBLE);
+        if(gl.tipoInv==3) scod = " INVENTARIO_TEORICO";  spinnCon.setVisibility(View.VISIBLE);
 
         setHandlers();
         spinner();
@@ -199,7 +200,7 @@ public class Productos extends PBase {
     private void showData(String tn) {
         clsInventario_detalleObj InvDet = new clsInventario_detalleObj(this, Con, db);
         Cursor dt;
-        String ss = "",barra,nomb,text,art;
+        String ss = "",barra,nomb,text,art="";
         int cc,rg,cnt,val=1;
 
         try {
@@ -226,14 +227,16 @@ public class Productos extends PBase {
 
             } else {
 
+                art = tn;
+
                 if(text.equals("Contados")){
 
-                    tn = "select b.id_articulo, b.descripcion, b.codigo_barra, b.tipo_conteo from articulo b inner join inventario_detalle a ON a.id_articulo = b.id_articulo AND a.codigo_barra = b.codigo_barra AND a.eliminado = 0";
+                    tn = "select b.id_articulo, b.descripcion, b.codigo_barra, b.tipo_conteo from "+ art +" b inner join inventario_detalle a ON a.id_articulo = b.id_articulo AND a.codigo_barra = b.codigo_barra AND a.eliminado = 0";
                     val=2;
 
                 }else if(text.equals("No Contados")){
 
-                    tn = "select b.id_articulo, b.descripcion, b.codigo_barra, b.tipo_conteo from articulo b inner join inventario_detalle a ON a.id_articulo <> b.id_articulo AND a.eliminado = 0";
+                    tn = "select b.id_articulo, b.descripcion, b.codigo_barra, b.tipo_conteo from "+ art +" b inner join inventario_detalle a ON a.id_articulo <> b.id_articulo AND a.eliminado = 0";
                     val=2;
 
                 }else if(text.equals("Todos")){

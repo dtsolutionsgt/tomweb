@@ -308,6 +308,23 @@ public class DateUtils {
 		return f;
 	}
 
+
+	public String getActDates(){
+		int cyear,cmonth,cday;
+		long f;
+		String ff;
+
+		final Calendar c = Calendar.getInstance();
+		cyear = c.get(Calendar.YEAR);
+		cmonth = c.get(Calendar.MONTH)+1;
+		cday = c.get(Calendar.DAY_OF_MONTH);
+
+		f=cfecha(cyear,cmonth,cday);
+
+		ff = Long.toString(f);
+		return ff;
+	}
+
 	public long getActDateTime(){
 		int cyear,cmonth,cday,ch,cm; 
 		long f;

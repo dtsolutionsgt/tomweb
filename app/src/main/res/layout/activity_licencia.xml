@@ -22,7 +22,7 @@
                 android:layout_centerVertical="true"
                 android:gravity="center_horizontal"
                 android:paddingLeft="10dp"
-                android:text="Comunicación"
+                android:text="Licencia"
                 android:textColor="#FFFFFF"
                 android:textSize="24sp"
                 android:textStyle="bold" />
@@ -135,5 +135,25 @@
         android:layout_marginTop="10dp"
         android:gravity="center_horizontal"
         android:text="Ingrese clave de activación" />
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/relBot"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="80dp"
+        android:layout_marginBottom="199dp"
+        android:text="Su clave de activación es: " />
+
+    <TextView
+        android:id="@+id/txtClave"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/relBot"
+        android:layout_marginStart="6dp"
+        android:layout_marginBottom="199dp"
+        android:layout_toEndOf="@+id/textView3"
+        android:text="TextView" />
 
 </RelativeLayout>

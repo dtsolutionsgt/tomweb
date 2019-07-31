@@ -71,7 +71,6 @@ public class clsClasses {
     }
 
     public class clsInventario_teorico {
-        public int id_inventario_teorico;
         public int id_empresa;
         public String id_articulo;
         public String descripcion;
@@ -80,7 +79,6 @@ public class clsClasses {
         public double costo;
         public String tipo_conteo;
         public int id_inventario_enc;
-        public String comunicado;
     }
 
     public class clsOperadores {

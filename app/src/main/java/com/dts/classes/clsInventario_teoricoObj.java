@@ -77,7 +77,6 @@ public class clsInventario_teoricoObj {
 
         ins.init("Inventario_teorico");
 
-        ins.add("id_inventario_teorico",item.id_inventario_teorico);
         ins.add("id_empresa",item.id_empresa);
         ins.add("id_articulo",item.id_articulo);
         ins.add("descripcion",item.descripcion);
@@ -86,7 +85,6 @@ public class clsInventario_teoricoObj {
         ins.add("costo",item.costo);
         ins.add("tipo_conteo",item.tipo_conteo);
         ins.add("id_inventario_enc",item.id_inventario_enc);
-        ins.add("comunicado",item.comunicado);
 
         db.execSQL(ins.sql());
 
@@ -101,9 +99,8 @@ public class clsInventario_teoricoObj {
         upd.add("costo",item.costo);
         upd.add("tipo_conteo",item.tipo_conteo);
         upd.add("id_inventario_enc",item.id_inventario_enc);
-        upd.add("comunicado",item.comunicado);
 
-        upd.Where("(id_inventario_teorico="+item.id_inventario_teorico+") AND (id_empresa="+item.id_empresa+") AND (id_articulo='"+item.id_articulo+"') AND (codigo_barra='"+item.codigo_barra+"')");
+        upd.Where("(id_empresa="+item.id_empresa+") AND (id_articulo='"+item.id_articulo+"') AND (codigo_barra='"+item.codigo_barra+"')");
 
         db.execSQL(upd.sql());
 
@@ -112,7 +109,7 @@ public class clsInventario_teoricoObj {
     }
 
     private void deleteItem(clsClasses.clsInventario_teorico item) {
-        sql="DELETE FROM Inventario_teorico WHERE (id_inventario_teorico="+item.id_inventario_teorico+") AND (id_empresa="+item.id_empresa+") AND (id_articulo='"+item.id_articulo+"') AND (codigo_barra='"+item.codigo_barra+"')";
+        sql="DELETE FROM Inventario_teorico WHERE (id_empresa="+item.id_empresa+") AND (id_articulo='"+item.id_articulo+"') AND (codigo_barra='"+item.codigo_barra+"')";
         db.execSQL(sql);
     }
 
@@ -135,16 +132,14 @@ public class clsInventario_teoricoObj {
 
             item = clsCls.new clsInventario_teorico();
 
-            item.id_inventario_teorico=dt.getInt(0);
-            item.id_empresa=dt.getInt(1);
-            item.id_articulo=dt.getString(2);
-            item.descripcion=dt.getString(3);
-            item.cantidad=dt.getDouble(4);
-            item.codigo_barra=dt.getString(5);
-            item.costo=dt.getDouble(6);
-            item.tipo_conteo=dt.getString(7);
-            item.id_inventario_enc=dt.getInt(8);
-            item.comunicado=dt.getString(9);
+            item.id_empresa=dt.getInt(0);
+            item.id_articulo=dt.getString(1);
+            item.descripcion=dt.getString(2);
+            item.cantidad=dt.getDouble(3);
+            item.codigo_barra=dt.getString(4);
+            item.costo=dt.getDouble(5);
+            item.tipo_conteo=dt.getString(6);
+            item.id_inventario_enc=dt.getInt(7);
 
             items.add(item);
 
@@ -172,7 +167,6 @@ public class clsInventario_teoricoObj {
 
         ins.init("Inventario_teorico");
 
-        ins.add("id_inventario_teorico",item.id_inventario_teorico);
         ins.add("id_empresa",item.id_empresa);
         ins.add("id_articulo",item.id_articulo);
         ins.add("descripcion",item.descripcion);
@@ -181,7 +175,6 @@ public class clsInventario_teoricoObj {
         ins.add("costo",item.costo);
         ins.add("tipo_conteo",item.tipo_conteo);
         ins.add("id_inventario_enc",item.id_inventario_enc);
-        ins.add("comunicado",item.comunicado);
 
         return ins.sql();
 
@@ -196,9 +189,8 @@ public class clsInventario_teoricoObj {
         upd.add("costo",item.costo);
         upd.add("tipo_conteo",item.tipo_conteo);
         upd.add("id_inventario_enc",item.id_inventario_enc);
-        upd.add("comunicado",item.comunicado);
 
-        upd.Where("(id_inventario_teorico="+item.id_inventario_teorico+") AND (id_empresa="+item.id_empresa+") AND (id_articulo='"+item.id_articulo+"') AND (codigo_barra='"+item.codigo_barra+"')");
+        upd.Where("(id_empresa="+item.id_empresa+") AND (id_articulo='"+item.id_articulo+"') AND (codigo_barra='"+item.codigo_barra+"')");
 
         return upd.sql();
 

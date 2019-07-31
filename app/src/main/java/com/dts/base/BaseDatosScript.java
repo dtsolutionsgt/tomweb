@@ -118,7 +118,6 @@ public class BaseDatosScript {
 			db.execSQL(sql);
 
 			sql = "CREATE TABLE [Inventario_teorico] (" +
-					"id_inventario_teorico INTEGER NOT NULL," +
 					"id_empresa INTEGER NOT NULL," +
 					"id_articulo TEXT NOT NULL," +
 					"descripcion TEXT NOT NULL," +
@@ -126,9 +125,7 @@ public class BaseDatosScript {
 					"codigo_barra TEXT NOT NULL," +
 					"costo REAL NOT NULL," +
 					"tipo_conteo TEXT NOT NULL," +
-					"id_inventario_enc INTEGER NOT NULL," +
-					"comunicado TEXT NOT NULL," +
-					"PRIMARY KEY ([id_inventario_teorico],[id_empresa],[id_articulo],[codigo_barra])" +
+					"id_inventario_enc INTEGER NOT NULL" +
 					");";
 			db.execSQL(sql);
 

@@ -1,12 +1,19 @@
 package com.dts.tomweb;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
+
+import java.io.FileOutputStream;
 
 public class Licencia extends PBase {
 
     private EditText Lic;
+    private TextView clave;
+    private Integer serieL;
+    private String serie, lic;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,6 +31,9 @@ public class Licencia extends PBase {
         }
 
         Lic = (EditText) findViewById(R.id.txtLic);
+        clave = (TextView) findViewById(R.id.txtClave);
+
+        clave.setText(gl.NoSerieHH);
 
     }
 
@@ -36,19 +46,36 @@ public class Licencia extends PBase {
     }
 
     public void doActivate(View view) {
+        serieL = gl.NoSerieHH.length();
+        serie = gl.NoSerieHH;
+        lic = Lic.getText().toString();
 
         try{
 
-            if(Lic.getText().toString().isEmpty()){
+            if(lic.isEmpty()){
                 msgbox("Debe ingresar la clave de activacion");
-            } else if(Lic.getText().toString().equals(gl.NoSerieHH)){
-                msgbox("Clave registrada correctamente");
-            }else if(!Lic.getText().toString().equals(gl.NoSerieHH)){
-                msgbox("Clave de activacion incorrecta");
+            } else{
+
+                if(lic.length()>=serieL){
+
+                    msgbox("El usuario ingresó: "+ lic +"\n No serie es: "+ serie);
+
+                    if(lic.equals(gl.NoSerieHH)){
+                        //crear archivo
+                        Crear_Registro_Licencia();
+                        msgbox("Se ha regitrado correctamente la licencia del dispositivo");
+                        //return a comws
+                    }else if(!lic.equals(gl.NoSerieHH)){
+                        msgbox("Clave de activacion incorrecta");
+                    }
+
+                }else {
+                    msgbox("El usuario ingresó: "+ lic +" long: "+ lic.length() +"\n No serie es: "+ serie + " long: "+ serieL);
+                }
+
+
             }
 
-            super.finish();
-            gl.validaLicDB=4;
 
         }catch (Exception e){
             addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
@@ -57,6 +84,8 @@ public class Licencia extends PBase {
     }
 
     public void doExit(View view) {
+        super.finish();
+        gl.validaLicDB=4;
         finish();
     }
 
@@ -64,6 +93,26 @@ public class Licencia extends PBase {
 
     //region Main
 
+    public boolean Crear_Registro_Licencia(){
+        String fecha;
+
+        try {
+            fecha = du.getActDates();
+
+            String FILENAME = "credentialsTOM";
+            String string = gl.NoSerieHH;
+
+            FileOutputStream fileLic= openFileOutput(FILENAME, Context.MODE_PRIVATE);
+            fileLic.write(string.getBytes());
+            fileLic.close();
+
+        }catch (Exception e){
+            addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
+            return false;
+        }
+
+        return true;
+    }
 
     //endregion
 

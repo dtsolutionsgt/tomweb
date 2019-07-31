@@ -15,6 +15,7 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.dts.base.BaseDatos;
 import com.dts.base.DateUtils;
@@ -30,6 +31,12 @@ import org.ksoap2.serialization.SoapObject;
 import org.ksoap2.serialization.SoapPrimitive;
 import org.ksoap2.serialization.SoapSerializationEnvelope;
 import org.ksoap2.transport.HttpTransportSE;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 
 public class ComWS extends PBase {
@@ -38,7 +45,7 @@ public class ComWS extends PBase {
     private int isbusy,regHH;
     private String sp;
     private int Com_IdEmpresa,Com_Id_Inventario;
-    private boolean errflag;
+    private boolean errflag, licdisp;
 
     private SQLiteDatabase dbT;
     private BaseDatos ConT;
@@ -159,6 +166,14 @@ public class ComWS extends PBase {
 
     public void doHelp(View view) {
 
+        try{
+
+            deleteFile("credentialsTOM");
+            Toast.makeText(this, "Eliminado", Toast.LENGTH_LONG).show();
+        }catch (Exception e){
+            Toast.makeText(this, "Error", Toast.LENGTH_LONG).show();
+        }
+
     }
 
     public void doExit(View view) {
@@ -194,6 +209,34 @@ public class ComWS extends PBase {
         dbld.clear();
         dbld.insert("USUARIO","WHERE 1=1");
         dbld.save();
+    }
+
+    public void Lic(){
+        super.finish();
+        startActivity(new Intent(this, Licencia.class));
+    }
+
+    public boolean obtenerCredenciales(){
+
+        try{
+
+            StringBuilder text = new StringBuilder();
+            FileInputStream fis = openFileInput("credentialsTOM");
+            BufferedReader br = new BufferedReader(new InputStreamReader(new BufferedInputStream(fis)));
+
+            String line;
+            while ((line = br.readLine()) != null) {
+                text.append(line);
+                text.append('\n');
+            }
+
+            br.close();
+
+        }catch (Exception e){
+            return false;
+        }
+
+        return true;
     }
 
 
@@ -537,7 +580,6 @@ public class ComWS extends PBase {
                 if (!AddTable("INVENTARIO_TEORICO")) return false;
             }
 
-
             saveData();
         } catch (Exception e) {
             addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"");
@@ -590,7 +632,10 @@ public class ComWS extends PBase {
                 registroHH.fill();
 
                 gl.licExist=registroHH.count;
-                gl.empresa = registroHH.first().id_empresa;
+
+                if(gl.licExist>0){
+                    gl.empresa = registroHH.first().id_empresa;
+                }
 
                 regHH=0;
             }else if(regHH==2){
@@ -726,6 +771,10 @@ public class ComWS extends PBase {
                 if (!getData()) {
                     if(gl.licExist==0){
                         fstr="El dispositivo no tiene licencia";
+
+                        if(!obtenerCredenciales()) licdisp = false; else licdisp = true;
+
+                        //validacion lic en disp true return, variable licdisp
                     }else {
                         fstr="Recepcion incompleta : "+fstr;
                     }
@@ -752,9 +801,15 @@ public class ComWS extends PBase {
             } else {
 
                 if(gl.licExist==0 && scon==1){
-                    isbusy=0;
-                    super.finish();
-                    startActivity(new Intent(this, Licencia.class));
+
+                    //validacion licdisp, dependiendo de eso envia a lic.act o return
+                    if(!licdisp){
+                        isbusy=0;
+                        msgLic("No hay licencia existente de este dispositivo");
+                    }else {
+                        return;
+                    }
+
                 }else{
                     mu.msgbox("Ocurrió error : \n"+fstr+" ("+reccnt+") " + ferr);
                     gl.licExist=0;
@@ -824,13 +879,9 @@ public class ComWS extends PBase {
 
                 if (!envioInvCiego()) return false;
 
-            }else if(gl.tipoInv==2){
+            }else if(gl.tipoInv==2 || gl.tipoInv==3){
 
                 if (!envioInvDetalle()) return false;
-
-            }else if(gl.tipoInv==3){
-
-                //if (!envioInvTeorico()) return false;
 
             }
         }catch (Exception e){
@@ -971,7 +1022,7 @@ public class ComWS extends PBase {
 
         fterr = "";
         try {
-            sprog = "Inventario Maestro...";wsStask.onProgressUpdate();
+            sprog = "Detalle de Inventario...";wsStask.onProgressUpdate();
 
             dbld.clear();
             if(dbld.insert("temp_inventario_detalle", "WHERE ELIMINADO=0")){
@@ -1092,6 +1143,28 @@ public class ComWS extends PBase {
 
                 if(gl.validaLicDB==2) gl.validaLicDB=4;
 
+                finish();
+            }
+        });
+
+        dialog.show();
+
+    }
+
+    private void msgLic(String msg) {
+        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+
+        dialog.setTitle(R.string.app_name);
+        dialog.setMessage(msg);
+
+        dialog.setPositiveButton("Licenciar", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                Lic();
+            }
+        });
+
+        dialog.setNegativeButton("Salir", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
                 finish();
             }
         });

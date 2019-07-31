@@ -18,6 +18,7 @@ import com.dts.base.clsClasses;
 import com.dts.classes.clsArticuloObj;
 import com.dts.classes.clsInventario_ciegoObj;
 import com.dts.classes.clsInventario_detalleObj;
+import com.dts.classes.clsInventario_teoricoObj;
 import com.dts.classes.clsRegistro_handheldObj;
 
 import org.w3c.dom.Text;
@@ -76,7 +77,6 @@ public class Conteo extends PBase {
                 if (arg2.getAction() == KeyEvent.ACTION_DOWN) {
                     switch (arg1) {
                         case KeyEvent.KEYCODE_ENTER:
-                            //Codigo.requestFocus();
                             return true;
                     }
                 }
@@ -95,11 +95,17 @@ public class Conteo extends PBase {
 
                             if(!existencia()) return false;
 
-                            if (gl.tipoInv==2 && tipoArt.equals("S")) {
-                                insertaConteo();
-                                Ubicacion.requestFocus();
-                                mostrarConteo();
-                                return true;
+                            mostrarConteo();
+
+                            if(gl.tipoInv==2 || gl.tipoInv==3){
+
+                                if(tipoArt.equals("S")) {
+                                    insertaConteo();
+                                    Ubicacion.requestFocus();
+                                    mostrarConteo();
+                                    return true;
+                                }
+
                             } else {
                                 mostrarConteo();
                             }
@@ -272,7 +278,7 @@ public class Conteo extends PBase {
 
                 InvCiego.add(item);
 
-            }else if(gl.tipoInv==2){
+            }else if(gl.tipoInv==2 || gl.tipoInv==3){
 
                 itemDeta.id_inventario_enc= gl.idInvEnc;
                 itemDeta.id_articulo = Cod;
@@ -286,8 +292,6 @@ public class Conteo extends PBase {
                 item.eliminado = 0;
 
                 InvDet.add(itemDeta);
-
-            }else if(gl.tipoInv==3){
 
             }
 
@@ -313,21 +317,22 @@ public class Conteo extends PBase {
 
                 InvCiego.fill(" WHERE CODIGO_BARRA = "+ barra + " AND UBICACION = "+ Ubic);
                 cc = InvCiego.count;
-            } else if(gl.tipoInv==2) {
+            } else if(gl.tipoInv==2 || gl.tipoInv==3) {
                 tabla = "INVENTARIO_DETALLE";
 
-                InvDetalle.fill(" WHERE CODIGO_BARRA = "+ barra + " AND UBICACION = "+ Ubic);
+                InvDetalle.fill(" WHERE CODIGO_BARRA = '"+ barra + "' AND UBICACION = '"+ Ubic +"'");
                 cc = InvDetalle.count;
             }
 
             if(cc==0){
-                msgbox("Este producto no exite en la ubicación descrita, o algunos de los dos no existe");
+                msgbox("Este producto no existe en la ubicación descrita, o no existe el producto");
                 return;
             }
 
-            sql = "UPDATE "+ tabla +" SET ELIMINADO = 1, COMUNICADO = 'N' WHERE CODIGO_BARRA = "+ barra + " AND UBICACION = "+ Ubic;
+            sql = "UPDATE "+ tabla +" SET ELIMINADO = 1, COMUNICADO = 'N' WHERE CODIGO_BARRA = '"+ barra + "' AND UBICACION = '"+ Ubic +"'";
             db.execSQL(sql);
 
+            Toast.makeText(this, "Producto Eliminado Correctamente", Toast.LENGTH_LONG).show();
         }catch (Exception e){
             addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), sql);
             msgbox("Error Eliminar" + e);
@@ -335,7 +340,7 @@ public class Conteo extends PBase {
     }
 
     public boolean existencia() {
-
+        clsInventario_teoricoObj teorico = new clsInventario_teoricoObj(this, Con, db);
         clsArticuloObj articulo = new clsArticuloObj(this, Con, db);
 
         try {
@@ -345,6 +350,14 @@ public class Conteo extends PBase {
                 articulo.fill( " WHERE ID_ARTICULO = '"+ Cod +"'");
 
                 if(articulo.count==0){
+                    gl.codBarra = Cod;
+                    msgAskArt("Agregar como no encontrado");
+                    return false;
+                }
+            }else if(gl.tipoInv==3){
+                teorico.fill( " WHERE ID_ARTICULO = '"+ Cod +"'");
+
+                if(teorico.count==0){
                     gl.codBarra = Cod;
                     msgAskArt("Agregar como no encontrado");
                     return false;
@@ -379,6 +392,7 @@ public class Conteo extends PBase {
     }
 
     public void mostrarConteo(){
+        clsInventario_teoricoObj teorico = new clsInventario_teoricoObj(this, Con, db);
         clsArticuloObj articulo = new clsArticuloObj(this, Con, db);
         Cursor dt;
         Double cant2;
@@ -399,6 +413,22 @@ public class Conteo extends PBase {
                 desc = articulo.first().descripcion;
                 tipoArt =  articulo.first().tipo_conteo;
                 barra = articulo.first().codigo_barra;
+
+                if(desc.isEmpty()){
+                    msgAskArt("Agregar como no encontrado");
+                    return;
+                }else{
+                    Desc.setText(desc);
+                    Barra.setText(barra);
+                }
+
+            }else if(gl.tipoInv==3){
+                Tabla = "INVENTARIO_DETALLE";
+
+                teorico.fill(" WHERE ID_ARTICULO ='"+ Cod +"'");
+                desc = teorico.first().descripcion;
+                tipoArt =  teorico.first().tipo_conteo;
+                barra = teorico.first().codigo_barra;
 
                 if(desc.isEmpty()){
                     msgAskArt("Agregar como no encontrado");
