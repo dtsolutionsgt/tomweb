@@ -95,13 +95,13 @@ public class Conteo extends PBase {
 
                             if(!existencia()) return false;
 
-                            mostrarConteo();
-
-                            if(gl.tipoInv==2 && tipoArt.equals("S")){
+                            if (gl.tipoInv==2 && tipoArt.equals("S")) {
                                 insertaConteo();
                                 Ubicacion.requestFocus();
                                 mostrarConteo();
                                 return true;
+                            } else {
+                                mostrarConteo();
                             }
 
                             Cantidad.requestFocus();
@@ -422,6 +422,8 @@ public class Conteo extends PBase {
 
             cant2 = dt.getDouble(0);
 
+            if (dt!=null) dt.close();
+
             Codigo2.setText(Cod);
             Cant2.setText(Double.toString(cant2));
 
@@ -556,6 +558,7 @@ public class Conteo extends PBase {
         dialog.show();
 
     }
+
     //endregion
 
     //region Activity Events

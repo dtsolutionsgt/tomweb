@@ -302,6 +302,8 @@ public class Productos extends PBase {
                 dt.moveToNext();
             }
 
+            if (dt!=null) dt.close();
+
             values.add("CODIGO");
             if(gl.tipoInv==1){
                 values.add("UBICACION");
