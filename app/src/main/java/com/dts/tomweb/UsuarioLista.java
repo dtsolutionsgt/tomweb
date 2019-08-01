@@ -176,6 +176,7 @@ public class UsuarioLista extends PBase {
     private void msgAskDel(String msg) {
         AlertDialog.Builder dialog = new AlertDialog.Builder(this);
 
+        dialog.setCancelable(false);
         dialog.setTitle("Usuario");
         dialog.setMessage("¿" + msg + "?");
 

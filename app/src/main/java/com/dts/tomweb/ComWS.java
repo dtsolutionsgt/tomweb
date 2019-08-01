@@ -43,7 +43,7 @@ public class ComWS extends PBase {
 
 
     private int isbusy,regHH;
-    private String sp;
+    private String credential;
     private int Com_IdEmpresa,Com_Id_Inventario;
     private boolean errflag, licdisp;
 
@@ -228,6 +228,7 @@ public class ComWS extends PBase {
             while ((line = br.readLine()) != null) {
                 text.append(line);
                 text.append('\n');
+                credential = line;
             }
 
             br.close();
@@ -807,6 +808,8 @@ public class ComWS extends PBase {
                         isbusy=0;
                         msgLic("No hay licencia existente de este dispositivo");
                     }else {
+                        isbusy=0;
+                        msgbox("Credencial del dispositivo: "+ credential + " debe validar y asignar este dispositivo en el BOF");
                         return;
                     }
 
@@ -1135,6 +1138,7 @@ public class ComWS extends PBase {
     private void msgAskExit(String msg) {
         AlertDialog.Builder dialog = new AlertDialog.Builder(this);
 
+        dialog.setCancelable(false);
         dialog.setTitle(R.string.app_name);
         dialog.setMessage(msg);
 
@@ -1154,6 +1158,7 @@ public class ComWS extends PBase {
     private void msgLic(String msg) {
         AlertDialog.Builder dialog = new AlertDialog.Builder(this);
 
+        dialog.setCancelable(false);
         dialog.setTitle(R.string.app_name);
         dialog.setMessage(msg);
 

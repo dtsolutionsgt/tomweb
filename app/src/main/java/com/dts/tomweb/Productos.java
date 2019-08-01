@@ -70,7 +70,7 @@ public class Productos extends PBase {
         setHandlers();
         spinner();
 
-        showData(scod);
+        //showData(scod);
 
     }
 
@@ -231,39 +231,43 @@ public class Productos extends PBase {
 
                 if(text.equals("Contados")){
 
-                    tn = "select b.id_articulo, b.descripcion, b.codigo_barra, b.tipo_conteo from "+ art +" b inner join inventario_detalle a ON a.id_articulo = b.id_articulo AND a.codigo_barra = b.codigo_barra AND a.eliminado = 0";
+                    tn = "select b.id_articulo, b.descripcion, b.codigo_barra, b.tipo_conteo from "+ art +" b inner join inventario_detalle a ON a.id_articulo = b.id_articulo AND a.codigo_barra = b.codigo_barra ";
                     val=2;
 
                 }else if(text.equals("No Contados")){
 
-                    tn = "select b.id_articulo, b.descripcion, b.codigo_barra, b.tipo_conteo from "+ art +" b inner join inventario_detalle a ON a.id_articulo <> b.id_articulo AND a.eliminado = 0";
-                    val=2;
+                    tn = "select b.id_articulo, b.descripcion, b.codigo_barra, b.tipo_conteo from articulo b where b.id_articulo not in (select id_articulo from inventario_detalle) ";
+                    val=3;
 
                 }else if(text.equals("Todos")){
 
                     tn = tn + " WHERE 1=1";
+                    val=1;
 
                 }
 
                 if (!nomb.isEmpty() && !barra.isEmpty()) {
                     if(val==1){
-                        tn = tn + " WHERE CODIGO_BARRA = '" + barra + "' AND DESCRIPCION ='" + nomb + "'";
+                        tn = tn + " AND CODIGO_BARRA = '" + barra + "' AND DESCRIPCION ='" + nomb + "'";
                     }else {
-                        tn = tn + " AND b.CODIGO_BARRA = '" + barra + "' AND b.DESCRIPCION ='" + nomb + "' GROUP BY b.id_articulo";
+                        if(val==2)tn = tn + " WHERE b.CODIGO_BARRA = '" + barra + "' AND b.DESCRIPCION ='" + nomb + "' AND a.ELIMINADO=0 GROUP BY b.id_articulo";
+                        if(val==3)tn = tn + " AND CODIGO_BARRA = '" + barra + "' AND DESCRIPCION ='" + nomb + "' GROUP BY b.id_articulo";
                     }
 
                 } else if (!barra.isEmpty()) {
                     if(val==1){
-                        tn = tn + " WHERE CODIGO_BARRA = '" + barra + "'";
+                        tn = tn + " AND CODIGO_BARRA = '" + barra + "'";
                     }else {
-                        tn = tn + " AND b.CODIGO_BARRA = '" + barra + "' GROUP BY b.id_articulo";
+                        if(val==2)tn = tn + " WHERE  b.CODIGO_BARRA = '" + barra + "' AND a.ELIMINADO=0 GROUP BY b.id_articulo";
+                        if(val==3)tn = tn + " AND  CODIGO_BARRA = '" + barra + "' GROUP BY b.id_articulo";
                     }
 
                 } else if (!nomb.isEmpty()) {
                     if(val==1){
-                        tn = tn + " WHERE DESCRIPCION = '" + nomb + "'";
+                        tn = tn + " AND DESCRIPCION = '" + nomb + "'";
                     }else {
-                        tn = tn + " AND b.DESCRIPCION = '" + nomb + "' GROUP BY b.id_articulo";
+                        if(val==2)tn = tn + " WHERE  b.DESCRIPCION = '" + nomb + "' AND a.ELIMINADO=0 GROUP BY b.id_articulo";
+                        if(val==3)tn = tn + " AND DESCRIPCION = '" + nomb + "' GROUP BY b.id_articulo";
                     }
 
                 }else {
@@ -271,7 +275,6 @@ public class Productos extends PBase {
 
                         tn = tn + " GROUP BY b.id_articulo";
                     }
-
 
                 }
 
@@ -281,9 +284,9 @@ public class Productos extends PBase {
             }
 
             dt=Con.OpenDT(ss);
-            if (dt.getCount()==0) {
+            /*if (dt.getCount()==0) {
                 pbar.setVisibility(View.INVISIBLE);return;
-            }
+            }*/
 
             cc = dt.getColumnCount();
             rg = dt.getCount();

@@ -35,17 +35,12 @@ public class TipoConteo extends PBase {
     //region Events
 
     public void doExit(View view) {
+        gl.cbck=2;
         finish();
     }
 
     public void doHelp(View view) {
 
-    }
-
-    public void doNext(View view){
-
-        callback = 1;
-        finish();
     }
 
     //endregion
@@ -65,8 +60,8 @@ public class TipoConteo extends PBase {
                 return;
             }
 
-            if(Fisico.isChecked()) tipo = "F";
-            if(Serial.isChecked()) tipo = "S";
+            if(Fisico.isChecked()){ tipo = "F"; gl.cbck = 1; }
+            if(Serial.isChecked()){ tipo = "S"; gl.cbck = 3; }
 
             if(gl.tipoInv==2){
 

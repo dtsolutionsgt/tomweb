@@ -311,7 +311,8 @@ public class BaseDatos extends SQLiteOpenHelper {
 	  
 	  private void msgbox(String msg) {
 			AlertDialog.Builder dialog = new AlertDialog.Builder(vcontext);
-	    	
+
+		    dialog.setCancelable(false);
 			dialog.setTitle(R.string.app_name);
 			dialog.setMessage(msg);
 

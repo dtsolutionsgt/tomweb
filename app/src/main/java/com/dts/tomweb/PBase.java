@@ -37,7 +37,7 @@ public class PBase extends Activity {
 
     protected InputMethodManager keyboard;
 
-    protected int callback =0,mode;
+    protected int callback,mode;
     protected int selid,selidx;
     protected long fecha,stamp;
     protected String s;

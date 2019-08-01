@@ -118,7 +118,9 @@ public class MiscUtils {
 		if (msg==null || msg.isEmpty()) {return;}
 		
 		AlertDialog.Builder dialog = new AlertDialog.Builder(cont);
-    	
+
+		dialog.setCancelable(false);
+
 		dialog.setTitle(R.string.app_name);
 		dialog.setMessage(msg);
 		//dialog.setIcon(R.drawable.info48);
@@ -134,7 +136,8 @@ public class MiscUtils {
 	
 	public void msgbox(int v) {
 		AlertDialog.Builder dialog = new AlertDialog.Builder(cont);
-    	
+
+		dialog.setCancelable(false);
 		dialog.setTitle(R.string.app_name);
 		dialog.setMessage(String.valueOf(v));
 		//dialog.setIcon(R.drawable.info48);

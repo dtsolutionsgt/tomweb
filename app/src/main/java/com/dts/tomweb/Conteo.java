@@ -1,6 +1,7 @@
 package com.dts.tomweb;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.RestrictionEntry;
@@ -8,6 +9,7 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
@@ -77,6 +79,7 @@ public class Conteo extends PBase {
                 if (arg2.getAction() == KeyEvent.ACTION_DOWN) {
                     switch (arg1) {
                         case KeyEvent.KEYCODE_ENTER:
+                            gl.ubicacion = Ubicacion.getText().toString();
                             return true;
                     }
                 }
@@ -90,6 +93,7 @@ public class Conteo extends PBase {
                 if (arg2.getAction() == KeyEvent.ACTION_DOWN) {
                     switch (arg1) {
                         case KeyEvent.KEYCODE_ENTER:
+                            gl.ubicacion = Ubicacion.getText().toString();
                             Barra.setText("");
                             Cod = Codigo.getText().toString();
 
@@ -100,9 +104,9 @@ public class Conteo extends PBase {
                             if(gl.tipoInv==2 || gl.tipoInv==3){
 
                                 if(tipoArt.equals("S")) {
+                                    Cantidad.setFocusable(false);
                                     insertaConteo();
                                     Ubicacion.requestFocus();
-                                    mostrarConteo();
                                     return true;
                                 }
 
@@ -125,9 +129,15 @@ public class Conteo extends PBase {
                 if (arg2.getAction() == KeyEvent.ACTION_DOWN) {
                     switch (arg1) {
                         case KeyEvent.KEYCODE_ENTER:
+                            gl.ubicacion = Ubicacion.getText().toString();
+                            barra = Barra.getText().toString();
 
-                            insertaConteo();
+                            if(barra.isEmpty()) {
+                                if (!existencia()) return false; else Barra.setText(barra);
+                            }
+
                             mostrarConteo();
+                            insertaConteo();
                             limpiaCampos2();
 
                             return true;
@@ -167,14 +177,14 @@ public class Conteo extends PBase {
     }
 
     public void doDelete (View view){
-        barra = Codigo.getText().toString();
+        Cod = Codigo.getText().toString();
         Ubic = Ubicacion.getText().toString();
 
-        if(barra.isEmpty() || Ubic.isEmpty()){
+        if(Cod.isEmpty() || Ubic.isEmpty()){
             msgbox("Ingrese el código y la ubicación del producto a eliminar");return;
         }
 
-        msgAskDelete("Seguro que desea eliminar el conteo de el producto: "+ barra +" "+desc);
+        msgAskDelete("Seguro que desea eliminar el conteo de el producto: "+ Cod +" "+desc);
     }
 
     public void doNext(View view) {
@@ -194,14 +204,40 @@ public class Conteo extends PBase {
     protected void onResume() {
         super.onResume();
 
-        if(callback==1){
-            callback=0;
+        if(gl.cbck==1){
+            gl.cbck=0;
+
+            Cantidad.setFocusable(true);
+            Cantidad.requestFocus();
 
             Codigo.setText(gl.codBarra);
             Ubicacion.setText(gl.ubicacion);
             Barra.setText(gl.codBarra);
 
-            //inventario();
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.showSoftInput(Cantidad, InputMethodManager.SHOW_IMPLICIT);
+
+        }else if(gl.cbck==2){
+
+            Codigo.requestFocus();
+            Codigo.setText("");
+            Ubicacion.setText(gl.ubicacion);
+            Barra.setText("");
+
+        }else if(gl.cbck==3){
+            gl.cbck=0;
+
+            Cantidad.setFocusable(false);
+            Codigo.requestFocus();
+
+            Codigo.setText(gl.codBarra);
+            Ubicacion.setText(gl.ubicacion);
+            Barra.setText(gl.codBarra);
+
+
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.showSoftInput(Codigo, InputMethodManager.SHOW_IMPLICIT);
+
         }
     }
 
@@ -297,7 +333,8 @@ public class Conteo extends PBase {
 
             Toast.makeText(this, "Agregado Correctamente", Toast.LENGTH_LONG).show();
 
-            Codigo.requestFocus();
+            mostrarConteo();
+
         }catch (Exception e){
             addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
             msgbox("Error: "+e);
@@ -354,8 +391,10 @@ public class Conteo extends PBase {
                     msgAskArt("Agregar como no encontrado");
                     return false;
                 }
+
             }else if(gl.tipoInv==3){
                 teorico.fill( " WHERE ID_ARTICULO = '"+ Cod +"'");
+                barra = teorico.first().codigo_barra;
 
                 if(teorico.count==0){
                     gl.codBarra = Cod;
@@ -385,7 +424,7 @@ public class Conteo extends PBase {
     }
 
     public void limpiaCampos2(){
-        Ubicacion.setText(Ubic);
+        //Ubicacion.setText(Ubic);
         Codigo.setText("");
         Barra.setText("");
         Cantidad.setText("");
@@ -414,6 +453,12 @@ public class Conteo extends PBase {
                 tipoArt =  articulo.first().tipo_conteo;
                 barra = articulo.first().codigo_barra;
 
+                if(tipoArt=="S"){
+                    Cantidad.setFocusable(false);
+                }else if(tipoArt=="F"){
+                    Cantidad.setFocusable(true);
+                }
+
                 if(desc.isEmpty()){
                     msgAskArt("Agregar como no encontrado");
                     return;
@@ -428,6 +473,13 @@ public class Conteo extends PBase {
                 teorico.fill(" WHERE ID_ARTICULO ='"+ Cod +"'");
                 desc = teorico.first().descripcion;
                 tipoArt =  teorico.first().tipo_conteo;
+
+                if(tipoArt=="S"){
+                    Cantidad.setFocusable(false);
+                }else if(tipoArt=="F"){
+                    Cantidad.setFocusable(true);
+                }
+
                 barra = teorico.first().codigo_barra;
 
                 if(desc.isEmpty()){
@@ -503,6 +555,7 @@ public class Conteo extends PBase {
     private void msgAskExit(String msg) {
         AlertDialog.Builder dialog = new AlertDialog.Builder(this);
 
+        dialog.setCancelable(false);
         dialog.setTitle("Tom");
         dialog.setMessage("¿" + msg + "?");
 
@@ -525,6 +578,7 @@ public class Conteo extends PBase {
     private void msgAskArt(String msg) {
         AlertDialog.Builder dialog = new AlertDialog.Builder(this);
 
+        dialog.setCancelable(false);
         dialog.setTitle("Tom");
         dialog.setMessage("¿" + msg + "?");
 
@@ -536,7 +590,8 @@ public class Conteo extends PBase {
 
         dialog.setNegativeButton("No", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
-
+                limpiaCampos2();
+                Codigo.requestFocus();
             }
         });
 
@@ -547,6 +602,7 @@ public class Conteo extends PBase {
     private void msgAskContinue(String msg) {
         AlertDialog.Builder dialog = new AlertDialog.Builder(this);
 
+        dialog.setCancelable(false);
         dialog.setTitle("Tom");
         dialog.setMessage(msg);
 
@@ -569,6 +625,7 @@ public class Conteo extends PBase {
     private void msgAskDelete(String msg) {
         AlertDialog.Builder dialog = new AlertDialog.Builder(this);
 
+        dialog.setCancelable(false);
         dialog.setTitle("Tom");
         dialog.setMessage("¿"+msg+"?");
 

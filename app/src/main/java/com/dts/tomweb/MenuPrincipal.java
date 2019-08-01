@@ -57,6 +57,7 @@ public class MenuPrincipal extends PBase {
     private void msgAskExit(String msg) {
         AlertDialog.Builder dialog = new AlertDialog.Builder(this);
 
+        dialog.setCancelable(false);
         dialog.setTitle("Tom");
         dialog.setMessage("¿" + msg + "?");
 
