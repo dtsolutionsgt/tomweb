@@ -45,7 +45,7 @@ public class ComWS extends PBase {
     private int isbusy,regHH;
     private String credential;
     private int Com_IdEmpresa,Com_Id_Inventario;
-    private boolean errflag, licdisp;
+    private boolean errflag;
 
     private SQLiteDatabase dbT;
     private BaseDatos ConT;
@@ -72,7 +72,7 @@ public class ComWS extends PBase {
     private boolean ftflag,esvacio;
 
     private RelativeLayout relEnv, relRec;
-    private TextView Prg;
+    private TextView Prg,Prg2;
     private ProgressBar prgBar;
 
     private final String NAMESPACE ="http://tempuri.org/";
@@ -94,6 +94,7 @@ public class ComWS extends PBase {
         relEnv = (RelativeLayout) findViewById(R.id.relEnv);
         relRec = (RelativeLayout) findViewById(R.id.relRec);
         Prg = (TextView) findViewById(R.id.lblProgress);
+        Prg2 = (TextView) findViewById(R.id.lblProgress2);
         prgBar = (ProgressBar) findViewById(R.id.progressBar2);
 
         isbusy=0;
@@ -210,36 +211,6 @@ public class ComWS extends PBase {
         dbld.insert("USUARIO","WHERE 1=1");
         dbld.save();
     }
-
-    public void Lic(){
-        super.finish();
-        startActivity(new Intent(this, Licencia.class));
-    }
-
-    public boolean obtenerCredenciales(){
-
-        try{
-
-            StringBuilder text = new StringBuilder();
-            FileInputStream fis = openFileInput("credentialsTOM");
-            BufferedReader br = new BufferedReader(new InputStreamReader(new BufferedInputStream(fis)));
-
-            String line;
-            while ((line = br.readLine()) != null) {
-                text.append(line);
-                text.append('\n');
-                credential = line;
-            }
-
-            br.close();
-
-        }catch (Exception e){
-            return false;
-        }
-
-        return true;
-    }
-
 
     // Web Service Methods
 
@@ -772,10 +743,6 @@ public class ComWS extends PBase {
                 if (!getData()) {
                     if(gl.licExist==0){
                         fstr="El dispositivo no tiene licencia";
-
-                        if(!obtenerCredenciales()) licdisp = false; else licdisp = true;
-
-                        //validacion lic en disp true return, variable licdisp
                     }else {
                         fstr="Recepcion incompleta : "+fstr;
                     }
@@ -803,15 +770,7 @@ public class ComWS extends PBase {
 
                 if(gl.licExist==0 && scon==1){
 
-                    //validacion licdisp, dependiendo de eso envia a lic.act o return
-                    if(!licdisp){
-                        isbusy=0;
-                        msgLic("No hay licencia existente de este dispositivo");
-                    }else {
-                        isbusy=0;
-                        msgbox("Credencial del dispositivo: "+ credential + " debe validar y asignar este dispositivo en el BOF");
-                        return;
-                    }
+                    msgLic("No hay licencia existente de este dispositivo, validarla en BOF, su número de activación es: "+ gl.NoSerieHH);
 
                 }else{
                     mu.msgbox("Ocurrió error : \n"+fstr+" ("+reccnt+") " + ferr);
@@ -1162,9 +1121,10 @@ public class ComWS extends PBase {
         dialog.setTitle(R.string.app_name);
         dialog.setMessage(msg);
 
-        dialog.setPositiveButton("Licenciar", new DialogInterface.OnClickListener() {
+        dialog.setPositiveButton("Reintentar", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
-                Lic();
+                Prg.setText("");
+                Prg2.setText("Su número de activación es: "+gl.NoSerieHH);
             }
         });
 

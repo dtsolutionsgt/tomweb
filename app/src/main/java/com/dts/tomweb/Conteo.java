@@ -71,6 +71,38 @@ public class Conteo extends PBase {
 
     //region Events
 
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent e) {
+        if (e.getAction() == KeyEvent.ACTION_DOWN && e.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
+            Cod = Codigo.getText().toString().trim();
+
+
+            if(Cod.isEmpty()) return true;
+            if(!existencia()) return false;
+
+            mostrarConteo();
+
+            if(gl.tipoInv==2 || gl.tipoInv==3){
+
+                if(tipoArt.equals("S")) {
+                    Cantidad.setFocusable(false);
+                    insertaConteo();
+                    mostrarConteo();
+                    Ubicacion.requestFocus();
+                    return true;
+                } else {
+                    Cantidad.setFocusableInTouchMode(true);
+                    Cantidad.setFocusable(true);
+                }
+
+
+            }
+
+            mostrarConteo();
+        }
+        return super.dispatchKeyEvent(e);
+    }
+
     private void setHandlers() {
 
         Ubicacion.setOnKeyListener(new View.OnKeyListener() {
