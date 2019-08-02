@@ -97,6 +97,7 @@ public class Conteo extends PBase {
                             Barra.setText("");
                             Cod = Codigo.getText().toString();
 
+                            if(Cod.isEmpty()) return true;
                             if(!existencia()) return false;
 
                             mostrarConteo();
@@ -106,15 +107,19 @@ public class Conteo extends PBase {
                                 if(tipoArt.equals("S")) {
                                     Cantidad.setFocusable(false);
                                     insertaConteo();
+                                    mostrarConteo();
                                     Ubicacion.requestFocus();
                                     return true;
+                                } else {
+                                    Cantidad.setFocusableInTouchMode(true);
+                                    Cantidad.setFocusable(true);
                                 }
 
-                            } else {
-                                mostrarConteo();
+
                             }
 
-                            Cantidad.requestFocus();
+                            mostrarConteo();
+                            //Cantidad.requestFocus();
 
                             return true;
                     }
@@ -137,8 +142,20 @@ public class Conteo extends PBase {
                             }
 
                             mostrarConteo();
+
+                            if(tipoArt.equals("S")) {
+                                Cantidad.setFocusable(false);
+                                insertaConteo();
+                                mostrarConteo();
+                                Ubicacion.requestFocus();
+                                return true;
+                            } else {
+                                Cantidad.setFocusableInTouchMode(true);
+                                Cantidad.setFocusable(true);
+                            }
+
                             insertaConteo();
-                            limpiaCampos2();
+                            mostrarConteo();
 
                             return true;
                     }
@@ -207,15 +224,13 @@ public class Conteo extends PBase {
         if(gl.cbck==1){
             gl.cbck=0;
 
+            Cantidad.setFocusableInTouchMode(true);
             Cantidad.setFocusable(true);
             Cantidad.requestFocus();
 
             Codigo.setText(gl.codBarra);
             Ubicacion.setText(gl.ubicacion);
             Barra.setText(gl.codBarra);
-
-            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.showSoftInput(Cantidad, InputMethodManager.SHOW_IMPLICIT);
 
         }else if(gl.cbck==2){
 
@@ -233,10 +248,6 @@ public class Conteo extends PBase {
             Codigo.setText(gl.codBarra);
             Ubicacion.setText(gl.ubicacion);
             Barra.setText(gl.codBarra);
-
-
-            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.showSoftInput(Codigo, InputMethodManager.SHOW_IMPLICIT);
 
         }
     }
@@ -333,7 +344,7 @@ public class Conteo extends PBase {
 
             Toast.makeText(this, "Agregado Correctamente", Toast.LENGTH_LONG).show();
 
-            mostrarConteo();
+            if(tipoArt.equals("F")) limpiaCampos2();
 
         }catch (Exception e){
             addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
@@ -435,13 +446,14 @@ public class Conteo extends PBase {
         clsArticuloObj articulo = new clsArticuloObj(this, Con, db);
         Cursor dt;
         Double cant2;
-        String Tabla="";
+        String Tabla="", codBck;
 
         try{
+            codBck = Cod;
 
-            Cod = Codigo.getText().toString();
             Ubic = Ubicacion.getText().toString();
-
+            Cod = Codigo.getText().toString();
+            if(Cod.isEmpty()) Cod=codBck;
             if(gl.tipoInv==1){
                 Tabla = "INVENTARIO_CIEGO";
                 Desc.setText("NO ENCONTRADO");
@@ -452,12 +464,6 @@ public class Conteo extends PBase {
                 desc = articulo.first().descripcion;
                 tipoArt =  articulo.first().tipo_conteo;
                 barra = articulo.first().codigo_barra;
-
-                if(tipoArt=="S"){
-                    Cantidad.setFocusable(false);
-                }else if(tipoArt=="F"){
-                    Cantidad.setFocusable(true);
-                }
 
                 if(desc.isEmpty()){
                     msgAskArt("Agregar como no encontrado");
@@ -473,12 +479,6 @@ public class Conteo extends PBase {
                 teorico.fill(" WHERE ID_ARTICULO ='"+ Cod +"'");
                 desc = teorico.first().descripcion;
                 tipoArt =  teorico.first().tipo_conteo;
-
-                if(tipoArt=="S"){
-                    Cantidad.setFocusable(false);
-                }else if(tipoArt=="F"){
-                    Cantidad.setFocusable(true);
-                }
 
                 barra = teorico.first().codigo_barra;
 

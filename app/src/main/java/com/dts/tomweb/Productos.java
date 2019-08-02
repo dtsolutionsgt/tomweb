@@ -284,9 +284,6 @@ public class Productos extends PBase {
             }
 
             dt=Con.OpenDT(ss);
-            /*if (dt.getCount()==0) {
-                pbar.setVisibility(View.INVISIBLE);return;
-            }*/
 
             cc = dt.getColumnCount();
             rg = dt.getCount();

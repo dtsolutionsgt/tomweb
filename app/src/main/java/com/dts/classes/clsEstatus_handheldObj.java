@@ -130,6 +130,7 @@ public class clsEstatus_handheldObj {
 
             dt.moveToNext();
         }
+        if (dt!=null) dt.close();
 
     }
 
@@ -141,6 +142,7 @@ public class clsEstatus_handheldObj {
             dt = Con.OpenDT(idsql);
             dt.moveToFirst();
             nid = dt.getInt(0) + 1;
+            if (dt!=null) dt.close();
         } catch (Exception e) {
             nid = 1;
         }

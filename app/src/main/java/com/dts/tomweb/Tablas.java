@@ -298,6 +298,7 @@ public class Tablas extends PBase {
                     }
                     dt.moveToNext();
                 }
+                if (dt!=null) dt.close();
             } catch (Exception e) {
             }
 
@@ -331,6 +332,7 @@ public class Tablas extends PBase {
                     spinlist.add(DT.getString(0));
                     DT.moveToNext();
                 }
+                if (DT!=null) DT.close();
             } catch (Exception e) {
                 mu.msgbox(e.getMessage());
             }

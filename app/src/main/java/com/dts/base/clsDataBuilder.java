@@ -148,6 +148,7 @@ public class clsDataBuilder {
 						  
 			    DT.moveToNext();
 			}
+			if (DT!=null) DT.close();
 
 		
 		} catch (Exception e) {

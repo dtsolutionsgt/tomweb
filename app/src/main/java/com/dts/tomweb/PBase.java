@@ -130,6 +130,7 @@ public class PBase extends Activity {
         dt=Con.OpenDT(sql);
         try {
             dt.moveToFirst();
+            if (dt!=null) dt.close();
         } catch (Exception e) {
         }
 

@@ -130,6 +130,7 @@ public class clsEstado_inventarioObj {
 
             dt.moveToNext();
         }
+        if (dt!=null) dt.close();
 
     }
 
@@ -141,6 +142,7 @@ public class clsEstado_inventarioObj {
             dt = Con.OpenDT(idsql);
             dt.moveToFirst();
             nid = dt.getInt(0) + 1;
+            if (dt!=null) dt.close();
         } catch (Exception e) {
             nid = 1;
         }

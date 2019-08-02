@@ -246,6 +246,7 @@ public class ListaConteos extends PBase {
                 }
                 dt.moveToNext();
             }
+            if (dt!=null) dt.close();
 
             values.add("CODIGO");
             values.add("UBICACION");
