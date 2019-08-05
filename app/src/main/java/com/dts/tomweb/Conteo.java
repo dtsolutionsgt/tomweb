@@ -71,7 +71,7 @@ public class Conteo extends PBase {
 
     //region Events
 
-    @Override
+    /*@Override
     public boolean dispatchKeyEvent(KeyEvent e) {
         if (e.getAction() == KeyEvent.ACTION_DOWN && e.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
             Cod = Codigo.getText().toString().trim();
@@ -101,7 +101,7 @@ public class Conteo extends PBase {
             mostrarConteo();
         }
         return super.dispatchKeyEvent(e);
-    }
+    }*/
 
     private void setHandlers() {
 
@@ -130,7 +130,15 @@ public class Conteo extends PBase {
                             Cod = Codigo.getText().toString();
 
                             if(Cod.isEmpty()) return true;
-                            if(!existencia()) return false;
+
+                            if (gl.tipoInv==1){
+                                barra = Codigo.getText().toString();
+                                Barra.setText(barra);
+
+                            }else {
+                                if(!existencia()) return false;
+                            }
+
 
                             mostrarConteo();
 
@@ -167,7 +175,12 @@ public class Conteo extends PBase {
                     switch (arg1) {
                         case KeyEvent.KEYCODE_ENTER:
                             gl.ubicacion = Ubicacion.getText().toString();
-                            barra = Barra.getText().toString();
+                            if (gl.tipoInv==1){
+                                barra = Codigo.getText().toString();
+                                Barra.setText(barra);
+                            }else {
+                                barra = Barra.getText().toString();
+                            }
 
                             if(barra.isEmpty()) {
                                 if (!existencia()) return false; else Barra.setText(barra);
@@ -175,16 +188,19 @@ public class Conteo extends PBase {
 
                             mostrarConteo();
 
-                            if(tipoArt.equals("S")) {
-                                Cantidad.setFocusable(false);
-                                insertaConteo();
-                                mostrarConteo();
-                                Ubicacion.requestFocus();
-                                return true;
-                            } else {
-                                Cantidad.setFocusableInTouchMode(true);
-                                Cantidad.setFocusable(true);
+                            if(gl.tipoInv!=1){
+                                if(tipoArt.equals("S")) {
+                                    Cantidad.setFocusable(false);
+                                    insertaConteo();
+                                    mostrarConteo();
+                                    Ubicacion.requestFocus();
+                                    return true;
+                                } else {
+                                    Cantidad.setFocusableInTouchMode(true);
+                                    Cantidad.setFocusable(true);
+                                }
                             }
+
 
                             insertaConteo();
                             mostrarConteo();
@@ -316,9 +332,17 @@ public class Conteo extends PBase {
             ff = "20"+sfecha;
             ffe= ff.substring(0,8);
 
-
-            if(tipoArt.equals("S")){
-                canti = 1.0;
+            if(gl.tipoInv!=1){
+                if(tipoArt.equals("S")){
+                    canti = 1.0;
+                }else {
+                    if(Cantidad.getText().toString().isEmpty()){
+                        msgbox("Ingrese la cantidad");
+                        return;
+                    }else {
+                        canti = Double.parseDouble(Cantidad.getText().toString());
+                    }
+                }
             }else {
                 if(Cantidad.getText().toString().isEmpty()){
                     msgbox("Ingrese la cantidad");
@@ -327,7 +351,6 @@ public class Conteo extends PBase {
                     canti = Double.parseDouble(Cantidad.getText().toString());
                 }
             }
-
 
             if(Codigo.getText().toString().isEmpty()){
                 msgbox("Ingrese el codigo");
@@ -376,7 +399,7 @@ public class Conteo extends PBase {
 
             Toast.makeText(this, "Agregado Correctamente", Toast.LENGTH_LONG).show();
 
-            if(tipoArt.equals("F")) limpiaCampos2();
+            if(gl.tipoInv==1) limpiaCampos2(); else if (tipoArt.equals("F")) limpiaCampos2();
 
         }catch (Exception e){
             addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
@@ -437,7 +460,6 @@ public class Conteo extends PBase {
 
             }else if(gl.tipoInv==3){
                 teorico.fill( " WHERE ID_ARTICULO = '"+ Cod +"'");
-                barra = teorico.first().codigo_barra;
 
                 if(teorico.count==0){
                     gl.codBarra = Cod;
@@ -511,7 +533,6 @@ public class Conteo extends PBase {
                 teorico.fill(" WHERE ID_ARTICULO ='"+ Cod +"'");
                 desc = teorico.first().descripcion;
                 tipoArt =  teorico.first().tipo_conteo;
-
                 barra = teorico.first().codigo_barra;
 
                 if(desc.isEmpty()){

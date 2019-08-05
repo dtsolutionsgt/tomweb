@@ -205,13 +205,13 @@ public class ListaConteos extends PBase {
             ubic = txtUbic.getText().toString();
 
             if(!ubic.isEmpty() && !barra.isEmpty()){
-                tn = tn +" WHERE CODIGO_BARRA = '"+ barra + "' AND UBICACION = '" + ubic + "'  AND ELIMINADO = 0";
+                tn = tn +" WHERE CODIGO_BARRA = '"+ barra + "' AND UBICACION = '" + ubic + "' AND ID_INVENTARIO_ENC="+ gl.idInvEnc +" AND ELIMINADO = 0";
             }else if(!barra.isEmpty()){
-                tn = tn +" WHERE CODIGO_BARRA = '"+ barra + "' AND ELIMINADO = 0";
+                tn = tn +" WHERE CODIGO_BARRA = '"+ barra + "' AND ID_INVENTARIO_ENC="+ gl.idInvEnc +" AND ELIMINADO = 0";
             }else if(!ubic.isEmpty()) {
-                tn = tn+ " WHERE UBICACION = '" + ubic + "' AND ELIMINADO = 0";
+                tn = tn+ " WHERE UBICACION = '" + ubic + "' AND ID_INVENTARIO_ENC="+ gl.idInvEnc +" AND ELIMINADO = 0";
             }else {
-                tn = tn + " WHERE ELIMINADO = 0";
+                tn = tn + " WHERE ID_INVENTARIO_ENC="+ gl.idInvEnc +" AND ELIMINADO = 0";
             }
 
             if(consol==true){

@@ -220,7 +220,7 @@
         android:layout_toEndOf="@+id/textView40"
         android:ems="10"
         android:imeOptions="actionGo"
-        android:inputType="numberDecimal"
+        android:inputType="number"
         android:nextFocusUp="@id/txtCodigo"
         android:nextFocusDown="@id/txtCodigo"
         android:singleLine="true" />

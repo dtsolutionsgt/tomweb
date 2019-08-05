@@ -79,7 +79,7 @@ public class clsDataBuilder {
 				dd=1;ee=1;
 			} else if(tn.equals("temp_inventario_detalle")){
 				tn="inventario_detalle";
-				dd=1;ee=2;
+				dd=1;ee=1;
 			}
 
 			String vSQL = "PRAGMA table_info('"+tn+"')"; 
@@ -92,12 +92,14 @@ public class clsDataBuilder {
 				  
 				n=PRG.getString(PRG.getColumnIndex("name"));
 				t=PRG.getString(PRG.getColumnIndex("type"));
+				j+=1;
 
 				if(tn.equals("inventario_detalle")){
-					if(n.equals("comunicado")) dd=2;
+					if(n.equals("comunicado")) {	dd=2;	}
+					if(n.equals("eliminado"))  {	dd=2; ee=2;	}
+				}else  {
+					if(n.equals("eliminado")) dd=2;
 				}
-
-				if(n.equals("eliminado")) dd=2;
 
 				if(dd!=2){
 					ct=getCType(n,t);
@@ -110,7 +112,7 @@ public class clsDataBuilder {
 
 				dd=1;
 				  
-			    PRG.moveToNext();j+=1;
+			    PRG.moveToNext();
 			}
 			
 		} catch (Exception e) {
