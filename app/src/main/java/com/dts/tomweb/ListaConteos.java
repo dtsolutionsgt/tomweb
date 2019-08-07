@@ -83,6 +83,20 @@ public class ListaConteos extends PBase {
     }
 
     public void doHelp(View view) {
+        String tx;
+
+        try{
+
+            tx="-Busqueda: La busqueda se puede hacer por código de barra, ubicación, o ambos.\n\n" +
+                    "-Regs: Muestra la cantidad de registros, o de conteos realizados.\n\n" +
+                    "-Consolidar: Consolida y muestra los registros según código de barra y ubicación.";
+
+            PopUp(tx);
+
+        }catch (Exception e){
+            addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
+        }
+
 
     }
 

@@ -2,6 +2,8 @@ package com.dts.tomweb;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Html;
+import android.text.Spanned;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -46,30 +48,23 @@ public class Inventario extends PBase {
     }
 
     public void doHelp(View view) {
+        String tx;
 
-        // inflate the layout of the popup window
-        LayoutInflater inflater = (LayoutInflater)
-                getSystemService(LAYOUT_INFLATER_SERVICE);
-        View popupView = inflater.inflate(R.layout.popup_window, null);
+        try{
 
-        // create the popup window
-        int width = LinearLayout.LayoutParams.WRAP_CONTENT;
-        int height = LinearLayout.LayoutParams.WRAP_CONTENT;
-        boolean focusable = true; // lets taps outside the popup also dismiss it
-        final PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
+            tx="-Correlativo: Este campo muestra el numero de inventario que se está utilizando.\n\n" +
+               "-Empresa: Muestra el identificador(id) de la empresa.\n\n" +
+               "-Fecha Inv: Fecha en la que se empezó el inventario.\n\n" +
+               "-Descripción: Nombre del inventario.\n\n" +
+               "-Tipo Inv: El tipo del inventario con el que se está trabajando.";
 
-        // show the popup window
-        // which view you pass in doesn't matter, it is only used for the window tolken
-        popupWindow.showAtLocation(view, Gravity.CENTER, 0, 0);
+            PopUp(tx);
 
-        // dismiss the popup window when touched
-        popupView.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                popupWindow.dismiss();
-                return true;
-            }
-        });
+        }catch (Exception e){
+            addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
+        }
+
+
     }
 
     public void doNext(View view) {

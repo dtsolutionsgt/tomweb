@@ -81,6 +81,22 @@ public class Productos extends PBase {
     }
 
     public void doHelp(View view) {
+        String tx;
+
+        try{
+
+            tx="-Busqueda: La busqueda se puede haccer por código de barra, nombre o ambos.\n\n" +
+                    "-Regs: Muestra la cantidad de registros, o de conteos realizados.\n\n" +
+                    "-Todos: Muestra todos los productos.\n\n" +
+                    "-Contados: Muestra solo los productos que ya fueron agregados a un conteo.\n\n" +
+                    "-No Contados: Muestra los productos que aún no han sido agregados a un conteo.";
+
+            PopUp(tx);
+
+        }catch (Exception e){
+            addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
+        }
+
 
     }
 

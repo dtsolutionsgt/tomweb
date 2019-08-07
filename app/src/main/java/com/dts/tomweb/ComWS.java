@@ -69,7 +69,7 @@ public class ComWS extends PBase {
     private static String sstr,fstr,ferr,fterr,idbg,dbg,ftmsg,sprog;
     private int scon,stockflag,reccnt,count;
     private String senv,gEmpresa,ActRuta;
-    private boolean ftflag,esvacio;
+    private boolean ftflag,ret;
 
     private RelativeLayout relEnv, relRec;
     private TextView Prg,Prg2;
@@ -166,14 +166,22 @@ public class ComWS extends PBase {
     }
 
     public void doHelp(View view) {
+        String tx;
 
         try{
 
-            deleteFile("credentialsTOM");
-            Toast.makeText(this, "Eliminado", Toast.LENGTH_LONG).show();
+            tx="Si hay datos sin comunicar se mostrará el boton de enviar, " +
+                    "si no hay nada que comunicar se mostrará el botón de recibir.\n\n" +
+                    "-Recibir: Recibirá datos nuevos del BOF (verificar su conexión a internet antes de recibir).\n\n" +
+                    "-Enviar: Enviará los datos del dispositivo al BOF (verificar su conexión a internet antes de enviar).\n\n" +
+                    "-En la esquina superior izquierda hay botón que muestra las tablas con los respectivos datos.";
+
+            PopUp(tx);
+
         }catch (Exception e){
-            Toast.makeText(this, "Error", Toast.LENGTH_LONG).show();
+            addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
         }
+
 
     }
 
@@ -420,10 +428,12 @@ public class ComWS extends PBase {
             sstr = "#";
             if (s.equalsIgnoreCase("#")) return 1;
 
+            errflag=true;
             sstr = s;
             return 0;
         } catch (Exception e) {
             addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"");
+            errflag=true;
             sstr=e.getMessage();
         }
 
@@ -872,6 +882,7 @@ public class ComWS extends PBase {
 
             invEnc.fill();
             gl.tipoInv =  invEnc.first().tipo_inventario;
+            gl.idInvEnc = invEnc.first().id_inventario_enc;
 
             count = 0;
 
@@ -880,7 +891,7 @@ public class ComWS extends PBase {
                 invCiego.fill("WHERE ID_INVENTARIO_ENC = "+ gl.idInvEnc +" AND COMUNICADO = 'N'");
                 count = invCiego.count;
 
-            }else if(gl.tipoInv>1){
+            }else if(gl.tipoInv==2 || gl.tipoInv==3){
 
                 invDet.fill("WHERE ID_INVENTARIO_ENC = "+ gl.idInvEnc +" AND COMUNICADO = 'N'");
                 count = invDet.count;
@@ -896,6 +907,7 @@ public class ComWS extends PBase {
             }else {
                 relRec.setVisibility(View.VISIBLE);
                 relEnv.setVisibility(View.INVISIBLE);
+                ret =  true;
             }
 
         }
@@ -1105,7 +1117,9 @@ public class ComWS extends PBase {
             public void onClick(DialogInterface dialog, int which) {
 
                 if(gl.validaLicDB==2) gl.validaLicDB=4;
-
+                if(ret){
+                    MPrincipal();
+                }
                 finish();
             }
         });
@@ -1136,6 +1150,10 @@ public class ComWS extends PBase {
 
         dialog.show();
 
+    }
+
+    private void MPrincipal(){
+        startActivity(new Intent(this, MenuPrincipal.class));
     }
 
     // Activity Events

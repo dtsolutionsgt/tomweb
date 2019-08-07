@@ -71,38 +71,6 @@ public class Conteo extends PBase {
 
     //region Events
 
-    /*@Override
-    public boolean dispatchKeyEvent(KeyEvent e) {
-        if (e.getAction() == KeyEvent.ACTION_DOWN && e.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
-            Cod = Codigo.getText().toString().trim();
-
-
-            if(Cod.isEmpty()) return true;
-            if(!existencia()) return false;
-
-            mostrarConteo();
-
-            if(gl.tipoInv==2 || gl.tipoInv==3){
-
-                if(tipoArt.equals("S")) {
-                    Cantidad.setFocusable(false);
-                    insertaConteo();
-                    mostrarConteo();
-                    Ubicacion.requestFocus();
-                    return true;
-                } else {
-                    Cantidad.setFocusableInTouchMode(true);
-                    Cantidad.setFocusable(true);
-                }
-
-
-            }
-
-            mostrarConteo();
-        }
-        return super.dispatchKeyEvent(e);
-    }*/
-
     private void setHandlers() {
 
         Ubicacion.setOnKeyListener(new View.OnKeyListener() {
@@ -111,7 +79,7 @@ public class Conteo extends PBase {
                 if (arg2.getAction() == KeyEvent.ACTION_DOWN) {
                     switch (arg1) {
                         case KeyEvent.KEYCODE_ENTER:
-                            gl.ubicacion = Ubicacion.getText().toString();
+                            gl.ubicacion = Ubicacion.getText().toString().trim();
                             return true;
                     }
                 }
@@ -125,14 +93,14 @@ public class Conteo extends PBase {
                 if (arg2.getAction() == KeyEvent.ACTION_DOWN) {
                     switch (arg1) {
                         case KeyEvent.KEYCODE_ENTER:
-                            gl.ubicacion = Ubicacion.getText().toString();
+                            gl.ubicacion = Ubicacion.getText().toString().trim();
                             Barra.setText("");
-                            Cod = Codigo.getText().toString();
+                            Cod = Codigo.getText().toString().trim();
 
                             if(Cod.isEmpty()) return true;
 
                             if (gl.tipoInv==1){
-                                barra = Codigo.getText().toString();
+                                barra = Codigo.getText().toString().trim();
                                 Barra.setText(barra);
 
                             }else {
@@ -148,7 +116,8 @@ public class Conteo extends PBase {
                                     Cantidad.setFocusable(false);
                                     insertaConteo();
                                     mostrarConteo();
-                                    Ubicacion.requestFocus();
+                                    Codigo.clearFocus();
+                                    Codigo.requestFocus();
                                     return true;
                                 } else {
                                     Cantidad.setFocusableInTouchMode(true);
@@ -174,12 +143,12 @@ public class Conteo extends PBase {
                 if (arg2.getAction() == KeyEvent.ACTION_DOWN) {
                     switch (arg1) {
                         case KeyEvent.KEYCODE_ENTER:
-                            gl.ubicacion = Ubicacion.getText().toString();
+                            gl.ubicacion = Ubicacion.getText().toString().trim();
                             if (gl.tipoInv==1){
-                                barra = Codigo.getText().toString();
+                                barra = Codigo.getText().toString().trim();
                                 Barra.setText(barra);
                             }else {
-                                barra = Barra.getText().toString();
+                                barra = Barra.getText().toString().trim();
                             }
 
                             if(barra.isEmpty()) {
@@ -227,23 +196,27 @@ public class Conteo extends PBase {
     }
 
     public void doHelp(View view) {
-        String ss;
+        String tx;
 
-        try {
-            ss = "UPDATE INVENTARIO_DETALLE SET COMUNICADO = 'N'";
-            db.execSQL(ss);
-        }catch (Exception  e){
+        try{
+
+            tx="-Ubicación: Si se deja el campo vacío tomará por defecto valor 1.\n\n" +
+                    "-Barra: Este campo se llenará automáticamente.\n\n" +
+                    "-Cantidad: Si el producto es serializado se inhabilita el campo y se agregará de  uno en uno al dar enter en la casilla 'Código'.\n\n" +
+                    "En el cuadro, 'Cantidad' mostrará el total de conteo según código y ubicación.";
+
+            PopUp(tx);
+
+        }catch (Exception e){
             addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
-            msgbox("Error: "+e);
         }
 
-        Toast.makeText(this, "Comunicado = N", Toast.LENGTH_LONG).show();
 
     }
 
     public void doDelete (View view){
-        Cod = Codigo.getText().toString();
-        Ubic = Ubicacion.getText().toString();
+        Cod = Codigo.getText().toString().trim();
+        Ubic = Ubicacion.getText().toString().trim();
 
         if(Cod.isEmpty() || Ubic.isEmpty()){
             msgbox("Ingrese el código y la ubicación del producto a eliminar");return;
@@ -320,13 +293,13 @@ public class Conteo extends PBase {
 
             regHH.fill();
             gl.IDregistro = regHH.first().id_registro;
-            Cod = Codigo.getText().toString();
+            Cod = Codigo.getText().toString().trim();
 
 
             if(Ubicacion.getText().toString().isEmpty()){
                 Ubic = "1";
             }else {
-                Ubic = Ubicacion.getText().toString();
+                Ubic = Ubicacion.getText().toString().trim();
             }
             sfecha=du.getActDate();
             ff = "20"+sfecha;
@@ -366,7 +339,7 @@ public class Conteo extends PBase {
             if(gl.tipoInv==1) {
 
                 Barra.setText(Codigo.getText().toString());
-                barra = Barra.getText().toString();
+                barra = Barra.getText().toString().trim();
 
                 item.id_inventario_enc =  gl.idInvEnc;
                 item.codigo_barra = barra;
@@ -505,8 +478,8 @@ public class Conteo extends PBase {
         try{
             codBck = Cod;
 
-            Ubic = Ubicacion.getText().toString();
-            Cod = Codigo.getText().toString();
+            Ubic = Ubicacion.getText().toString().trim();
+            Cod = Codigo.getText().toString().trim();
             if(Cod.isEmpty()) Cod=codBck;
             if(gl.tipoInv==1){
                 Tabla = "INVENTARIO_CIEGO";
@@ -576,9 +549,9 @@ public class Conteo extends PBase {
         String c1, c2, c3;
 
         try{
-            c1 = Codigo.getText().toString();
-            c2 = Ubicacion.getText().toString();
-            c3 = Cantidad.getText().toString();
+            c1 = Codigo.getText().toString().trim();
+            c2 = Ubicacion.getText().toString().trim();
+            c3 = Cantidad.getText().toString().trim();
 
             if(!c1.isEmpty() && !c2.isEmpty() && !c3.isEmpty()){
                 result = 1; return;

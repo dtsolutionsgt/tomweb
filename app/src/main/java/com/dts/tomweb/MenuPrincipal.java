@@ -42,8 +42,13 @@ public class MenuPrincipal extends PBase {
     }
 
     public void doCom(View view) {
-        gl.validaLicDB=10;
-        startActivity(new Intent(this,ComWS.class));
+
+        try{
+            gl.validaLicDB=10;
+            startActivity(new Intent(this,ComWS.class));
+        }catch (Exception e){
+            addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
+        }
     }
 
     public void doExit(View view) {

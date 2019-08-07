@@ -53,8 +53,22 @@ public class Ingreso extends PBase {
         processLogIn();
     }
 
-    public void doShowMenu(View view) {
-        showMenu();
+    public void doHelp(View view) {
+        String tx;
+
+        try{
+
+            tx="-Usuario: Ingrese el usuario que esté asignado al inventario que se está trabajando en la empresa.\n\n" +
+                    "-Clave: Ingrese la clave(contraseña) asignada al usuario anterior.\n\n" +
+                    "Para ingresar presione enter.";
+
+            PopUp(tx);
+
+        }catch (Exception e){
+            addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
+        }
+
+
     }
 
     private void setHandlers() {
@@ -182,13 +196,6 @@ public class Ingreso extends PBase {
             addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
             msgbox(new Object() {}.getClass().getEnclosingMethod().getName() + " . " + e.getMessage());
         }
-
-    }
-
-
-    // Menu
-
-    private void showMenu() {
 
     }
 

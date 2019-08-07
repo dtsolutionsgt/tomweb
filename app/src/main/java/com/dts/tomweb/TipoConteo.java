@@ -90,7 +90,7 @@ public class TipoConteo extends PBase {
             }
 
 
-            Toast.makeText(this, "Agregado correctamente", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Producto agregado correctamente", Toast.LENGTH_LONG).show();
 
             super.finish();
 
