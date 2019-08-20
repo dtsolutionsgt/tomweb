@@ -7,6 +7,8 @@ import android.content.Intent;
 import android.content.RestrictionEntry;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -137,6 +139,20 @@ public class Conteo extends PBase {
             }
         });
 
+        Codigo.addTextChangedListener(new TextWatcher() {
+
+            public void afterTextChanged(Editable s) {
+            }
+
+            public void beforeTextChanged(CharSequence s, int start,int count, int after) {
+            }
+
+            public void onTextChanged(CharSequence s, int start,int before, int count) {
+                Cod = Codigo.getText().toString();
+            }
+
+        });
+
         Cantidad.setOnKeyListener(new View.OnKeyListener() {
             @Override
             public boolean onKey(View arg0, int arg1, KeyEvent arg2) {
@@ -183,6 +199,20 @@ public class Conteo extends PBase {
 
     }
 
+    public boolean getBarra(){
+        clsInventario_ciegoObj InvCiego = new clsInventario_ciegoObj(this, Con, db);
+
+        try {
+
+            InvCiego.fill(" WHERE ID = '"+ Cod +"'");
+
+            if(InvCiego.count==0) return false;
+            barra = InvCiego.first().codigo_barra.trim();
+
+        }catch (Exception e){  }
+        return true;
+    }
+
     public void doExit(View view) {
         finish();
     }
@@ -201,7 +231,7 @@ public class Conteo extends PBase {
         try{
 
             tx="-Ubicación: Si se deja el campo vacío tomará por defecto valor 1.\n\n" +
-                    "-Barra: Este campo se llenará automáticamente.\n\n" +
+                    "-Barra: Este campo se llenará automáticamente al dar enter en 'Codigo'.\n\n" +
                     "-Cantidad: Si el producto es serializado se inhabilita el campo y se agregará de  uno en uno al dar enter en la casilla 'Código'.\n\n" +
                     "En el cuadro, 'Cantidad' mostrará el total de conteo según código y ubicación.";
 
@@ -218,11 +248,13 @@ public class Conteo extends PBase {
         Cod = Codigo.getText().toString().trim();
         Ubic = Ubicacion.getText().toString().trim();
 
-        if(Cod.isEmpty() || Ubic.isEmpty()){
-            msgbox("Ingrese el código y la ubicación del producto a eliminar");return;
+        if(Ubic.isEmpty()){
+            msgbox("Ingrese la ubicación del producto a eliminar");return;
+        }else if(Cod.isEmpty()){
+            msgbox("Ingrese el código del producto a eliminar, y presione enter para actualizar la barra");return;
         }
 
-        msgAskDelete("Seguro que desea eliminar el conteo de el producto: "+ Cod +" "+desc);
+        msgAskDelete("Seguro que desea eliminar el conteo de el producto: "+ Cod +" - "+desc);
     }
 
     public void doNext(View view) {
@@ -387,25 +419,31 @@ public class Conteo extends PBase {
         Integer cc=0;
 
         try{
+            if(barra == null){
+                if(!getBarra()) {
+                    msgbox("Verifique que el código corresponda a la barra, si no presione enter en el código ya escrito para actualizar");
+                    return;
+                }
+            }
 
             if(gl.tipoInv==1){
                 tabla = "INVENTARIO_CIEGO";
 
-                InvCiego.fill(" WHERE CODIGO_BARRA = "+ barra + " AND UBICACION = "+ Ubic);
+                InvCiego.fill(" WHERE ID='"+ Cod +"' AND CODIGO_BARRA = '"+ barra + "' AND UBICACION = '"+ Ubic +"' AND ID_INVENTARIO_ENC = '"+ gl.idInvEnc +"'");
                 cc = InvCiego.count;
             } else if(gl.tipoInv==2 || gl.tipoInv==3) {
                 tabla = "INVENTARIO_DETALLE";
 
-                InvDetalle.fill(" WHERE CODIGO_BARRA = '"+ barra + "' AND UBICACION = '"+ Ubic +"'");
+                InvDetalle.fill(" WHERE ID_ARTICULO='"+ Cod +"' AND CODIGO_BARRA = '"+ barra + "' AND UBICACION = '"+ Ubic +"' AND ID_INVENTARIO_ENC = '"+ gl.idInvEnc +"'");
                 cc = InvDetalle.count;
             }
 
             if(cc==0){
-                msgbox("Este producto no existe en la ubicación descrita, o no existe el producto");
+                msgbox("Este producto no existe en la ubicación descrita, o no existe el producto.\nVerifique que el código corresponda a la barra, si no presione enter en el código ya escrito para actualizar.");
                 return;
             }
 
-            sql = "UPDATE "+ tabla +" SET ELIMINADO = 1, COMUNICADO = 'N' WHERE CODIGO_BARRA = '"+ barra + "' AND UBICACION = '"+ Ubic +"'";
+            sql = "UPDATE "+ tabla +" SET ELIMINADO = 1, COMUNICADO = 'N' WHERE CODIGO_BARRA = '"+ barra + "' AND UBICACION = '"+ Ubic +"' AND ID_INVENTARIO_ENC = '"+ gl.idInvEnc +"'";
             db.execSQL(sql);
 
             Toast.makeText(this, "Producto Eliminado Correctamente", Toast.LENGTH_LONG).show();
@@ -483,7 +521,8 @@ public class Conteo extends PBase {
             if(Cod.isEmpty()) Cod=codBck;
             if(gl.tipoInv==1){
                 Tabla = "INVENTARIO_CIEGO";
-                Desc.setText("NO ENCONTRADO");
+                desc = "NO ENCONTRADO";
+                Desc.setText(desc);
             }else if(gl.tipoInv==2){
                 Tabla = "INVENTARIO_DETALLE";
 

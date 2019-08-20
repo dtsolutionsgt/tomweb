@@ -230,13 +230,13 @@ public class Productos extends PBase {
             if(gl.tipoInv==1) {
 
                 if (!nomb.isEmpty() && !barra.isEmpty()) {
-                    tn = tn + " WHERE CODIGO_BARRA = " + barra + " AND UBICACION =" + nomb + " AND ELIMINADO = 0";
+                    tn = tn + " WHERE CODIGO_BARRA = " + barra + " AND UBICACION =" + nomb + " AND ELIMINADO = 0 AND ID_INVENTARIO_ENC = "+gl.idInvEnc;
                 } else if (!barra.isEmpty()) {
-                    tn = tn + " WHERE CODIGO_BARRA = " + barra + " AND ELIMINADO = 0";
+                    tn = tn + " WHERE CODIGO_BARRA = " + barra + " AND ELIMINADO = 0 AND ID_INVENTARIO_ENC = "+gl.idInvEnc;
                 } else if (!nomb.isEmpty()) {
-                    tn = tn + " WHERE UBICACION = " + nomb + " AND ELIMINADO = 0";
+                    tn = tn + " WHERE UBICACION = " + nomb + " AND ELIMINADO = 0 AND ID_INVENTARIO_ENC = "+gl.idInvEnc;
                 }else{
-                    tn = tn + " WHERE ELIMINADO = 0";
+                    tn = tn + " WHERE ELIMINADO = 0 AND ID_INVENTARIO_ENC = "+gl.idInvEnc;
                 }
 
                 ss = "SELECT CODIGO_BARRA, UBICACION, CANTIDAD FROM " + tn;
@@ -252,12 +252,12 @@ public class Productos extends PBase {
 
                 }else if(text.equals("No Contados")){
 
-                    tn = "select b.id_articulo, b.descripcion, b.codigo_barra, b.tipo_conteo from articulo b where b.id_articulo not in (select id_articulo from inventario_detalle) ";
+                    tn = "select b.id_articulo, b.descripcion, b.codigo_barra, b.tipo_conteo from "+ art +" b where b.id_articulo not in (select id_articulo from inventario_detalle where id_inventario_enc = '"+ gl.idInvEnc +"') ";
                     val=3;
 
                 }else if(text.equals("Todos")){
 
-                    tn = tn + " WHERE 1=1";
+                    tn = tn + " WHERE id_inventario_enc ="+ gl.idInvEnc;
                     val=1;
 
                 }
@@ -266,7 +266,7 @@ public class Productos extends PBase {
                     if(val==1){
                         tn = tn + " AND CODIGO_BARRA = '" + barra + "' AND DESCRIPCION ='" + nomb + "'";
                     }else {
-                        if(val==2)tn = tn + " WHERE b.CODIGO_BARRA = '" + barra + "' AND b.DESCRIPCION ='" + nomb + "' AND a.ELIMINADO=0 GROUP BY b.id_articulo";
+                        if(val==2)tn = tn + " WHERE b.CODIGO_BARRA = '" + barra + "' AND b.DESCRIPCION ='" + nomb + "' AND a.ID_INVENTARIO_ENC = '"+ gl.idInvEnc +"' AND a.ELIMINADO=0 GROUP BY b.id_articulo";
                         if(val==3)tn = tn + " AND CODIGO_BARRA = '" + barra + "' AND DESCRIPCION ='" + nomb + "' GROUP BY b.id_articulo";
                     }
 
@@ -274,7 +274,7 @@ public class Productos extends PBase {
                     if(val==1){
                         tn = tn + " AND CODIGO_BARRA = '" + barra + "'";
                     }else {
-                        if(val==2)tn = tn + " WHERE  b.CODIGO_BARRA = '" + barra + "' AND a.ELIMINADO=0 GROUP BY b.id_articulo";
+                        if(val==2)tn = tn + " WHERE  b.CODIGO_BARRA = '" + barra + "' AND a.ID_INVENTARIO_ENC = '"+ gl.idInvEnc +"' AND a.ELIMINADO=0 GROUP BY b.id_articulo";
                         if(val==3)tn = tn + " AND  CODIGO_BARRA = '" + barra + "' GROUP BY b.id_articulo";
                     }
 
@@ -282,14 +282,15 @@ public class Productos extends PBase {
                     if(val==1){
                         tn = tn + " AND DESCRIPCION = '" + nomb + "'";
                     }else {
-                        if(val==2)tn = tn + " WHERE  b.DESCRIPCION = '" + nomb + "' AND a.ELIMINADO=0 GROUP BY b.id_articulo";
+                        if(val==2)tn = tn + " WHERE  b.DESCRIPCION = '" + nomb + "' AND a.ID_INVENTARIO_ENC = '"+ gl.idInvEnc +"' AND a.ELIMINADO=0 GROUP BY b.id_articulo";
                         if(val==3)tn = tn + " AND DESCRIPCION = '" + nomb + "' GROUP BY b.id_articulo";
                     }
 
                 }else {
                     if(!text.equals("Todos")){
 
-                        tn = tn + " GROUP BY b.id_articulo";
+                        if(val==2)  tn = tn + " AND a.ID_INVENTARIO_ENC = '"+ gl.idInvEnc +"' GROUP BY b.id_articulo";
+                        if(val==3)  tn = tn + " GROUP BY b.id_articulo";
                     }
 
                 }
@@ -303,9 +304,7 @@ public class Productos extends PBase {
 
             cc = dt.getColumnCount();
             rg = dt.getCount();
-            if(rg>0){
-                regs.setText(""+rg);
-            }
+            regs.setText(""+rg);
 
             dt.moveToFirst();
             while (!dt.isAfterLast()) {

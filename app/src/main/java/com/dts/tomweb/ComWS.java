@@ -120,6 +120,7 @@ public class ComWS extends PBase {
 
         AlertDialog.Builder dialog = new AlertDialog.Builder(this);
 
+        dialog.setCancelable(false);
         dialog.setTitle("Recepción");
         dialog.setMessage("¿Recibir datos nuevos?");
 
@@ -146,6 +147,7 @@ public class ComWS extends PBase {
 
         AlertDialog.Builder dialog = new AlertDialog.Builder(this);
 
+        dialog.setCancelable(false);
         dialog.setTitle("Envio");
         dialog.setMessage("¿Enviar datos?");
 
@@ -552,15 +554,20 @@ public class ComWS extends PBase {
 
             if(gl.tipoInv==1) {
                 //Nada que recibir, inventario ciego
+                listItems.add("DELETE FROM INVENTARIO_CIEGO");
+
             }else if(gl.tipoInv==2){
                 while (count!=2){
                     count++;
                     if (!AddTable("INVENTARIO_MAESTRO")) return false;
+                    listItems.add("DELETE FROM INVENTARIO_DETALLE");
                 }
 
             }else if(gl.tipoInv==3){
                 if (!AddTable("INVENTARIO_TEORICO")) return false;
+                listItems.add("DELETE FROM INVENTARIO_DETALLE");
             }
+
 
             saveData();
         } catch (Exception e) {
@@ -757,6 +764,7 @@ public class ComWS extends PBase {
                         fstr="Recepcion incompleta : "+fstr;
                     }
                 }
+
             } else {
                 fstr="No se puede conectar al web service : "+sstr;
             }
@@ -904,6 +912,7 @@ public class ComWS extends PBase {
             if(!ftflag){
                 relRec.setVisibility(View.INVISIBLE);
                 relEnv.setVisibility(View.VISIBLE);
+                ret = true;
             }else {
                 relRec.setVisibility(View.VISIBLE);
                 relEnv.setVisibility(View.INVISIBLE);
@@ -960,7 +969,7 @@ public class ComWS extends PBase {
             sprog = "Inventario Ciego...";wsStask.onProgressUpdate();
 
             dbld.clear();
-            if(dbld.insert("temp_inventario_ciego", "WHERE ELIMINADO=0")){
+            if(dbld.insert("temp_inventario_ciego", "WHERE ELIMINADO=0 AND ID_INVENTARIO_ENC = '"+ gl.idInvEnc+"'")){
                 try {
                     if (commitSQL() == 1) {
                         if(Procesar_Inventario_Ciego(gl.idInvEnc, gl.IDregistro)){
@@ -999,7 +1008,7 @@ public class ComWS extends PBase {
             sprog = "Detalle de Inventario...";wsStask.onProgressUpdate();
 
             dbld.clear();
-            if(dbld.insert("temp_inventario_detalle", "WHERE ELIMINADO=0")){
+            if(dbld.insert("temp_inventario_detalle", "WHERE ELIMINADO=0 AND ID_INVENTARIO_ENC = '"+ gl.idInvEnc+"'")){
                 try {
                     if (commitSQL() == 1) {
                         if(Procesar_Inventario_Detalle(gl.idInvEnc, gl.IDregistro)){
