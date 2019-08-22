@@ -16,6 +16,7 @@ import android.widget.GridView;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.dts.listadapt.LA_Tablas;
 import com.dts.listadapt.LA_Tablas2;
@@ -78,7 +79,21 @@ public class Tablas extends PBase {
         finish();
     }
 
-    public void doHelp(View view) { }
+    public void doHelp(View view) {
+        try {
+            upd.init("INVENTARIO_CIEGO");
+
+            upd.add("COMUNICADO", "N");
+
+            upd.Where("(id_inventario_enc='209')");
+
+            db.execSQL(upd.sql());
+
+            Toast.makeText(this, "exito", Toast.LENGTH_LONG).show();
+        }catch (Exception e){
+            Toast.makeText(this, "fail", Toast.LENGTH_LONG).show();
+        }
+    }
 
     private void setHandlers() {
 

@@ -36,9 +36,9 @@ public class Conteo extends PBase {
     private EditText Barra, Cantidad, Ubicacion, Codigo;
     private TextView Codigo2, Cant2, Desc;
 
-    private String Ubic, Cod, tipoArt, barra, desc;
+    private String Ubic, Cod, tipoArt, barra, desc,ccod;
     private Double canti;
-    private Integer result=0;
+    private Integer result=0, resta;
 
     private ImageView eliminar;
 
@@ -139,19 +139,6 @@ public class Conteo extends PBase {
             }
         });
 
-        Codigo.addTextChangedListener(new TextWatcher() {
-
-            public void afterTextChanged(Editable s) {
-            }
-
-            public void beforeTextChanged(CharSequence s, int start,int count, int after) {
-            }
-
-            public void onTextChanged(CharSequence s, int start,int before, int count) {
-                Cod = Codigo.getText().toString();
-            }
-
-        });
 
         Cantidad.setOnKeyListener(new View.OnKeyListener() {
             @Override
@@ -254,7 +241,7 @@ public class Conteo extends PBase {
             msgbox("Ingrese el código del producto a eliminar, y presione enter para actualizar la barra");return;
         }
 
-        msgAskDelete("Seguro que desea eliminar el conteo de el producto: "+ Cod +" - "+desc);
+        msgAskDelete("Seguro que desea eliminar el conteo de el producto: '"+ desc +" - "+ Cod +"' En la ubicación: '"+Ubic+"' y código de barra: '"+ barra +"'");
     }
 
     public void doNext(View view) {
@@ -429,12 +416,12 @@ public class Conteo extends PBase {
             if(gl.tipoInv==1){
                 tabla = "INVENTARIO_CIEGO";
 
-                InvCiego.fill(" WHERE ID='"+ Cod +"' AND CODIGO_BARRA = '"+ barra + "' AND UBICACION = '"+ Ubic +"' AND ID_INVENTARIO_ENC = '"+ gl.idInvEnc +"'");
+                InvCiego.fill(" WHERE CODIGO_BARRA = '"+ barra + "' AND UBICACION = '"+ Ubic +"' AND ID_INVENTARIO_ENC = '"+ gl.idInvEnc +"'");
                 cc = InvCiego.count;
             } else if(gl.tipoInv==2 || gl.tipoInv==3) {
                 tabla = "INVENTARIO_DETALLE";
 
-                InvDetalle.fill(" WHERE ID_ARTICULO='"+ Cod +"' AND CODIGO_BARRA = '"+ barra + "' AND UBICACION = '"+ Ubic +"' AND ID_INVENTARIO_ENC = '"+ gl.idInvEnc +"'");
+                InvDetalle.fill(" WHERE CODIGO_BARRA = '"+ barra + "' AND UBICACION = '"+ Ubic +"' AND ID_INVENTARIO_ENC = '"+ gl.idInvEnc +"'");
                 cc = InvDetalle.count;
             }
 
@@ -445,6 +432,7 @@ public class Conteo extends PBase {
 
             sql = "UPDATE "+ tabla +" SET ELIMINADO = 1, COMUNICADO = 'N' WHERE CODIGO_BARRA = '"+ barra + "' AND UBICACION = '"+ Ubic +"' AND ID_INVENTARIO_ENC = '"+ gl.idInvEnc +"'";
             db.execSQL(sql);
+            limpiaCampos3();
 
             Toast.makeText(this, "Producto Eliminado Correctamente", Toast.LENGTH_LONG).show();
         }catch (Exception e){
@@ -492,6 +480,19 @@ public class Conteo extends PBase {
 
     //region Aux
 
+    public void showToast(View view){
+        try{
+            if(!Barra.getText().toString().isEmpty()){
+                Toast.makeText(this, Cod, Toast.LENGTH_LONG).show();
+            }else {
+                return;
+            }
+
+        }catch (Exception e){
+            Toast.makeText(this, "Error", Toast.LENGTH_LONG).show();
+        }
+    }
+
     public void limpiaCampos(){
         Ubicacion.setText("");
         Codigo.setText("");
@@ -504,6 +505,12 @@ public class Conteo extends PBase {
         Codigo.setText("");
         Barra.setText("");
         Cantidad.setText("");
+    }
+
+    public void limpiaCampos3(){
+        Codigo2.setText("");
+        Cant2.setText("");
+        Desc.setText("");
     }
 
     public void mostrarConteo(){
@@ -571,7 +578,15 @@ public class Conteo extends PBase {
 
             if (dt!=null) dt.close();
 
-            Codigo2.setText(Cod);
+            if(Cod.length()>8){
+
+                ccod = Cod.substring(0,7)+"...";
+                Codigo2.setText(ccod);
+
+            }else {
+                Codigo2.setText(Cod);
+            }
+
             Cant2.setText(Double.toString(cant2));
 
             if(result==1){

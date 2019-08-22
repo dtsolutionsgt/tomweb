@@ -223,8 +223,8 @@ public class Productos extends PBase {
             values.clear();
             dvalues.clear();
 
-            barra = txtBarra.getText().toString();
-            nomb = txtNombre.getText().toString();
+            barra = txtBarra.getText().toString().trim();
+            nomb = txtNombre.getText().toString().trim();
             text = spinnCon.getSelectedItem().toString();
 
             if(gl.tipoInv==1) {

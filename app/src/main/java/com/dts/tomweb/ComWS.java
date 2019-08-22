@@ -10,6 +10,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Looper;
 import android.os.SystemClock;
+import android.provider.ContactsContract;
 import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
@@ -309,6 +310,13 @@ public class ComWS extends PBase {
 
         try {
 
+            s="";
+            int ii=dbld.size();
+            for (int i = 0; i < dbld.size(); i++) {
+                ss=dbld.items.get(i);
+                s=s+ss+"\n";
+            }
+
             idbg=idbg+" Procesar_Inventario_Ciego ";
 
             SoapObject request = new SoapObject(NAMESPACE, METHOD_NAME);
@@ -317,15 +325,19 @@ public class ComWS extends PBase {
 
             PropertyInfo param = new PropertyInfo();
             param.setType(String.class);
-            param.setName("Id_Inventario_Enc");param.setValue(Id_Inventario_Enc);
-
+            param.setName("SQL");param.setValue(s);
 
             PropertyInfo param2 = new PropertyInfo();
             param2.setType(String.class);
-            param2.setName("Id_Registro");param2.setValue(Id_Registro);
+            param2.setName("Id_Inventario_Enc");param2.setValue(Id_Inventario_Enc);
+
+            PropertyInfo param3 = new PropertyInfo();
+            param3.setType(String.class);
+            param3.setName("Id_Registro");param3.setValue(Id_Registro);
 
             request.addProperty(param);
             request.addProperty(param2);
+            request.addProperty(param3);
             envelope.setOutputSoapObject(request);
 
             HttpTransportSE transport = new HttpTransportSE(URL);
@@ -341,12 +353,13 @@ public class ComWS extends PBase {
             return false;
         } catch (Exception e) {
             addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"");
+            sstr = e.getMessage();
             idbg=idbg+" ERR "+e.getMessage();
             return false;
         }
     }
 
-    public boolean Procesar_Inventario_Detalle(Integer Id_Inventario_Enc,Integer Id_Registro) {
+    public boolean Procesar_Inventario_Detalle(Integer Id_Inventario_Enc, Integer Id_Registro) {
         int rc;
         String s,ss;
 
@@ -354,6 +367,12 @@ public class ComWS extends PBase {
         sstr="OK";
 
         try {
+
+            s="";
+            for (int i = 0; i < dbld.size(); i++) {
+                ss=dbld.items.get(i);
+                s=s+ss+"\n";
+            }
 
             idbg=idbg+" Procesar_Inventario_Detalle ";
 
@@ -363,15 +382,20 @@ public class ComWS extends PBase {
 
             PropertyInfo param = new PropertyInfo();
             param.setType(String.class);
-            param.setName("Id_Inventario_Enc");param.setValue(Id_Inventario_Enc);
-
+            param.setName("SQL");param.setValue(s);
 
             PropertyInfo param2 = new PropertyInfo();
             param2.setType(String.class);
-            param2.setName("Id_Registro");param2.setValue(Id_Registro);
+            param2.setName("Id_Inventario_Enc");param2.setValue(Id_Inventario_Enc);
+
+
+            PropertyInfo param3 = new PropertyInfo();
+            param3.setType(String.class);
+            param3.setName("Id_Registro");param3.setValue(Id_Registro);
 
             request.addProperty(param);
             request.addProperty(param2);
+            request.addProperty(param3);
             envelope.setOutputSoapObject(request);
 
             HttpTransportSE transport = new HttpTransportSE(URL);
@@ -387,6 +411,7 @@ public class ComWS extends PBase {
             return false;
         } catch (Exception e) {
             addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"");
+            sstr = e.getMessage();
             idbg=idbg+" ERR "+e.getMessage();
             return false;
         }
@@ -544,13 +569,15 @@ public class ComWS extends PBase {
 
         try {
             if (!AddTable("REGISTRO_HANDHELD")) return false;
-            saveData();
+            if (!saveData())return false;
+
             if(gl.licExist==0) return false;
             if (!AddTable("ESTADO_INVENTARIO")) return false;
             if (!AddTable("INVENTARIO_ENCABEZADO")) return false;
-            saveData();
+            if (!saveData())return false;
+
             if (!AddTable("OPERADORES")) return false;
-            saveData();
+            if (!saveData())return false;
 
             if(gl.tipoInv==1) {
                 //Nada que recibir, inventario ciego
@@ -568,13 +595,13 @@ public class ComWS extends PBase {
                 listItems.add("DELETE FROM INVENTARIO_DETALLE");
             }
 
+            if (!saveData())return false;
 
-            saveData();
-        } catch (Exception e) {
+
+         } catch (Exception e) {
             addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"");
             return false;
         }
-
 
         try {
             ConT.close();
@@ -586,7 +613,7 @@ public class ComWS extends PBase {
         return true;
     }
 
-    private void saveData(){
+    private boolean saveData(){
         int rc;
         ferr="";
         clsRegistro_handheldObj registroHH =new clsRegistro_handheldObj(this,Con,db);
@@ -594,7 +621,7 @@ public class ComWS extends PBase {
         try {
 
             rc=listItems.size();reccnt=rc;
-            if (rc==0) return;
+            if (rc==0) return true;
 
             ConT = new BaseDatos(this);
             dbT = ConT.getWritableDatabase();
@@ -636,6 +663,7 @@ public class ComWS extends PBase {
 
             }
 
+            return true;
         } catch (Exception e) {
             Log.e("Error",e.getMessage());
             addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"");
@@ -647,7 +675,7 @@ public class ComWS extends PBase {
 
             sstr=e.getMessage();
             ferr=sstr+"\n"+sql;
-            return;
+            return false;
         }
     }
 
@@ -673,8 +701,8 @@ public class ComWS extends PBase {
             }
 
         } catch (Exception e) {
-            addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
             fstr="Tab:"+TN+", "+ e.getMessage();idbg=idbg + e.getMessage();
+            addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
             return false;
         }
     }
@@ -764,14 +792,13 @@ public class ComWS extends PBase {
                         fstr="Recepcion incompleta : "+fstr;
                     }
                 }
-
             } else {
                 fstr="No se puede conectar al web service : "+sstr;
             }
         } catch (Exception e) {
-            addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
             scon=0;
             fstr="No se puede conectar al web service. "+e.getMessage();
+            addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
         }
 
     }
@@ -841,7 +868,6 @@ public class ComWS extends PBase {
     }
 
 
-
     // WEB SERVICE - ENVIO
 
     private boolean sendData() {
@@ -864,12 +890,11 @@ public class ComWS extends PBase {
                 if (!envioInvDetalle()) return false;
 
             }
-        }catch (Exception e){
+        } catch (Exception e){
             addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
             errflag=true;fterr += "\n" + e.getMessage();dbg = e.getMessage();
+            return false;
         }
-
-
 
         return true;
     }
@@ -969,32 +994,37 @@ public class ComWS extends PBase {
             sprog = "Inventario Ciego...";wsStask.onProgressUpdate();
 
             dbld.clear();
-            if(dbld.insert("temp_inventario_ciego", "WHERE ELIMINADO=0 AND ID_INVENTARIO_ENC = '"+ gl.idInvEnc+"'")){
+            if (dbld.insert("temp_inventario_ciego", "WHERE ELIMINADO=0 AND ID_INVENTARIO_ENC = '"+ gl.idInvEnc+"'")){
                 try {
-                    if (commitSQL() == 1) {
+                    //if (commitSQL() == 1) {
+
                         if(Procesar_Inventario_Ciego(gl.idInvEnc, gl.IDregistro)){
                             ss = "UPDATE INVENTARIO_CIEGO SET COMUNICADO = 'S'";
                             db.execSQL(ss);
-
                         }else{
+                            errflag=true;
+                            fterr="Error al procesar el inventario ciego";
                             return false;
                         }
-
-                    } else {
-                        fterr += sstr;dbg +=" , ***";
+                    /*} else {
+                        errflag=true;
+                        fterr = sstr;dbg +=" , ***";
                         return false;
-                    }
+                    }*/
                 } catch (Exception e) {
                     addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
-                    errflag=true;fterr += "\n" + e.getMessage();dbg = e.getMessage();
+                    errflag=true;fterr=e.getMessage();dbg = e.getMessage();
+                    return false;
                 }
-            }else {
+            } else {
+                errflag=true;fterr="Error al crear los datos de inventario ciego";
                 return false;
             }
 
         } catch (Exception e) {
             addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
             errflag=true;fterr = e.getMessage();dbg = fterr;
+            return false;
         }
 
         return true;
@@ -1016,23 +1046,29 @@ public class ComWS extends PBase {
                             db.execSQL(ss);
 
                         }else{
+                            errflag=true;
+                            fterr="Error al procesar el detalle del inventario";
                             return false;
                         }
                     } else {
-                        fterr += sstr;dbg +=" , ***";
+                        errflag=true;
+                        fterr = sstr;dbg +=" , ***";
                         return false;
                     }
                 } catch (Exception e) {
                     addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
                     errflag=true;fterr += "\n" + e.getMessage();dbg = e.getMessage();
+                    return false;
                 }
-            }else {
+            } else {
+                errflag=true;fterr="Error al crear los datos del detalle del inventario";
                 return false;
             }
 
         } catch (Exception e) {
             addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
             errflag=true;fterr = e.getMessage();dbg = fterr;
+            return false;
         }
 
         return true;
@@ -1064,6 +1100,7 @@ public class ComWS extends PBase {
             addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
             scon=0;
             fterr="No se puede conectar al web service. "+e.getMessage();
+            errflag=true;
         }
     }
 

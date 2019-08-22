@@ -215,8 +215,8 @@ public class ListaConteos extends PBase {
             dvalues.clear();
             values.clear();
 
-            barra = txtBarra.getText().toString();
-            ubic = txtUbic.getText().toString();
+            barra = txtBarra.getText().toString().trim();
+            ubic = txtUbic.getText().toString().trim();
 
             if(!ubic.isEmpty() && !barra.isEmpty()){
                 tn = tn +" WHERE CODIGO_BARRA = '"+ barra + "' AND UBICACION = '" + ubic + "' AND ID_INVENTARIO_ENC="+ gl.idInvEnc +" AND ELIMINADO = 0";
@@ -270,9 +270,9 @@ public class ListaConteos extends PBase {
             dlayoutParams.width =((int) (cw*cc))+25;
             dgrid.setLayoutParams(dlayoutParams);
 
-            dgrid.setColumnWidth(cw);
-            dgrid.setStretchMode(GridView.NO_STRETCH);
-            dgrid.setNumColumns(cc);
+            //dgrid.setColumnWidth(cw);
+            //dgrid.setStretchMode(GridView.NO_STRETCH);
+            dgrid.setNumColumns(3);
 
             dadapter=new LA_Tablas2(this,dvalues);
             dgrid.setAdapter(dadapter);
@@ -282,9 +282,9 @@ public class ListaConteos extends PBase {
             layoutParams.width =((int) (cw*cc))+25;
             grid.setLayoutParams(layoutParams);
 
-            grid.setColumnWidth(cw);
-            grid.setStretchMode(GridView.NO_STRETCH);
-            grid.setNumColumns(cc);
+            //grid.setColumnWidth(cw);
+            //grid.setStretchMode(GridView.NO_STRETCH);
+            grid.setNumColumns(3);
 
             adapter=new LA_Tablas(this,values);
             grid.setAdapter(adapter);
