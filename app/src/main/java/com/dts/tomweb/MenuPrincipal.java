@@ -69,7 +69,7 @@ public class MenuPrincipal extends PBase {
         dialog.setPositiveButton("Si", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 gl.exitapp=true;
-                finish();
+                finito();
             }
         });
 
@@ -89,6 +89,10 @@ public class MenuPrincipal extends PBase {
     @Override
     public void onBackPressed() {
         msgAskExit("Salir de aplicación");
+    }
+
+    public void finito(){
+        super.finish();
     }
 
     //endregion

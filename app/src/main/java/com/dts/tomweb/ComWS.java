@@ -104,7 +104,7 @@ public class ComWS extends PBase {
         Prg.setText("");
         prgBar.setVisibility(View.INVISIBLE);
 
-        URL="http://192.168.1.52/wsTom2/wstomwebws.asmx";
+        URL="http://52.41.114.122/wsTomWeb/wstomwebws.asmx";
 
         envCompleto();
     }
@@ -117,7 +117,6 @@ public class ComWS extends PBase {
         if (isbusy==1) {
             toast("Por favor, espere que se termine la tarea actual.");return;
         }
-
 
         AlertDialog.Builder dialog = new AlertDialog.Builder(this);
 
@@ -325,7 +324,7 @@ public class ComWS extends PBase {
 
             PropertyInfo param = new PropertyInfo();
             param.setType(String.class);
-            param.setName("SQL");param.setValue(s);
+            param.setName("pSQL");param.setValue(s);
 
             PropertyInfo param2 = new PropertyInfo();
             param2.setType(String.class);
@@ -382,7 +381,7 @@ public class ComWS extends PBase {
 
             PropertyInfo param = new PropertyInfo();
             param.setType(String.class);
-            param.setName("SQL");param.setValue(s);
+            param.setName("pSQL");param.setValue(s);
 
             PropertyInfo param2 = new PropertyInfo();
             param2.setType(String.class);
@@ -440,7 +439,7 @@ public class ComWS extends PBase {
 
             PropertyInfo param = new PropertyInfo();
             param.setType(String.class);
-            param.setName("SQL");param.setValue(s);
+            param.setName("pSQL");param.setValue(s);
 
             request.addProperty(param);
             envelope.setOutputSoapObject(request);
@@ -1040,7 +1039,7 @@ public class ComWS extends PBase {
             dbld.clear();
             if(dbld.insert("temp_inventario_detalle", "WHERE ELIMINADO=0 AND ID_INVENTARIO_ENC = '"+ gl.idInvEnc+"'")){
                 try {
-                    if (commitSQL() == 1) {
+                    //if (commitSQL() == 1) {
                         if(Procesar_Inventario_Detalle(gl.idInvEnc, gl.IDregistro)){
                             ss = "UPDATE INVENTARIO_DETALLE SET COMUNICADO = 'S'";
                             db.execSQL(ss);
@@ -1050,11 +1049,11 @@ public class ComWS extends PBase {
                             fterr="Error al procesar el detalle del inventario";
                             return false;
                         }
-                    } else {
+                    /*} else {
                         errflag=true;
                         fterr = sstr;dbg +=" , ***";
                         return false;
-                    }
+                    }*/
                 } catch (Exception e) {
                     addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
                     errflag=true;fterr += "\n" + e.getMessage();dbg = e.getMessage();

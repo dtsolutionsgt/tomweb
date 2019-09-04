@@ -135,9 +135,10 @@ public class Inventario extends PBase {
             }
 
             gl.idInvEnc=item.id_inventario_enc;
+            gl.empresa=item.id_empresa;
 
             Correlativo.setText(Integer.toString(gl.idInvEnc));
-            Empresa.setText(Integer.toString(item.id_empresa));
+            Empresa.setText(Integer.toString(gl.empresa));
             Estado.setText(estado);
             FechaInv.setText(sfecha);
             Descrip.setText(item.nombre);

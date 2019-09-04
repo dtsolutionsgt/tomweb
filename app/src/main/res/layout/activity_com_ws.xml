@@ -152,8 +152,7 @@
                 android:layout_alignParentTop="false"
                 android:layout_centerInParent="true"
                 android:background="@drawable/frame_round"
-                android:clickable="true"
-                android:onClick="askSend">
+                android:clickable="true">
 
                 <TextView
                     android:id="@+id/textView18"
@@ -175,6 +174,7 @@
                     android:layout_alignParentStart="true"
                     android:layout_alignParentTop="true"
                     android:layout_marginTop="0dp"
+                    android:onClick="askSend"
                     android:padding="10dp"
                     android:src="@drawable/upload" />
             </RelativeLayout>

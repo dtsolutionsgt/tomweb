@@ -257,7 +257,7 @@ public class Productos extends PBase {
 
                 }else if(text.equals("Todos")){
 
-                    tn = tn + " WHERE id_inventario_enc ="+ gl.idInvEnc;
+                    tn = tn + " WHERE id_empresa ="+ gl.empresa;
                     val=1;
 
                 }

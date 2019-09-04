@@ -249,12 +249,12 @@ public class Conteo extends PBase {
 
         getCampos();
 
-        if(result==0){
+        /*if(result==0){
             ComWS();
         }else if(result==1){
             insertaConteo();
             mostrarConteo();
-        }
+        }*/
     }
 
     @Override
@@ -607,15 +607,17 @@ public class Conteo extends PBase {
             c2 = Ubicacion.getText().toString().trim();
             c3 = Cantidad.getText().toString().trim();
 
-            if(!c1.isEmpty() && !c2.isEmpty() && !c3.isEmpty()){
+            if(!c1.isEmpty() || !c2.isEmpty() || !c3.isEmpty()){
+                msgAskContinue("A dejado algunos campos con valores, ¿Seguro que desea continuar?");
                 result = 1; return;
+            }else{
+                ComWS();
             }
 
             if(c1.isEmpty()){
                 if(c2.isEmpty() && c3.isEmpty()){
                     result = 0;return;
                 }else {
-                    msgAskContinue("A dejado algunos campos con valores, ¿Seguro que desea continuar?");
                     result = 2;return;
                 }
             }else{
