@@ -1,5 +1,7 @@
 package com.dts.tomweb;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Html;
@@ -12,6 +14,8 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import com.dts.classes.clsInventario_encabezadoObj;
 
 import com.dts.base.clsClasses;
@@ -68,7 +72,9 @@ public class Inventario extends PBase {
     }
 
     public void doNext(View view) {
-        startActivity(new Intent(this, Conteo.class));
+        //startActivity(new Intent(this, Conteo.class));
+        alertDialog();
+        //break;
     }
 
     private void setHandlers(){
@@ -149,6 +155,27 @@ public class Inventario extends PBase {
             addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
             msgbox(""+e);
         }
+    }
+
+    private void alertDialog() {
+        AlertDialog.Builder dialog=new AlertDialog.Builder(this);
+        dialog.setMessage("Seleccione una opción");
+        dialog.setTitle("Conteo de inventario");
+        dialog.setPositiveButton("Inv. RFID",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog,
+                                        int which) {
+                        Toast.makeText(getApplicationContext(),"Inventario por RFID",Toast.LENGTH_LONG).show();
+                    }
+                });
+        dialog.setNegativeButton("Inv. Manual",new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Toast.makeText(getApplicationContext(),"Inventario manual", Toast.LENGTH_LONG).show();
+            }
+        });
+        AlertDialog alertDialog=dialog.create();
+        alertDialog.show();
     }
 
     //endregion
