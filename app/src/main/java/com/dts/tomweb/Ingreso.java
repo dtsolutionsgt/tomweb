@@ -60,18 +60,15 @@ public class Ingreso extends PBase {
                                 // get first reader from list
                                 readerDevice = availableRFIDReaderList.get(0);
                                 reader = readerDevice.getRFIDReader();
-                                if (!reader.isConnected()) {
-                                    // Establish connection to the RFID Reader
+                                /*if (!reader.isConnected()) {
                                     reader.connect();
-                                    //ConfigureReader();
+                                    ConfigureReader();
                                     return true;
-                                }
+                                } */
                             }
                         }
                     }
                 } catch (InvalidUsageException e) {
-                    e.printStackTrace();
-                } catch (OperationFailureException e) {
                     e.printStackTrace();
                     Log.d(TAG, "OperationFailureException " + e.getVendorMessage());
                 }
@@ -84,7 +81,7 @@ public class Ingreso extends PBase {
                 super.onPostExecute(aBoolean);
                 if (aBoolean) {
                     //Toast.makeText(getApplicationContext(), "Reader Connected", Toast.LENGTH_LONG).show();
-                    textView.setText("Compatible con RFID");
+                    textView.setText("Equipo compatible con RFID");
                 }
             }
         }.execute();

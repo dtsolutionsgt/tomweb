@@ -166,6 +166,7 @@ public class Inventario extends PBase {
                     public void onClick(DialogInterface dialog,
                                         int which) {
                         Toast.makeText(getApplicationContext(),"Inventario por RFID",Toast.LENGTH_LONG).show();
+                        startActivity(new Intent(getApplicationContext(), ConteoRfid.class));
                     }
                 });
         dialog.setNegativeButton("Inv. Manual",new DialogInterface.OnClickListener() {
