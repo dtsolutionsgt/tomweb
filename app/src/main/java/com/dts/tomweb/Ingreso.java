@@ -1,15 +1,26 @@
 package com.dts.tomweb;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.zebra.rfid.api3.ENUM_TRANSPORT;
+import com.zebra.rfid.api3.InvalidUsageException;
+import com.zebra.rfid.api3.OperationFailureException;
+import com.zebra.rfid.api3.RFIDReader;
+import com.zebra.rfid.api3.ReaderDevice;
+import com.zebra.rfid.api3.Readers;
+
 import com.dts.classes.clsInventario_encabezadoObj;
 import com.dts.classes.clsRegistro_handheldObj;
 import com.dts.classes.clsOperadoresObj;
+
+import java.util.ArrayList;
 
 public class Ingreso extends PBase {
 
@@ -18,11 +29,65 @@ public class Ingreso extends PBase {
 
     private String version="Ver: 1.0.0 - 12/06/19";
 
+    /************************************************************************/
+    /******** variables para validar la existencia de lector rfid **********/
+    public static Readers readers;
+    private static ArrayList<ReaderDevice> availableRFIDReaderList;
+    private static ReaderDevice readerDevice;
+    private static RFIDReader reader;
+    private static String TAG = "DEMO";
+    TextView textView;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ingreso);
+
+        textView = findViewById(R.id.TagText);
+        if (readers == null) {
+            readers = new Readers(this, ENUM_TRANSPORT.SERVICE_SERIAL);
+        }
+
+        new AsyncTask<Void, Void, Boolean>() {
+            @Override
+            protected Boolean doInBackground(Void... voids) {
+                try {
+                    if (readers != null) {
+                        if (readers.GetAvailableRFIDReaderList() != null) {
+                            availableRFIDReaderList = readers.GetAvailableRFIDReaderList();
+                            if (availableRFIDReaderList.size() != 0) {
+                                // get first reader from list
+                                readerDevice = availableRFIDReaderList.get(0);
+                                reader = readerDevice.getRFIDReader();
+                                if (!reader.isConnected()) {
+                                    // Establish connection to the RFID Reader
+                                    reader.connect();
+                                    //ConfigureReader();
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                } catch (InvalidUsageException e) {
+                    e.printStackTrace();
+                } catch (OperationFailureException e) {
+                    e.printStackTrace();
+                    Log.d(TAG, "OperationFailureException " + e.getVendorMessage());
+                }
+                return false;
+            }
+
+            @Override
+            protected void onPostExecute(Boolean aBoolean)
+            {
+                super.onPostExecute(aBoolean);
+                if (aBoolean) {
+                    //Toast.makeText(getApplicationContext(), "Reader Connected", Toast.LENGTH_LONG).show();
+                    textView.setText("Compatible con RFID");
+                }
+            }
+        }.execute();
 
         try {
             super.InitBase(savedInstanceState);

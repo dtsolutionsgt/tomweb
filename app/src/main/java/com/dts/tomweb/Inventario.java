@@ -68,12 +68,12 @@ public class Inventario extends PBase {
             addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
         }
 
-
     }
 
     public void doNext(View view) {
-        //startActivity(new Intent(this, Conteo.class));
         alertDialog();
+        //startActivity(new Intent(this, Conteo.class));
+
         //break;
     }
 
@@ -172,6 +172,7 @@ public class Inventario extends PBase {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 Toast.makeText(getApplicationContext(),"Inventario manual", Toast.LENGTH_LONG).show();
+                startActivity(new Intent(getApplicationContext(), Conteo.class));
             }
         });
         AlertDialog alertDialog=dialog.create();

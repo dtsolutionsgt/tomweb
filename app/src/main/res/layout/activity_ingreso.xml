@@ -161,16 +161,27 @@
         android:layout_alignLeft="@id/relLogin"
         android:layout_alignRight="@id/relLogin">
 
+
+        <TextView
+            android:id="@+id/TagText"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:layout_marginTop="5dp"
+            android:text="_" />
+
+
         <ImageView
             android:id="@+id/imageView6"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
 
-            android:layout_marginTop="25dp"
+            android:layout_marginTop="35dp"
             android:adjustViewBounds="false"
             android:clickable="true"
             android:onClick="doEnter"
             android:src="@drawable/title" />
+
     </RelativeLayout>
+
 
 </RelativeLayout>
