@@ -40,6 +40,19 @@ public class clsClasses {
         public int eliminado;
     }
 
+    public class clsInventario_ciego_rfid {
+        public int id_inventario_enc;
+        public String codigo_barra;
+        public double cantidad;
+        public int id;
+        public String comunicado;
+        public String ubicacion;
+        public int id_operador;
+        public String fecha;
+        public int id_registro;
+        public int eliminado;
+    }
+
     public class clsInventario_detalle {
         public int id_inventario_det;
         public int id_inventario_enc;

@@ -358,6 +358,66 @@ public class ComWS extends PBase {
         }
     }
 
+    public boolean Procesar_Inventario_Ciego_Rfid(Integer Id_Inventario_Enc,Integer Id_Registro) {
+        int rc;
+        String s,ss;
+
+        METHOD_NAME = "Procesar_Inventario_Ciego_Rfid";
+        sstr="OK";
+
+        try {
+
+            s="";
+            int ii=dbld.size();
+            for (int i = 0; i < dbld.size(); i++) {
+                ss=dbld.items.get(i);
+                s=s+ss+"\n";
+            }
+
+            idbg=idbg+" Procesar_Inventario_Ciego_Rfid ";
+
+            SoapObject request = new SoapObject(NAMESPACE, METHOD_NAME);
+            SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);
+            envelope.dotNet = true;
+
+            PropertyInfo param = new PropertyInfo();
+            param.setType(String.class);
+            param.setName("pSQL");param.setValue(s);
+
+            PropertyInfo param2 = new PropertyInfo();
+            param2.setType(String.class);
+            param2.setName("Id_Inventario_Enc");param2.setValue(Id_Inventario_Enc);
+
+            PropertyInfo param3 = new PropertyInfo();
+            param3.setType(String.class);
+            param3.setName("Id_Registro");param3.setValue(Id_Registro);
+
+            request.addProperty(param);
+            request.addProperty(param2);
+            request.addProperty(param3);
+            envelope.setOutputSoapObject(request);
+
+            HttpTransportSE transport = new HttpTransportSE(URL);
+            transport.call(NAMESPACE+METHOD_NAME, envelope);
+
+            SoapPrimitive resSoap =(SoapPrimitive) envelope.getResponse();
+            s = resSoap.toString();
+
+            sstr = "#";
+            if (s.equalsIgnoreCase("#")) return true;
+
+            sstr = s;
+            return false;
+        } catch (Exception e) {
+            addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"");
+            sstr = e.getMessage();
+            idbg=idbg+" ERR "+e.getMessage();
+            return false;
+        }
+    }
+
+
+
     public boolean Procesar_Inventario_Detalle(Integer Id_Inventario_Enc, Integer Id_Registro) {
         int rc;
         String s,ss;
@@ -581,6 +641,7 @@ public class ComWS extends PBase {
             if(gl.tipoInv==1) {
                 //Nada que recibir, inventario ciego
                 listItems.add("DELETE FROM INVENTARIO_CIEGO");
+                listItems.add("DELETE FROM INVENTARIO_CIEGO_RFID");
 
             }else if(gl.tipoInv==2){
                 while (count!=2){
