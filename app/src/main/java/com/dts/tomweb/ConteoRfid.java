@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.DisplayMetrics;
@@ -20,6 +21,10 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.dts.base.clsClasses;
+import com.dts.classes.clsInventario_ciego_RfidObj;
+import com.dts.classes.clsInventario_detalleObj;
+import com.dts.classes.clsRegistro_handheldObj;
 import com.dts.listadapt.LA_Tablas;
 import com.dts.listadapt.LA_Tablas2;
 
@@ -43,6 +48,7 @@ import com.zebra.rfid.api3.TagData;
 import com.zebra.rfid.api3.TriggerInfo;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class ConteoRfid extends PBase {
 
@@ -64,7 +70,7 @@ public class ConteoRfid extends PBase {
     private String scod;
     private boolean consol;
 
-    /*******************************/
+    /*********elementos de RFID ************/
     public static Readers readers;
     private static ArrayList<ReaderDevice> availableRFIDReaderList;
     private static ReaderDevice readerDevice;
@@ -72,6 +78,7 @@ public class ConteoRfid extends PBase {
     private static String TAG = "DEMO";
     TextView textView;
     private EventHandler eventHandler;
+    private ArrayList<String> listaTag;
 
 
     @Override
@@ -79,6 +86,10 @@ public class ConteoRfid extends PBase {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_conteo_rfid);
         textView = findViewById(R.id.TagText);
+
+
+        /************************************************/
+        /******** variables y constantes rfid **********/
 
         if (readers == null) {
             readers = new Readers(this, ENUM_TRANSPORT.SERVICE_SERIAL);
@@ -124,6 +135,9 @@ public class ConteoRfid extends PBase {
             }
         }.execute();
 
+
+        /*************************************************************/
+        /********** variables y constantes de grid *******************/
         super.InitBase(savedInstanceState);
         addlog("ConteoRfid",""+du.getActDateTime(),gl.nombreusuario);
 
@@ -134,13 +148,6 @@ public class ConteoRfid extends PBase {
         txtUbic = (EditText) findViewById(R.id.txtNombre);
         regs = (TextView) findViewById(R.id.txtRegs);
         cb = (CheckBox) findViewById(R.id.cbConsolidar);
-
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        cw = (int) ((displayMetrics.widthPixels-22)/5)-1;
-
-        cb.setChecked(false);
-        consol=false;
 
         if(gl.tipoInv==1) scod = " INVENTARIO_CIEGO_RFID";
         if(gl.tipoInv==2 || gl.tipoInv==3) scod = " INVENTARIO_DETALLE";
@@ -153,6 +160,38 @@ public class ConteoRfid extends PBase {
 
     /*********************************************************************/
     /************** configuración RFID  **********************************/
+
+    @Override
+    public void onBackPressed() {
+        // super.onBackPressed();
+        //Toast.makeText(getApplicationContext(),"Cerando RFID",Toast.LENGTH_LONG).show();
+        super.onDestroy();
+        try {
+            if (reader != null)
+            {
+                reader.Events.removeEventsListener(eventHandler);
+                reader.disconnect();
+                Toast.makeText(getApplicationContext(), "RFID Desconectado.", Toast.LENGTH_LONG).show();
+                reader = null;
+                readers.Dispose();
+                readers = null;
+            }
+        }
+        catch (InvalidUsageException e)
+        {
+            e.printStackTrace();
+        }
+        catch (OperationFailureException e)
+        {
+            e.printStackTrace();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        //return;
+    }
 
     private void ConfigureReader() {
         if (reader.isConnected()) {
@@ -214,11 +253,35 @@ public class ConteoRfid extends PBase {
         @SuppressLint("WrongViewCast")
         @Override
         public void eventReadNotify(RfidReadEvents e) {
-            TagData[] myTags = reader.Actions.getReadTags(100);
+            TagData[] myTags = reader.Actions.getReadTags(30);
             if (myTags != null) {
                 for (int index = 0; index < myTags.length; index++) {
                     Log.d(TAG, "Tag ID " + myTags[index].getTagID());
-                    Log.d(TAG, "Tag ID " + e);
+                    //Log.d(TAG, "Tag evento " + e);
+                   final String tag = myTags[index].getTagID();
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            dvalues.add(tag);
+                            dvalues.add("1");
+                            dvalues.add("1");
+                            dadapter=new LA_Tablas2(getApplicationContext(),dvalues);
+                            dgrid.setAdapter(dadapter);
+                            dadapter.notifyDataSetChanged();
+                        }
+                    });
+
+                     /* try{
+                                values.add(myTags[index].getTagID());
+                                values.add("1");
+                                values.add("1");
+                                dadapter=new LA_Tablas2(getApplicationContext(),dvalues);
+                                dgrid.setAdapter(dadapter);
+                                dadapter.notifyDataSetChanged();
+                            }catch (Exception f){
+                                f.printStackTrace();
+                            }*/
+
                     if (myTags[index].getOpCode() == ACCESS_OPERATION_CODE.ACCESS_OPERATION_READ && myTags[index].getOpStatus() == ACCESS_OPERATION_STATUS.ACCESS_SUCCESS)
                     {
                         if (myTags[index].getMemoryBankData().length() > 0) {
@@ -279,6 +342,11 @@ public class ConteoRfid extends PBase {
         }
 
     }
+
+
+
+
+
 
    /* public void insertaConteo(){
         clsInventario_ciego_RfidObj InvCiego = new clsInventario_ciego_RfidObj(this, Con, db);
@@ -512,10 +580,10 @@ public class ConteoRfid extends PBase {
         int cc,rg;
 
         try {
-            dvalues.clear();
+            //dvalues.clear();
             values.clear();
 
-            barra = txtBarra.getText().toString().trim();
+           /* barra = txtBarra.getText().toString().trim();
             ubic = txtUbic.getText().toString().trim();
 
             if(!ubic.isEmpty() && !barra.isEmpty()){
@@ -532,10 +600,10 @@ public class ConteoRfid extends PBase {
                 ss="SELECT CODIGO_BARRA, UBICACION, SUM(CANTIDAD) FROM "+ tn +" GROUP BY CODIGO_BARRA, UBICACION";
             }else {
                 ss="SELECT CODIGO_BARRA, UBICACION, CANTIDAD FROM "+ tn;
-            }
+            }*/
 
 
-            dt=Con.OpenDT(ss);
+          /*  dt=Con.OpenDT(ss);
             if (dt.getCount()==0) {
                 pbar.setVisibility(View.INVISIBLE);return;
             }
@@ -560,18 +628,16 @@ public class ConteoRfid extends PBase {
                 }
                 dt.moveToNext();
             }
-            if (dt!=null) dt.close();
+            if (dt!=null) dt.close();*/
 
             values.add("CODIGO");
             values.add("UBICACION");
             values.add("CANTIDAD");
 
             ViewGroup.LayoutParams dlayoutParams = dgrid.getLayoutParams();
-            dlayoutParams.width =((int) (cw*cc))+25;
+            //dlayoutParams.width =((int) (cw*cc))+25;
+            dlayoutParams.width =((int) (cw*3))+25;
             dgrid.setLayoutParams(dlayoutParams);
-
-            //dgrid.setColumnWidth(cw);
-            //dgrid.setStretchMode(GridView.NO_STRETCH);
             dgrid.setNumColumns(3);
 
             dadapter=new LA_Tablas2(this,dvalues);
@@ -579,11 +645,9 @@ public class ConteoRfid extends PBase {
 
 
             ViewGroup.LayoutParams layoutParams = grid.getLayoutParams();
-            layoutParams.width =((int) (cw*cc))+25;
+            //layoutParams.width =((int) (cw*cc))+25;
+            layoutParams.width =((int) (cw*3))+25;
             grid.setLayoutParams(layoutParams);
-
-            //grid.setColumnWidth(cw);
-            //grid.setStretchMode(GridView.NO_STRETCH);
             grid.setNumColumns(3);
 
             adapter=new LA_Tablas(this,values);
