@@ -4,10 +4,8 @@ import android.annotation.SuppressLint;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,16 +15,12 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ProgressBar;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.dts.base.clsClasses;
-import com.dts.classes.clsInventario_ciego_RfidObj;
-import com.dts.classes.clsInventario_detalleObj;
-import com.dts.classes.clsRegistro_handheldObj;
+import com.dts.listadapt.LA_RFID;
 import com.dts.listadapt.LA_Tablas;
-import com.dts.listadapt.LA_Tablas2;
 
 import com.zebra.rfid.api3.ACCESS_OPERATION_CODE;
 import com.zebra.rfid.api3.ACCESS_OPERATION_STATUS;
@@ -48,7 +42,6 @@ import com.zebra.rfid.api3.TagData;
 import com.zebra.rfid.api3.TriggerInfo;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class ConteoRfid extends PBase {
 
@@ -63,8 +56,13 @@ public class ConteoRfid extends PBase {
     private ArrayList<String> spinlist = new ArrayList<String>();
     private ArrayList<String> values=new ArrayList<String>();
     private ArrayList<String> dvalues=new ArrayList<String>();
+
+    private ArrayList<clsClasses.clsInventario_ciego_rfid> datos_rfid = new ArrayList<clsClasses.clsInventario_ciego_rfid>();
+    public clsClasses.clsInventario_ciego_rfid listaTag;
+
     private LA_Tablas adapter;
-    private LA_Tablas2 dadapter;
+    //private LA_Tablas2 dadapter;
+    private LA_RFID dadapter;
 
     private int cw;
     private String scod;
@@ -78,8 +76,6 @@ public class ConteoRfid extends PBase {
     private static String TAG = "DEMO";
     TextView textView;
     private EventHandler eventHandler;
-    private ArrayList<String> listaTag;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -248,39 +244,55 @@ public class ConteoRfid extends PBase {
         }
     }
 
+    public void guardar(View view) {
+
+        ArrayList<String> arrlist = new ArrayList<String>();
+
+        int cantidad =0;
+        String etiqueta ="";
+        int ubicacion = 0;
+
+        for(int i=0;i<dadapter.getCount();i++){
+            if(i % 3 == 0){
+                etiqueta =(String) dadapter.getItem(i);
+                Log.d(TAG, "valor " + etiqueta);
+            }
+        }
+
+    }
+
     public class EventHandler implements RfidEventsListener {
 
         @SuppressLint("WrongViewCast")
         @Override
         public void eventReadNotify(RfidReadEvents e) {
+
+            datos_rfid.clear();
+
             TagData[] myTags = reader.Actions.getReadTags(30);
+
             if (myTags != null) {
+
                 for (int index = 0; index < myTags.length; index++) {
                     Log.d(TAG, "Tag ID " + myTags[index].getTagID());
                     //Log.d(TAG, "Tag evento " + e);
                    final String tag = myTags[index].getTagID();
+
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            dvalues.add(tag);
-                            dvalues.add("1");
-                            dvalues.add("1");
-                            dadapter=new LA_Tablas2(getApplicationContext(),dvalues);
-                            dgrid.setAdapter(dadapter);
-                            dadapter.notifyDataSetChanged();
+                            listaTag = new clsClasses.clsInventario_ciego_rfid();
+
+                            listaTag.codigo_barra = tag;
+                            listaTag.cantidad= 1;
+                            listaTag.ubicacion = "1";
+
+                            datos_rfid.add(listaTag);
+
+                            dadapter = new LA_RFID(getApplicationContext(),datos_rfid);
+
                         }
                     });
-
-                     /* try{
-                                values.add(myTags[index].getTagID());
-                                values.add("1");
-                                values.add("1");
-                                dadapter=new LA_Tablas2(getApplicationContext(),dvalues);
-                                dgrid.setAdapter(dadapter);
-                                dadapter.notifyDataSetChanged();
-                            }catch (Exception f){
-                                f.printStackTrace();
-                            }*/
 
                     if (myTags[index].getOpCode() == ACCESS_OPERATION_CODE.ACCESS_OPERATION_READ && myTags[index].getOpStatus() == ACCESS_OPERATION_STATUS.ACCESS_SUCCESS)
                     {
@@ -342,11 +354,6 @@ public class ConteoRfid extends PBase {
         }
 
     }
-
-
-
-
-
 
    /* public void insertaConteo(){
         clsInventario_ciego_RfidObj InvCiego = new clsInventario_ciego_RfidObj(this, Con, db);
@@ -640,9 +647,11 @@ public class ConteoRfid extends PBase {
             dgrid.setLayoutParams(dlayoutParams);
             dgrid.setNumColumns(3);
 
-            dadapter=new LA_Tablas2(this,dvalues);
-            dgrid.setAdapter(dadapter);
+            //dadapter=new LA_Tablas2(this,dvalues);
+            //dgrid.setAdapter(dadapter);
 
+            dadapter= new LA_RFID(this,datos_rfid);
+            dgrid.setAdapter(dadapter);
 
             ViewGroup.LayoutParams layoutParams = grid.getLayoutParams();
             //layoutParams.width =((int) (cw*cc))+25;

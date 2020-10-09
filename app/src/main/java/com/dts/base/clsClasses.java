@@ -40,7 +40,7 @@ public class clsClasses {
         public int eliminado;
     }
 
-    public class clsInventario_ciego_rfid {
+    public static class clsInventario_ciego_rfid {
         public int id_inventario_enc;
         public String codigo_barra;
         public double cantidad;

@@ -202,6 +202,19 @@
         android:text="Consolidar"
         android:textSize="24sp" />
 
+    <ImageView
+        android:id="@+id/imageView16"
+        android:layout_width="60dp"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/relBot"
+        android:layout_marginStart="180dp"
+        android:layout_marginBottom="15dp"
+        android:layout_toEndOf="@+id/imageView17"
+        android:onClick="guardar"
+        android:src="@drawable/mnupedido" />
+
+
+
     <TextView
         android:id="@+id/txtRegs"
         android:layout_width="56dp"

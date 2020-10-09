@@ -19,6 +19,7 @@ public class clsInventario_ciego_RfidObj {
     public BaseDatos.Insert ins;
     public BaseDatos.Update upd;
     private clsClasses clsCls = new clsClasses();
+    public clsClasses.clsInventario_ciego_rfid item;
 
     private String sel="SELECT * FROM Inventario_ciego_rfid";
     private String sql;
@@ -125,7 +126,7 @@ public class clsInventario_ciego_RfidObj {
 
     private void fillItems(String sq) {
         Cursor dt;
-        clsClasses.clsInventario_ciego_rfid item;
+        //clsClasses.clsInventario_ciego_rfid item;
 
         items.clear();
 
@@ -135,7 +136,7 @@ public class clsInventario_ciego_RfidObj {
 
         while (!dt.isAfterLast()) {
 
-            item = clsCls.new clsInventario_ciego_rfid();
+            item = new clsClasses.clsInventario_ciego_rfid();
 
             item.id_inventario_enc=dt.getInt(0);
             item.codigo_barra=dt.getString(1);

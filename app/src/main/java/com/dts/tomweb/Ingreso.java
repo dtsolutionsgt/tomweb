@@ -97,7 +97,7 @@ public class Ingreso extends PBase {
             lblTitle = (TextView) findViewById(R.id.textView2);
             lblVer = (TextView) findViewById(R.id.Productos);lblVer.setText(version);
 
-            txtUser.setText("1");txtPass.setText("1");txtPass.requestFocus();
+            txtUser.setText("2");txtPass.setText("gustav");txtPass.requestFocus();
 
             setHandlers();
 
