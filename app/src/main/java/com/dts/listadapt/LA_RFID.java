@@ -21,7 +21,9 @@ import java.util.ArrayList;
 public class LA_RFID extends BaseAdapter {
 
     private static ArrayList<clsClasses.clsInventario_ciego_rfid> items;
+
     private int selectedIndex;
+
     private LayoutInflater l_Inflater;
 
     public LA_RFID(Context applicationContext, ArrayList<clsClasses.clsInventario_ciego_rfid> dvalues) {
@@ -52,17 +54,26 @@ public class LA_RFID extends BaseAdapter {
 
         if (convertView == null) {
 
-            convertView = l_Inflater.inflate(R.layout.grid_cell, null);
+            //convertView = l_Inflater.inflate(R.layout.grid_cell, null);
+            convertView = l_Inflater.inflate(R.layout.grid_rfid,null);
             holder = new ViewHolder();
 
-            holder.lblDesc = (TextView) convertView.findViewById(R.id.textView13);
+            holder.lblTag = convertView.findViewById(R.id.textView17);
+            //holder.lblUbicacion = convertView.findViewById(R.id.textView27);
+            //holder.lblCantidad = convertView.findViewById(R.id.textView30);
 
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
         }
 
-        holder.lblDesc.setText(items.get(position).codigo_barra);
+
+        holder.lblTag.setText(items.get(position).codigo_barra);
+        //holder.lblTag.setText(items.get(position).codigo_barra);
+        //holder.lblUbicacion.setText(items.get(position).ubicacion);
+        //holder.lblCantidad.setText(items.get(position).cantidad+"");
+
+
 
         if(selectedIndex!= -1 && position == selectedIndex) {
             convertView.setBackgroundColor(Color.rgb(26,138,198));
@@ -74,9 +85,10 @@ public class LA_RFID extends BaseAdapter {
     }
 
     static class ViewHolder {
-        TextView lblDesc;
-        TextView lbl1, lbl2;
-        ImageView img1;
+        TextView lblTag;
+        //TextView lblUbicacion;
+        //TextView lblCantidad;
+
     }
 
 }

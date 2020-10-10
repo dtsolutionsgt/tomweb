@@ -19,9 +19,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.dts.base.clsClasses;
+import com.dts.classes.clsInventario_ciego_RfidObj;
+import com.dts.classes.clsInventario_detalleObj;
+import com.dts.classes.clsRegistro_handheldObj;
 import com.dts.listadapt.LA_RFID;
 import com.dts.listadapt.LA_Tablas;
 
+import com.dts.listadapt.LA_Tablas2;
 import com.zebra.rfid.api3.ACCESS_OPERATION_CODE;
 import com.zebra.rfid.api3.ACCESS_OPERATION_STATUS;
 import com.zebra.rfid.api3.ENUM_TRANSPORT;
@@ -53,16 +57,9 @@ public class ConteoRfid extends PBase {
     private TextView regs;
     private CheckBox cb;
 
-    private ArrayList<String> spinlist = new ArrayList<String>();
-    private ArrayList<String> values=new ArrayList<String>();
-    private ArrayList<String> dvalues=new ArrayList<String>();
-
-    private ArrayList<clsClasses.clsInventario_ciego_rfid> datos_rfid = new ArrayList<clsClasses.clsInventario_ciego_rfid>();
-    public clsClasses.clsInventario_ciego_rfid listaTag;
-
     private LA_Tablas adapter;
-    //private LA_Tablas2 dadapter;
-    private LA_RFID dadapter;
+    private LA_Tablas2 dadapter;
+    private LA_RFID dadapter_rfid;
 
     private int cw;
     private String scod;
@@ -76,6 +73,20 @@ public class ConteoRfid extends PBase {
     private static String TAG = "DEMO";
     TextView textView;
     private EventHandler eventHandler;
+
+    private ArrayList<String> spinlist = new ArrayList<String>();
+    private ArrayList<String> values=new ArrayList<String>();
+    private ArrayList<String> dvalues=new ArrayList<String>();
+    private ArrayList<clsClasses.clsInventario_ciego_rfid> datos_rfid = new ArrayList<clsClasses.clsInventario_ciego_rfid>();
+    public clsClasses.clsInventario_ciego_rfid listaTag;
+
+    /*********************************************/
+    /*********  elementos para guardar ***********/
+    private String Ubic, Cod, tipoArt, barra, desc,ccod;
+    private Double canti;
+    private Integer result=0, resta;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -247,7 +258,6 @@ public class ConteoRfid extends PBase {
     public void guardar(View view) {
 
         ArrayList<String> arrlist = new ArrayList<String>();
-
         int cantidad =0;
         String etiqueta ="";
         int ubicacion = 0;
@@ -267,7 +277,8 @@ public class ConteoRfid extends PBase {
         @Override
         public void eventReadNotify(RfidReadEvents e) {
 
-            datos_rfid.clear();
+            //datos_rfid.clear();
+
 
             TagData[] myTags = reader.Actions.getReadTags(30);
 
@@ -281,15 +292,24 @@ public class ConteoRfid extends PBase {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            listaTag = new clsClasses.clsInventario_ciego_rfid();
-
+                            /*listaTag = new clsClasses.clsInventario_ciego_rfid();
                             listaTag.codigo_barra = tag;
                             listaTag.cantidad= 1;
                             listaTag.ubicacion = "1";
-
                             datos_rfid.add(listaTag);
+                            dadapter_rfid = new LA_RFID(getApplicationContext(),datos_rfid);
+                            dgrid.setAdapter(dadapter_rfid);
+                            dadapter_rfid.notifyDataSetChanged();*/
 
-                            dadapter = new LA_RFID(getApplicationContext(),datos_rfid);
+                            insertaConteo(tag);
+
+                            dvalues.add(tag);
+                            dvalues.add("1");
+                            dvalues.add("1");
+                            dadapter= new LA_Tablas2(getApplicationContext(),dvalues);
+                            dgrid.setAdapter(dadapter);
+                            dadapter.notifyDataSetChanged();
+
 
                         }
                     });
@@ -355,30 +375,35 @@ public class ConteoRfid extends PBase {
 
     }
 
-   /* public void insertaConteo(){
+    public void insertaConteo(String tag){
         clsInventario_ciego_RfidObj InvCiego = new clsInventario_ciego_RfidObj(this, Con, db);
-        clsClasses.clsInventario_ciego_rfid item=clsCls.new clsInventario_ciego_rfid();
+        clsClasses.clsInventario_ciego_rfid item= new clsClasses.clsInventario_ciego_rfid();
         clsInventario_detalleObj InvDet = new clsInventario_detalleObj(this, Con, db);
-        clsClasses.clsInventario_detalle itemDeta=clsCls.new clsInventario_detalle();
-
+        clsClasses.clsInventario_detalle itemDeta= clsCls.new clsInventario_detalle();
         clsRegistro_handheldObj regHH = new clsRegistro_handheldObj(this, Con, db);
 
         Long sfecha;
         String  ff,ffe;
         Integer fecha;
+        String codigo_tag = tag;
+        Integer cant = 1;
+
 
         try{
 
             regHH.fill();
             gl.IDregistro = regHH.first().id_registro;
-            Cod = Codigo.getText().toString().trim();
+            //Cod = Codigo.getText().toString().trim();
+            Cod = codigo_tag;
 
+            Ubic = "1";
 
-            if(Ubicacion.getText().toString().isEmpty()){
+            /*if(Ubicacion.getText().toString().isEmpty()){
                 Ubic = "1";
             }else {
                 Ubic = Ubicacion.getText().toString().trim();
-            }
+            }*/
+
             sfecha=du.getActDate();
             ff = "20"+sfecha;
             ffe= ff.substring(0,8);
@@ -387,26 +412,28 @@ public class ConteoRfid extends PBase {
                 if(tipoArt.equals("S")){
                     canti = 1.0;
                 }else {
-                    if(Cantidad.getText().toString().isEmpty()){
+                   /* if(Cantidad.getText().toString().isEmpty()){
                         msgbox("Ingrese la cantidad");
                         return;
                     }else {
                         canti = Double.parseDouble(Cantidad.getText().toString());
-                    }
+                    }*/
+                   canti = Double.parseDouble(String.valueOf(cant));
                 }
             }else {
-                if(Cantidad.getText().toString().isEmpty()){
+                /*if(Cantidad.getText().toString().isEmpty()){
                     msgbox("Ingrese la cantidad");
                     return;
                 }else {
                     canti = Double.parseDouble(Cantidad.getText().toString());
-                }
+                }*/
+                canti = Double.parseDouble(String.valueOf(cant));
             }
 
-            if(Codigo.getText().toString().isEmpty()){
+          /*  if(Codigo.getText().toString().isEmpty()){
                 msgbox("Ingrese el codigo");
                 return;
-            }
+            }*/
 
             if(canti==0){
                 msgbox("Ingrese una cantidad mayor a 0");
@@ -416,8 +443,10 @@ public class ConteoRfid extends PBase {
 
             if(gl.tipoInv==1) {
 
-                Barra.setText(Codigo.getText().toString());
-                barra = Barra.getText().toString().trim();
+            /*    Barra.setText(Codigo.getText().toString());
+                barra = Barra.getText().toString().trim();*/
+            //barra = listaTag.codigo_barra;
+                barra = codigo_tag;
 
                 item.id_inventario_enc =  gl.idInvEnc;
                 item.codigo_barra = barra;
@@ -451,7 +480,7 @@ public class ConteoRfid extends PBase {
             addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
             msgbox("Error: "+e);
         }
-    }*/
+    }
 
 
     /*************************************************/
@@ -641,18 +670,6 @@ public class ConteoRfid extends PBase {
             values.add("UBICACION");
             values.add("CANTIDAD");
 
-            ViewGroup.LayoutParams dlayoutParams = dgrid.getLayoutParams();
-            //dlayoutParams.width =((int) (cw*cc))+25;
-            dlayoutParams.width =((int) (cw*3))+25;
-            dgrid.setLayoutParams(dlayoutParams);
-            dgrid.setNumColumns(3);
-
-            //dadapter=new LA_Tablas2(this,dvalues);
-            //dgrid.setAdapter(dadapter);
-
-            dadapter= new LA_RFID(this,datos_rfid);
-            dgrid.setAdapter(dadapter);
-
             ViewGroup.LayoutParams layoutParams = grid.getLayoutParams();
             //layoutParams.width =((int) (cw*cc))+25;
             layoutParams.width =((int) (cw*3))+25;
@@ -661,6 +678,26 @@ public class ConteoRfid extends PBase {
 
             adapter=new LA_Tablas(this,values);
             grid.setAdapter(adapter);
+
+
+            ViewGroup.LayoutParams dlayoutParams = dgrid.getLayoutParams();
+            //dlayoutParams.width =((int) (cw*cc))+25;
+            dlayoutParams.width =((int) (cw*3))+25;
+            dgrid.setLayoutParams(dlayoutParams);
+            dgrid.setNumColumns(3);
+
+            dadapter=new LA_Tablas2(this,dvalues);
+            dgrid.setAdapter(dadapter);
+
+            //listaTag = new clsClasses.clsInventario_ciego_rfid();
+            //datos_rfid.add(listaTag);
+
+            //dadapter= new LA_RFID(this,datos_rfid);
+            //dgrid.setAdapter(dadapter);
+
+
+
+
 
             pbar.setVisibility(View.INVISIBLE);
         } catch (Exception e) {
