@@ -84,7 +84,7 @@ public class BaseDatosScript {
 
 			sql = "CREATE TABLE [Inventario_ciego_rfid] (" +
 					"id_inventario_enc INTEGER NOT NULL," +
-					"codigo_barra TEXT NOT NULL," +
+					"codigo_barra TEXT UNIQUE NOT NULL," +
 					"cantidad REAL NOT NULL," +
 					"id INTEGER PRIMARY KEY AUTOINCREMENT," +
 					"comunicado TEXT NOT NULL," +

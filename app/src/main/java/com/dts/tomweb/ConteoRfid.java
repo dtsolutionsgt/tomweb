@@ -301,7 +301,7 @@ public class ConteoRfid extends PBase {
                             dgrid.setAdapter(dadapter_rfid);
                             dadapter_rfid.notifyDataSetChanged();*/
 
-                            insertaConteo(tag);
+                            insertaConteo(tag, scod);
 
                             dvalues.add(tag);
                             dvalues.add("1");
@@ -375,7 +375,7 @@ public class ConteoRfid extends PBase {
 
     }
 
-    public void insertaConteo(String tag){
+    public void insertaConteo(String tag, String tn){
         clsInventario_ciego_RfidObj InvCiego = new clsInventario_ciego_RfidObj(this, Con, db);
         clsClasses.clsInventario_ciego_rfid item= new clsClasses.clsInventario_ciego_rfid();
         clsInventario_detalleObj InvDet = new clsInventario_detalleObj(this, Con, db);
@@ -387,7 +387,6 @@ public class ConteoRfid extends PBase {
         Integer fecha;
         String codigo_tag = tag;
         Integer cant = 1;
-
 
         try{
 
@@ -458,7 +457,14 @@ public class ConteoRfid extends PBase {
                 item.id_registro = gl.IDregistro;
                 item.eliminado = 0;
 
-                InvCiego.add(item);
+
+                try {
+                    InvCiego.add(item);
+                } catch (Exception e) {
+                    //e.printStackTrace();
+                    sql="update Inventario_ciego_rfid set cantidad = cantidad + 1 WHERE CODIGO_BARRA = '"+ barra + "' ";
+                    db.execSQL(sql);
+                }
 
             }else if(gl.tipoInv==2 || gl.tipoInv==3){
 
