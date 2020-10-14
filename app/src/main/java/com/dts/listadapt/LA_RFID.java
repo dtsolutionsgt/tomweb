@@ -9,18 +9,14 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.dts.base.AppMethods;
-import com.dts.base.DateUtils;
-import com.dts.base.MiscUtils;
 import com.dts.base.clsClasses;
-import com.dts.tomweb.PBase;
 import com.dts.tomweb.R;
 
 import java.util.ArrayList;
 
 public class LA_RFID extends BaseAdapter {
 
-    private static ArrayList<clsClasses.clsInventario_ciego_rfid> items;
+    private static  ArrayList<clsClasses.clsInventario_ciego_rfid> items;
 
     private int selectedIndex;
 
@@ -68,8 +64,9 @@ public class LA_RFID extends BaseAdapter {
         }
 
 
-        holder.lblTag.setText(items.get(position).codigo_barra);
-        //holder.lblTag.setText(items.get(position).codigo_barra);
+        //holder.lblTag.setText(items.get(position));
+        holder.lblTag.setText((CharSequence) items.get(position));
+
         //holder.lblUbicacion.setText(items.get(position).ubicacion);
         //holder.lblCantidad.setText(items.get(position).cantidad+"");
 
@@ -86,8 +83,8 @@ public class LA_RFID extends BaseAdapter {
 
     static class ViewHolder {
         TextView lblTag;
-        //TextView lblUbicacion;
-        //TextView lblCantidad;
+        TextView lblUbicacion;
+        TextView lblCantidad;
 
     }
 

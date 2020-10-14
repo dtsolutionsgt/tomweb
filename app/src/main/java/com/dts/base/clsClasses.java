@@ -49,6 +49,7 @@ public class clsClasses {
         public String ubicacion;
         public int id_operador;
         public String fecha;
+        public String hora;
         public int id_registro;
         public int eliminado;
     }

@@ -91,6 +91,7 @@ public class BaseDatosScript {
 					"ubicacion TEXT NOT NULL," +
 					"id_operador INTEGER NOT NULL," +
 					"fecha TEXT NOT NULL," +
+					"hora TEXT NOT NULL," +
 					"Id_registro INTEGER NOT NULL," +
 					"eliminado INTEGER NOT NULL" +
 					")";

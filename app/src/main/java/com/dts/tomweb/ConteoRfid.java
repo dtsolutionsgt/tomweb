@@ -1,6 +1,8 @@
 package com.dts.tomweb;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -45,7 +47,10 @@ import com.zebra.rfid.api3.STOP_TRIGGER_TYPE;
 import com.zebra.rfid.api3.TagData;
 import com.zebra.rfid.api3.TriggerInfo;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Locale;
 
 public class ConteoRfid extends PBase {
 
@@ -74,18 +79,18 @@ public class ConteoRfid extends PBase {
     TextView textView;
     private EventHandler eventHandler;
 
-    private ArrayList<String> spinlist = new ArrayList<String>();
+    //private ArrayList<String> spinlist = new ArrayList<String>();
     private ArrayList<String> values=new ArrayList<String>();
     private ArrayList<String> dvalues=new ArrayList<String>();
-    private ArrayList<clsClasses.clsInventario_ciego_rfid> datos_rfid = new ArrayList<clsClasses.clsInventario_ciego_rfid>();
-    public clsClasses.clsInventario_ciego_rfid listaTag;
+    private ArrayList<clsClasses.clsInventario_ciego_rfid> dvalues_rfid = new ArrayList<clsClasses.clsInventario_ciego_rfid>();
+
 
     /*********************************************/
     /*********  elementos para guardar ***********/
     private String Ubic, Cod, tipoArt, barra, desc,ccod;
     private Double canti;
     private Integer result=0, resta;
-
+    String currentTime;
 
 
     @Override
@@ -145,12 +150,13 @@ public class ConteoRfid extends PBase {
 
         /*************************************************************/
         /********** variables y constantes de grid *******************/
+
         super.InitBase(savedInstanceState);
         addlog("ConteoRfid",""+du.getActDateTime(),gl.nombreusuario);
 
         grid = (GridView) findViewById(R.id.gridview1);
         dgrid = (GridView) findViewById(R.id.gridview2);
-        pbar=(ProgressBar) findViewById(R.id.progressBar);pbar.setVisibility(View.INVISIBLE);
+        //pbar=(ProgressBar) findViewById(R.id.progressBar);pbar.setVisibility(View.INVISIBLE);
         txtBarra = (EditText) findViewById(R.id.txtBarra);
         txtUbic = (EditText) findViewById(R.id.txtNombre);
         regs = (TextView) findViewById(R.id.txtRegs);
@@ -172,32 +178,8 @@ public class ConteoRfid extends PBase {
     public void onBackPressed() {
         // super.onBackPressed();
         //Toast.makeText(getApplicationContext(),"Cerando RFID",Toast.LENGTH_LONG).show();
-        super.onDestroy();
-        try {
-            if (reader != null)
-            {
-                reader.Events.removeEventsListener(eventHandler);
-                reader.disconnect();
-                Toast.makeText(getApplicationContext(), "RFID Desconectado.", Toast.LENGTH_LONG).show();
-                reader = null;
-                readers.Dispose();
-                readers = null;
-            }
-        }
-        catch (InvalidUsageException e)
-        {
-            e.printStackTrace();
-        }
-        catch (OperationFailureException e)
-        {
-            e.printStackTrace();
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
+        msgAskExit("Salir de RFID?");
 
-        //return;
     }
 
     private void ConfigureReader() {
@@ -255,21 +237,18 @@ public class ConteoRfid extends PBase {
         }
     }
 
-    public void guardar(View view) {
-
+/*    public void guardar1(View view) {
         ArrayList<String> arrlist = new ArrayList<String>();
         int cantidad =0;
         String etiqueta ="";
         int ubicacion = 0;
-
         for(int i=0;i<dadapter.getCount();i++){
             if(i % 3 == 0){
                 etiqueta =(String) dadapter.getItem(i);
                 Log.d(TAG, "valor " + etiqueta);
             }
         }
-
-    }
+    }*/
 
     public class EventHandler implements RfidEventsListener {
 
@@ -278,9 +257,9 @@ public class ConteoRfid extends PBase {
         public void eventReadNotify(RfidReadEvents e) {
 
             //datos_rfid.clear();
+            //dvalues.clear();
 
-
-            TagData[] myTags = reader.Actions.getReadTags(30);
+            TagData[] myTags = reader.Actions.getReadTags(50);
 
             if (myTags != null) {
 
@@ -292,7 +271,8 @@ public class ConteoRfid extends PBase {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            /*listaTag = new clsClasses.clsInventario_ciego_rfid();
+
+                        /*    listaTag = new clsClasses.clsInventario_ciego_rfid();
                             listaTag.codigo_barra = tag;
                             listaTag.cantidad= 1;
                             listaTag.ubicacion = "1";
@@ -301,16 +281,15 @@ public class ConteoRfid extends PBase {
                             dgrid.setAdapter(dadapter_rfid);
                             dadapter_rfid.notifyDataSetChanged();*/
 
-                            insertaConteo(tag, scod);
-
-                            dvalues.add(tag);
+                            insertaConteo(tag);
+                            /*dvalues.add(tag);
                             dvalues.add("1");
                             dvalues.add("1");
                             dadapter= new LA_Tablas2(getApplicationContext(),dvalues);
                             dgrid.setAdapter(dadapter);
-                            dadapter.notifyDataSetChanged();
+                            dadapter.notifyDataSetChanged();*/
 
-
+                            //showData(scod);
                         }
                     });
 
@@ -322,6 +301,13 @@ public class ConteoRfid extends PBase {
                         }
                     }
                 }
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        showData(scod);
+                    }
+                });
             }
         }
 
@@ -340,9 +326,11 @@ public class ConteoRfid extends PBase {
                                 reader.Actions.Inventory.perform();
                             } catch (InvalidUsageException e) {
                                 e.printStackTrace();
+                                addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"failed_triger_rfid"+ currentTime );
                             } catch (OperationFailureException e)
                             {
                                 e.printStackTrace();
+                                addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"failed_triger_rfid"+ currentTime );
                             }
                             return null;
                         }
@@ -375,7 +363,7 @@ public class ConteoRfid extends PBase {
 
     }
 
-    public void insertaConteo(String tag, String tn){
+    public void insertaConteo(String tag){
         clsInventario_ciego_RfidObj InvCiego = new clsInventario_ciego_RfidObj(this, Con, db);
         clsClasses.clsInventario_ciego_rfid item= new clsClasses.clsInventario_ciego_rfid();
         clsInventario_detalleObj InvDet = new clsInventario_detalleObj(this, Con, db);
@@ -388,20 +376,15 @@ public class ConteoRfid extends PBase {
         String codigo_tag = tag;
         Integer cant = 1;
 
+        currentTime = new SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(new Date());
+
         try{
 
             regHH.fill();
             gl.IDregistro = regHH.first().id_registro;
             //Cod = Codigo.getText().toString().trim();
             Cod = codigo_tag;
-
             Ubic = "1";
-
-            /*if(Ubicacion.getText().toString().isEmpty()){
-                Ubic = "1";
-            }else {
-                Ubic = Ubicacion.getText().toString().trim();
-            }*/
 
             sfecha=du.getActDate();
             ff = "20"+sfecha;
@@ -439,7 +422,6 @@ public class ConteoRfid extends PBase {
                 return;
             }
 
-
             if(gl.tipoInv==1) {
 
             /*    Barra.setText(Codigo.getText().toString());
@@ -454,6 +436,7 @@ public class ConteoRfid extends PBase {
                 item.ubicacion = Ubic;
                 item.id_operador = gl.userid;
                 item.fecha = ffe;
+                item.hora = currentTime;
                 item.id_registro = gl.IDregistro;
                 item.eliminado = 0;
 
@@ -464,6 +447,7 @@ public class ConteoRfid extends PBase {
                     //e.printStackTrace();
                     sql="update Inventario_ciego_rfid set cantidad = cantidad + 1 WHERE CODIGO_BARRA = '"+ barra + "' ";
                     db.execSQL(sql);
+                    addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"update inv_ciego_"+ currentTime );
                 }
 
             }else if(gl.tipoInv==2 || gl.tipoInv==3){
@@ -481,20 +465,75 @@ public class ConteoRfid extends PBase {
 
                 InvDet.add(itemDeta);
             }
-            Toast.makeText(this, "Agregado Correctamente", Toast.LENGTH_LONG).show();
+            //Toast.makeText(this, "Agregado Correctamente", Toast.LENGTH_LONG).show();
+
         }catch (Exception e){
-            addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
+            addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "error_inv_ciego" + currentTime);
             msgbox("Error: "+e);
         }
+    }
+
+    private void msgAskExit(String msg) {
+        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+
+        dialog.setCancelable(false);
+        dialog.setTitle("Tom");
+        dialog.setMessage("¿"+msg+"?");
+
+        dialog.setPositiveButton("Si", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                CerrarRFIF();
+            }
+        });
+
+        dialog.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+
+            }
+        });
+
+        dialog.show();
+
+    }
+
+    public void doExit(View view) {
+        finish();
+    }
+
+    public void CerrarRFIF(){
+        try {
+            if (reader != null)
+            {
+                reader.Events.removeEventsListener(eventHandler);
+                reader.disconnect();
+                Toast.makeText(getApplicationContext(), "RFID Desconectado.", Toast.LENGTH_LONG).show();
+                reader = null;
+                readers.Dispose();
+                readers = null;
+            }
+        }
+        catch (InvalidUsageException e)
+        {
+            e.printStackTrace();
+            addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"ERROR_RFID_DISCONNECT"+ currentTime );
+        }
+        catch (OperationFailureException e)
+        {
+            e.printStackTrace();
+            addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"ERROR_RFID_DISCONNECT"+ currentTime );
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"ERROR_RFID_DISCONNECT"+ currentTime );
+        }
+
+        finish();
     }
 
 
     /*************************************************/
     /********** configuración del grid ***************/
-
-    public void doExit(View view) {
-        finish();
-    }
 
     public void doHelp(View view) {
         String tx;
@@ -620,9 +659,14 @@ public class ConteoRfid extends PBase {
         Cursor dt;
         String ss = "",barra,ubic;
         int cc,rg;
+        currentTime = new SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(new Date());
+
+        clsInventario_ciego_RfidObj InvCiego = new clsInventario_ciego_RfidObj(this, Con, db);
+        clsClasses.clsInventario_ciego_rfid items= new clsClasses.clsInventario_ciego_rfid();
+
 
         try {
-            //dvalues.clear();
+            dvalues.clear();
             values.clear();
 
            /* barra = txtBarra.getText().toString().trim();
@@ -672,42 +716,69 @@ public class ConteoRfid extends PBase {
             }
             if (dt!=null) dt.close();*/
 
+
+            tn = tn +" WHERE ID_INVENTARIO_ENC="+ gl.idInvEnc +" AND ELIMINADO = 0";
+            ss="SELECT CODIGO_BARRA, UBICACION, CANTIDAD FROM "+ tn;
+
+            dt=Con.OpenDT(ss);
+            /* if (dt.getCount()==0) {
+                pbar.setVisibility(View.INVISIBLE);return;
+            }*/
+            cc = dt.getColumnCount();
+            rg = dt.getCount();
+            if(rg>0){
+                regs.setText(""+rg);
+            }
+
+            dt.moveToFirst();
+            while (!dt.isAfterLast()) {
+                for (int i = 0; i < cc; i++) {
+                    try {
+                        ss=dt.getString(i);
+                    } catch (Exception e) {
+                        addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"ERROR_QUERY_RFID" + currentTime);
+                        ss="?";
+                    }
+                    dvalues.add(ss);
+                }
+
+              /*  items.codigo_barra = dt.getString(0);
+                items.ubicacion = dt.getString(1);
+                items.cantidad = Double.parseDouble(dt.getString(2));
+                dvalues_rfid.add(items);*/
+                dt.moveToNext();
+            }
+            if (dt!=null) dt.close();
+
             values.add("CODIGO");
             values.add("UBICACION");
             values.add("CANTIDAD");
 
             ViewGroup.LayoutParams layoutParams = grid.getLayoutParams();
-            //layoutParams.width =((int) (cw*cc))+25;
-            layoutParams.width =((int) (cw*3))+25;
+            layoutParams.width =((int) (cw*cc))+25;
+            //layoutParams.width =((int) (cw*1))+25;
             grid.setLayoutParams(layoutParams);
+            //grid.setNumColumns(1);
             grid.setNumColumns(3);
 
             adapter=new LA_Tablas(this,values);
             grid.setAdapter(adapter);
 
-
             ViewGroup.LayoutParams dlayoutParams = dgrid.getLayoutParams();
-            //dlayoutParams.width =((int) (cw*cc))+25;
-            dlayoutParams.width =((int) (cw*3))+25;
+            dlayoutParams.width =((int) (cw*cc))+25;
+            //dlayoutParams.width =((int) (cw*1))+25;
             dgrid.setLayoutParams(dlayoutParams);
+            //dgrid.setNumColumns(1);
             dgrid.setNumColumns(3);
 
             dadapter=new LA_Tablas2(this,dvalues);
             dgrid.setAdapter(dadapter);
 
-            //listaTag = new clsClasses.clsInventario_ciego_rfid();
-            //datos_rfid.add(listaTag);
+            //dadapter_rfid= new LA_RFID(getApplicationContext(),dvalues_rfid);
+            //dgrid.setAdapter(dadapter_rfid);
 
-            //dadapter= new LA_RFID(this,datos_rfid);
-            //dgrid.setAdapter(dadapter);
-
-
-
-
-
-            pbar.setVisibility(View.INVISIBLE);
         } catch (Exception e) {
-            addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"");
+            addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"ERROR_SHOWDATA_RFID" + currentTime);
             msgbox("showData2: "+e);
         }
 

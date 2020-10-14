@@ -85,6 +85,7 @@ public class clsInventario_ciego_RfidObj {
         ins.add("ubicacion",item.ubicacion);
         ins.add("id_operador",item.id_operador);
         ins.add("fecha",item.fecha);
+        ins.add("hora",item.hora);
         ins.add("Id_registro",item.id_registro);
         ins.add("eliminado",item.eliminado);
 
@@ -103,6 +104,7 @@ public class clsInventario_ciego_RfidObj {
         upd.add("ubicacion",item.ubicacion);
         upd.add("id_operador",item.id_operador);
         upd.add("fecha",item.fecha);
+        upd.add("hora",item.hora);
         upd.add("Id_registro",item.id_registro);
         upd.add("eliminado",item.eliminado);
 
@@ -146,8 +148,9 @@ public class clsInventario_ciego_RfidObj {
             item.ubicacion=dt.getString(5);
             item.id_operador=dt.getInt(6);
             item.fecha=dt.getString(7);
-            item.id_registro=dt.getInt(8);
-            item.eliminado=dt.getInt(9);
+            item.hora=dt.getString(8);
+            item.id_registro=dt.getInt(9);
+            item.eliminado=dt.getInt(10);
 
             items.add(item);
 
@@ -173,7 +176,7 @@ public class clsInventario_ciego_RfidObj {
         return nid;
     }
 
-    public String addItemSql(clsClasses.clsInventario_ciego item) {
+    public String addItemSql(clsClasses.clsInventario_ciego_rfid item) {
 
         ins.init("Inventario_ciego_rfid");
 
@@ -185,6 +188,7 @@ public class clsInventario_ciego_RfidObj {
         ins.add("ubicacion",item.ubicacion);
         ins.add("id_operador",item.id_operador);
         ins.add("fecha",item.fecha);
+        ins.add("hora",item.hora);
         ins.add("Id_registro",item.id_registro);
         ins.add("eliminado",item.eliminado);
 
@@ -192,7 +196,7 @@ public class clsInventario_ciego_RfidObj {
 
     }
 
-    public String updateItemSql(clsClasses.clsInventario_ciego item) {
+    public String updateItemSql(clsClasses.clsInventario_ciego_rfid item) {
 
         upd.init("Inventario_ciego_rfid");
 
@@ -203,6 +207,7 @@ public class clsInventario_ciego_RfidObj {
         upd.add("ubicacion",item.ubicacion);
         upd.add("id_operador",item.id_operador);
         upd.add("fecha",item.fecha);
+        upd.add("hora",item.hora);
         upd.add("Id_registro",item.id_registro);
         upd.add("eliminado",item.eliminado);
 
