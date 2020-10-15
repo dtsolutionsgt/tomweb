@@ -16,6 +16,7 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.GridView;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -54,7 +55,7 @@ import java.util.Locale;
 
 public class ConteoRfid extends PBase {
 
-    private GridView grid,dgrid;
+    private ListView lvConteoRFID;
     //private Spinner spin,spinf;
     private ProgressBar pbar;
     private EditText txtBarra;
@@ -79,25 +80,23 @@ public class ConteoRfid extends PBase {
     TextView textView;
     private EventHandler eventHandler;
 
-    //private ArrayList<String> spinlist = new ArrayList<String>();
-    private ArrayList<String> values=new ArrayList<String>();
-    private ArrayList<String> dvalues=new ArrayList<String>();
     private ArrayList<clsClasses.clsInventario_ciego_rfid> dvalues_rfid = new ArrayList<clsClasses.clsInventario_ciego_rfid>();
-
 
     /*********************************************/
     /*********  elementos para guardar ***********/
     private String Ubic, Cod, tipoArt, barra, desc,ccod;
     private Double canti;
-    private Integer result=0, resta;
+    //private Integer result=0, resta;
     String currentTime;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_conteo_rfid);
         textView = findViewById(R.id.TagText);
+        pbar = findViewById(R.id.progressBar);
 
 
         /************************************************/
@@ -154,8 +153,7 @@ public class ConteoRfid extends PBase {
         super.InitBase(savedInstanceState);
         addlog("ConteoRfid",""+du.getActDateTime(),gl.nombreusuario);
 
-        grid = (GridView) findViewById(R.id.gridview1);
-        dgrid = (GridView) findViewById(R.id.gridview2);
+        lvConteoRFID = (ListView) findViewById(R.id.lvConteoRFID);
         //pbar=(ProgressBar) findViewById(R.id.progressBar);pbar.setVisibility(View.INVISIBLE);
         txtBarra = (EditText) findViewById(R.id.txtBarra);
         txtUbic = (EditText) findViewById(R.id.txtNombre);
@@ -447,7 +445,6 @@ public class ConteoRfid extends PBase {
                     //e.printStackTrace();
                     sql="update Inventario_ciego_rfid set cantidad = cantidad + 1 WHERE CODIGO_BARRA = '"+ barra + "' ";
                     db.execSQL(sql);
-                    addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"update inv_ciego_"+ currentTime );
                 }
 
             }else if(gl.tipoInv==2 || gl.tipoInv==3){
@@ -565,31 +562,12 @@ public class ConteoRfid extends PBase {
                 }
             });
 
-            grid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            lvConteoRFID.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
                     try {
-                        Object lvObj = grid.getItemAtPosition(position);
-                        String item = (String) lvObj;
-
-                        adapter.setSelectedIndex(position);
-                        toast(item);
-                    } catch (Exception e) {
-                        addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"");
-                        msgbox("Error setHandler: "+e);
-                    }
-                }
-
-                ;
-            });
-
-            dgrid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
-                    try {
-                        Object lvObj = dgrid.getItemAtPosition(position);
+                        Object lvObj = lvConteoRFID.getItemAtPosition(position);
                         String item = (String) lvObj;
 
                         dadapter.setSelectedIndex(position);
@@ -603,12 +581,12 @@ public class ConteoRfid extends PBase {
                 ;
             });
 
-            dgrid.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            lvConteoRFID.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
                 @Override
                 public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
 
                     try {
-                        Object lvObj = dgrid.getItemAtPosition(position);
+                        Object lvObj = lvConteoRFID.getItemAtPosition(position);
                         String item = (String) lvObj;
 
                         adapter.setSelectedIndex(position);
@@ -657,7 +635,7 @@ public class ConteoRfid extends PBase {
 
     private void showData(String tn) {
         Cursor dt;
-        String ss = "",barra,ubic;
+        String ss = "";
         int cc,rg;
         currentTime = new SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(new Date());
 
@@ -666,8 +644,8 @@ public class ConteoRfid extends PBase {
 
 
         try {
-            dvalues.clear();
-            values.clear();
+
+            dvalues_rfid.clear();
 
            /* barra = txtBarra.getText().toString().trim();
             ubic = txtUbic.getText().toString().trim();
@@ -732,7 +710,7 @@ public class ConteoRfid extends PBase {
 
             dt.moveToFirst();
             while (!dt.isAfterLast()) {
-                for (int i = 0; i < cc; i++) {
+                /*for (int i = 0; i < cc; i++) {
                     try {
                         ss=dt.getString(i);
                     } catch (Exception e) {
@@ -741,41 +719,20 @@ public class ConteoRfid extends PBase {
                     }
                     dvalues.add(ss);
                 }
-
-              /*  items.codigo_barra = dt.getString(0);
+*/
+                items= new clsClasses.clsInventario_ciego_rfid();
+                items.codigo_barra = dt.getString(0);
                 items.ubicacion = dt.getString(1);
                 items.cantidad = Double.parseDouble(dt.getString(2));
-                dvalues_rfid.add(items);*/
+                dvalues_rfid.add(items);
                 dt.moveToNext();
             }
             if (dt!=null) dt.close();
 
-            values.add("CODIGO");
-            values.add("UBICACION");
-            values.add("CANTIDAD");
+            dadapter_rfid= new LA_RFID(getApplicationContext(),dvalues_rfid);
+            lvConteoRFID.setAdapter(dadapter_rfid);
 
-            ViewGroup.LayoutParams layoutParams = grid.getLayoutParams();
-            layoutParams.width =((int) (cw*cc))+25;
-            //layoutParams.width =((int) (cw*1))+25;
-            grid.setLayoutParams(layoutParams);
-            //grid.setNumColumns(1);
-            grid.setNumColumns(3);
-
-            adapter=new LA_Tablas(this,values);
-            grid.setAdapter(adapter);
-
-            ViewGroup.LayoutParams dlayoutParams = dgrid.getLayoutParams();
-            dlayoutParams.width =((int) (cw*cc))+25;
-            //dlayoutParams.width =((int) (cw*1))+25;
-            dgrid.setLayoutParams(dlayoutParams);
-            //dgrid.setNumColumns(1);
-            dgrid.setNumColumns(3);
-
-            dadapter=new LA_Tablas2(this,dvalues);
-            dgrid.setAdapter(dadapter);
-
-            //dadapter_rfid= new LA_RFID(getApplicationContext(),dvalues_rfid);
-            //dgrid.setAdapter(dadapter_rfid);
+            pbar.setVisibility(View.INVISIBLE);
 
         } catch (Exception e) {
             addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"ERROR_SHOWDATA_RFID" + currentTime);

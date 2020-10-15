@@ -28,6 +28,10 @@ public class LA_RFID extends BaseAdapter {
         selectedIndex = -1;
     }
 
+    public void refreshItems() {
+        notifyDataSetChanged();
+    }
+
     public void setSelectedIndex(int ind) {
         selectedIndex = ind;
         notifyDataSetChanged();
@@ -55,21 +59,23 @@ public class LA_RFID extends BaseAdapter {
             holder = new ViewHolder();
 
             holder.lblTag = convertView.findViewById(R.id.textView17);
-            //holder.lblUbicacion = convertView.findViewById(R.id.textView27);
-            //holder.lblCantidad = convertView.findViewById(R.id.textView30);
+            holder.lblUbicacion = convertView.findViewById(R.id.textView27);
+            holder.lblCantidad = convertView.findViewById(R.id.textView30);
 
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
         }
 
-
-        //holder.lblTag.setText(items.get(position));
-        holder.lblTag.setText((CharSequence) items.get(position));
-
-        //holder.lblUbicacion.setText(items.get(position).ubicacion);
-        //holder.lblCantidad.setText(items.get(position).cantidad+"");
-
+        if (position==0) {
+            holder.lblTag.setText("Código");
+            holder.lblUbicacion.setText("Ubicación");
+            holder.lblCantidad.setText("Cantidad");
+        }else{
+            holder.lblTag.setText(items.get(position).codigo_barra);
+            holder.lblUbicacion.setText(items.get(position).ubicacion);
+            holder.lblCantidad.setText(items.get(position).cantidad+"");
+        }
 
 
         if(selectedIndex!= -1 && position == selectedIndex) {
