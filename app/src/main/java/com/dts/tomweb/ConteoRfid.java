@@ -3,6 +3,7 @@ package com.dts.tomweb;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -70,6 +71,7 @@ public class ConteoRfid extends PBase {
     private int cw;
     private String scod;
     private boolean consol;
+    private Integer result=0;
 
     /*********elementos de RFID ************/
     public static Readers readers;
@@ -233,6 +235,14 @@ public class ConteoRfid extends PBase {
         {
             e.printStackTrace();
         }
+    }
+
+    public void doNext(View view) {
+
+        gl.validaLicDB=10;
+        getCampos();
+        //ComWS();
+
     }
 
 /*    public void guardar1(View view) {
@@ -638,71 +648,28 @@ public class ConteoRfid extends PBase {
         String ss = "";
         int cc,rg;
         currentTime = new SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(new Date());
-
-        clsInventario_ciego_RfidObj InvCiego = new clsInventario_ciego_RfidObj(this, Con, db);
-        clsClasses.clsInventario_ciego_rfid items= new clsClasses.clsInventario_ciego_rfid();
-
+        new clsClasses.clsInventario_ciego_rfid();
+        clsClasses.clsInventario_ciego_rfid items;
 
         try {
 
             dvalues_rfid.clear();
 
-           /* barra = txtBarra.getText().toString().trim();
-            ubic = txtUbic.getText().toString().trim();
-
-            if(!ubic.isEmpty() && !barra.isEmpty()){
-                tn = tn +" WHERE CODIGO_BARRA = '"+ barra + "' AND UBICACION = '" + ubic + "' AND ID_INVENTARIO_ENC="+ gl.idInvEnc +" AND ELIMINADO = 0";
-            }else if(!barra.isEmpty()){
-                tn = tn +" WHERE CODIGO_BARRA = '"+ barra + "' AND ID_INVENTARIO_ENC="+ gl.idInvEnc +" AND ELIMINADO = 0";
-            }else if(!ubic.isEmpty()) {
-                tn = tn+ " WHERE UBICACION = '" + ubic + "' AND ID_INVENTARIO_ENC="+ gl.idInvEnc +" AND ELIMINADO = 0";
-            }else {
-                tn = tn + " WHERE ID_INVENTARIO_ENC="+ gl.idInvEnc +" AND ELIMINADO = 0";
-            }
-
-            if(consol==true){
-                ss="SELECT CODIGO_BARRA, UBICACION, SUM(CANTIDAD) FROM "+ tn +" GROUP BY CODIGO_BARRA, UBICACION";
-            }else {
-                ss="SELECT CODIGO_BARRA, UBICACION, CANTIDAD FROM "+ tn;
-            }*/
-
-
-          /*  dt=Con.OpenDT(ss);
-            if (dt.getCount()==0) {
-                pbar.setVisibility(View.INVISIBLE);return;
-            }
-
-            cc = dt.getColumnCount();
-            rg = dt.getCount();
-            if(rg>0){
-                regs.setText(""+rg);
-            }
-
-            dt.moveToFirst();
-            while (!dt.isAfterLast()) {
-
-                for (int i = 0; i < cc; i++) {
-                    try {
-                        ss=dt.getString(i);
-                    } catch (Exception e) {
-                        addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"");
-                        ss="?";
-                    }
-                    dvalues.add(ss);
-                }
-                dt.moveToNext();
-            }
-            if (dt!=null) dt.close();*/
-
-
             tn = tn +" WHERE ID_INVENTARIO_ENC="+ gl.idInvEnc +" AND ELIMINADO = 0";
             ss="SELECT CODIGO_BARRA, UBICACION, CANTIDAD FROM "+ tn;
+
+          /*  if(consol==true){
+                ss="SELECT CODIGO_BARRA, UBICACION, SUM(CANTIDAD) FROM "+ tn +" GROUP BY CODIGO_BARRA, UBICACION";
+            }else {
+                ss = "SELECT CODIGO_BARRA, UBICACION, CANTIDAD FROM " + tn;
+            }*/
 
             dt=Con.OpenDT(ss);
             /* if (dt.getCount()==0) {
                 pbar.setVisibility(View.INVISIBLE);return;
             }*/
-            cc = dt.getColumnCount();
+            //cc = dt.getColumnCount();
+
             rg = dt.getCount();
             if(rg>0){
                 regs.setText(""+rg);
@@ -741,4 +708,53 @@ public class ConteoRfid extends PBase {
 
 
     }
+
+    public void getCampos(){
+        try{
+
+            Integer registros = dadapter_rfid.getCount();
+
+          /*  Log.d("data ", String.valueOf(registros));*/
+
+            if(registros <=0){
+                msgAskContinue("No hay data rfid registrada, ¿Seguro que desea continuar?");
+                result = 1; return;
+            }else{
+                ComWS();
+            }
+
+        }catch (Exception e){
+            addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
+            msgbox("Error getCampos: "+e);
+        }
+    }
+
+    public void ComWS(){
+        startActivity(new Intent(this, ComWS.class));
+    }
+
+
+    private void msgAskContinue(String msg) {
+        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+
+        dialog.setCancelable(false);
+        dialog.setTitle("Tom");
+        dialog.setMessage(msg);
+
+        dialog.setPositiveButton("Si", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                ComWS();
+            }
+        });
+
+        dialog.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+
+            }
+        });
+
+        dialog.show();
+
+    }
+
 }

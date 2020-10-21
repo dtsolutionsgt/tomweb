@@ -54,7 +54,6 @@ public class LA_RFID extends BaseAdapter {
 
         if (convertView == null) {
 
-            //convertView = l_Inflater.inflate(R.layout.grid_cell, null);
             convertView = l_Inflater.inflate(R.layout.grid_rfid,null);
             holder = new ViewHolder();
 

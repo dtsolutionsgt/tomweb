@@ -21,6 +21,7 @@ import android.widget.Toast;
 import com.dts.base.BaseDatos;
 import com.dts.base.DateUtils;
 import com.dts.base.clsDataBuilder;
+import com.dts.classes.clsInventario_ciego_RfidObj;
 import com.dts.classes.clsInventario_ciegoObj;
 import com.dts.classes.clsInventario_detalleObj;
 import com.dts.classes.clsRegistro_handheldObj;
@@ -945,7 +946,11 @@ public class ComWS extends PBase {
 
                 if (!envioInvCiego()) return false;
 
-            }else if(gl.tipoInv==2 || gl.tipoInv==3){
+            }
+            else if(gl.tipoInv==5){
+                if (!envioInvCiegoRfid()) return false;
+            }
+            else if(gl.tipoInv==2 || gl.tipoInv==3){
 
                 if (!envioInvDetalle()) return false;
 
@@ -962,6 +967,7 @@ public class ComWS extends PBase {
     public void envCompleto(){
         clsInventario_encabezadoObj invEnc = new clsInventario_encabezadoObj(this, Con, db);
         clsInventario_ciegoObj invCiego = new clsInventario_ciegoObj(this, Con, db);
+        clsInventario_ciego_RfidObj invCiegoRfid = new clsInventario_ciego_RfidObj(this, Con, db);
         clsInventario_detalleObj invDet = new clsInventario_detalleObj(this, Con, db);
         Cursor dt;
         String ss;
@@ -984,7 +990,12 @@ public class ComWS extends PBase {
                 invCiego.fill("WHERE ID_INVENTARIO_ENC = "+ gl.idInvEnc +" AND COMUNICADO = 'N'");
                 count = invCiego.count;
 
-            }else if(gl.tipoInv==2 || gl.tipoInv==3){
+            }
+            else if(gl.tipoInv ==5){
+                invCiegoRfid.fill("WHERE ID_INVENTARIO_ENC = "+ gl.idInvEnc +" AND COMUNICADO = 'N'");
+                count = invCiegoRfid.count;
+            }
+            else if(gl.tipoInv==2 || gl.tipoInv==3){
 
                 invDet.fill("WHERE ID_INVENTARIO_ENC = "+ gl.idInvEnc +" AND COMUNICADO = 'N'");
                 count = invDet.count;
@@ -1078,6 +1089,50 @@ public class ComWS extends PBase {
                 }
             } else {
                 errflag=true;fterr="Error al crear los datos de inventario ciego";
+                return false;
+            }
+
+        } catch (Exception e) {
+            addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
+            errflag=true;fterr = e.getMessage();dbg = fterr;
+            return false;
+        }
+
+        return true;
+    }
+
+    public boolean envioInvCiegoRfid(){
+        String ss;
+
+        fterr = "";
+        try {
+            sprog = "Inventario Ciego Rfid...";wsStask.onProgressUpdate();
+
+            dbld.clear();
+            if (dbld.insert("temp_inventario_ciego_rfid", "WHERE ELIMINADO=0 AND ID_INVENTARIO_ENC = '"+ gl.idInvEnc+"'")){
+                try {
+                    //if (commitSQL() == 1) {
+
+                    if(Procesar_Inventario_Ciego_Rfid(gl.idInvEnc, gl.IDregistro)){
+                        ss = "UPDATE INVENTARIO_CIEGO_RFID SET COMUNICADO = 'S'";
+                        db.execSQL(ss);
+                    }else{
+                        errflag=true;
+                        fterr="Error al procesar el inventario ciego rfid";
+                        return false;
+                    }
+                    /*} else {
+                        errflag=true;
+                        fterr = sstr;dbg +=" , ***";
+                        return false;
+                    }*/
+                } catch (Exception e) {
+                    addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
+                    errflag=true;fterr=e.getMessage();dbg = e.getMessage();
+                    return false;
+                }
+            } else {
+                errflag=true;fterr="Error al crear los datos de inventario ciego rfid";
                 return false;
             }
 
