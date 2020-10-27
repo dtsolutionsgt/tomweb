@@ -166,8 +166,9 @@
             android:id="@+id/TagText"
             android:layout_width="225dp"
             android:layout_height="30dp"
+            android:gravity="center_horizontal"
             android:layout_marginTop="5dp"
-            android:text="_" />
+            android:text="" />
 
 
         <ImageView

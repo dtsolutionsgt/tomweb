@@ -69,7 +69,7 @@ public class LA_RFID extends BaseAdapter {
         if (position==0) {
             holder.lblTag.setText("Código");
             holder.lblUbicacion.setText("Ubicación");
-            holder.lblCantidad.setText("Cantidad");
+            holder.lblCantidad.setText("Lecturas");
         }else{
             holder.lblTag.setText(items.get(position).codigo_barra);
             holder.lblUbicacion.setText(items.get(position).ubicacion);

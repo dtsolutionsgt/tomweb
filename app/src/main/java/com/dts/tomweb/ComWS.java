@@ -375,7 +375,7 @@ public class ComWS extends PBase {
                 s=s+ss+"\n";
             }
 
-            idbg=idbg+" Procesar_Inventario_Ciego_Rfid ";
+            idbg=idbg+" Procesar_Inventario_Ciego_Rfid";
 
             SoapObject request = new SoapObject(NAMESPACE, METHOD_NAME);
             SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);
@@ -618,9 +618,6 @@ public class ComWS extends PBase {
     // WEB SERVICE - RECEPCION
 
     private boolean getData(){
-        Cursor DT;
-        String val="";
-
 
         listItems.clear();
         idbg="";stockflag=0;
@@ -642,7 +639,6 @@ public class ComWS extends PBase {
             if(gl.tipoInv==1) {
                 //Nada que recibir, inventario ciego
                 listItems.add("DELETE FROM INVENTARIO_CIEGO");
-                listItems.add("DELETE FROM INVENTARIO_CIEGO_RFID");
 
             }else if(gl.tipoInv==2){
                 while (count!=2){
@@ -654,6 +650,9 @@ public class ComWS extends PBase {
             }else if(gl.tipoInv==3){
                 if (!AddTable("INVENTARIO_TEORICO")) return false;
                 listItems.add("DELETE FROM INVENTARIO_DETALLE");
+            }
+            else if(gl.tipoInv==5){
+                listItems.add("DELETE FROM INVENTARIO_CIEGO_RFID");
             }
 
             if (!saveData())return false;
@@ -932,10 +931,9 @@ public class ComWS extends PBase {
     // WEB SERVICE - ENVIO
 
     private boolean sendData() {
+
         clsRegistro_handheldObj regHH = new clsRegistro_handheldObj(this, Con, db);
-
         errflag=false;
-
         senv = "Envío terminado \n \n";
 
         try {
@@ -945,16 +943,15 @@ public class ComWS extends PBase {
             if(gl.tipoInv==1) {
 
                 if (!envioInvCiego()) return false;
-
-            }
-            else if(gl.tipoInv==5){
-                if (!envioInvCiegoRfid()) return false;
             }
             else if(gl.tipoInv==2 || gl.tipoInv==3){
 
                 if (!envioInvDetalle()) return false;
-
             }
+            else if(gl.tipoInv==5){
+                if (!envioInvCiegoRfid()) return false;
+            }
+
         } catch (Exception e){
             addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
             errflag=true;fterr += "\n" + e.getMessage();dbg = e.getMessage();
@@ -971,13 +968,15 @@ public class ComWS extends PBase {
         clsInventario_detalleObj invDet = new clsInventario_detalleObj(this, Con, db);
         Cursor dt;
         String ss;
-        Integer count;
+        String tn;
+        Integer count,rg;
 
         if(gl.validaLicDB==0){
             msgbox("Base de datos vacia, recibir datos");
             relEnv.setVisibility(View.INVISIBLE);
             gl.validaLicDB=2;
         }else if(gl.validaLicDB==10){
+
 
             invEnc.fill();
             gl.tipoInv =  invEnc.first().tipo_inventario;
@@ -991,15 +990,14 @@ public class ComWS extends PBase {
                 count = invCiego.count;
 
             }
-            else if(gl.tipoInv ==5){
-                invCiegoRfid.fill("WHERE ID_INVENTARIO_ENC = "+ gl.idInvEnc +" AND COMUNICADO = 'N'");
-                count = invCiegoRfid.count;
-            }
             else if(gl.tipoInv==2 || gl.tipoInv==3){
 
                 invDet.fill("WHERE ID_INVENTARIO_ENC = "+ gl.idInvEnc +" AND COMUNICADO = 'N'");
                 count = invDet.count;
-
+            }
+            else if(gl.tipoInv==5){
+                invCiegoRfid.fill("WHERE ID_INVENTARIO_ENC = "+ gl.idInvEnc +" AND COMUNICADO = 'N'");
+                count = invCiegoRfid.count;
             }
 
 
@@ -1109,9 +1107,8 @@ public class ComWS extends PBase {
             sprog = "Inventario Ciego Rfid...";wsStask.onProgressUpdate();
 
             dbld.clear();
-            if (dbld.insert("temp_inventario_ciego_rfid", "WHERE ELIMINADO=0 AND ID_INVENTARIO_ENC = '"+ gl.idInvEnc+"'")){
+            if (dbld.insertrfid("temp_inventario_ciego_rfid", "WHERE ELIMINADO=0 AND ID_INVENTARIO_ENC = '"+ gl.idInvEnc+"'")){
                 try {
-                    //if (commitSQL() == 1) {
 
                     if(Procesar_Inventario_Ciego_Rfid(gl.idInvEnc, gl.IDregistro)){
                         ss = "UPDATE INVENTARIO_CIEGO_RFID SET COMUNICADO = 'S'";
@@ -1121,11 +1118,7 @@ public class ComWS extends PBase {
                         fterr="Error al procesar el inventario ciego rfid";
                         return false;
                     }
-                    /*} else {
-                        errflag=true;
-                        fterr = sstr;dbg +=" , ***";
-                        return false;
-                    }*/
+
                 } catch (Exception e) {
                     addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
                     errflag=true;fterr=e.getMessage();dbg = e.getMessage();

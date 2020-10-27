@@ -23,6 +23,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.dts.base.clsClasses;
+import com.dts.classes.clsInventario_ciegoObj;
 import com.dts.classes.clsInventario_ciego_RfidObj;
 import com.dts.classes.clsInventario_detalleObj;
 import com.dts.classes.clsRegistro_handheldObj;
@@ -54,10 +55,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 
+import static java.sql.Types.NULL;
+
 public class ConteoRfid extends PBase {
 
     private ListView lvConteoRFID;
-    //private Spinner spin,spinf;
     private ProgressBar pbar;
     private EditText txtBarra;
     private EditText txtUbic;
@@ -86,11 +88,9 @@ public class ConteoRfid extends PBase {
 
     /*********************************************/
     /*********  elementos para guardar ***********/
-    private String Ubic, Cod, tipoArt, barra, desc,ccod;
+    private String Ubic, Cod, tipoArt, barra;
     private Double canti;
-    //private Integer result=0, resta;
     String currentTime;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,7 +99,6 @@ public class ConteoRfid extends PBase {
         setContentView(R.layout.activity_conteo_rfid);
         textView = findViewById(R.id.TagText);
         pbar = findViewById(R.id.progressBar);
-
 
         /************************************************/
         /******** variables y constantes rfid **********/
@@ -112,18 +111,22 @@ public class ConteoRfid extends PBase {
             @Override
             protected Boolean doInBackground(Void... voids) {
                 try {
-                    if (readers != null) {
+                    if (readers != null ) {
                         if (readers.GetAvailableRFIDReaderList() != null) {
                             availableRFIDReaderList = readers.GetAvailableRFIDReaderList();
                             if (availableRFIDReaderList.size() != 0) {
                                 // get first reader from list
                                 readerDevice = availableRFIDReaderList.get(0);
                                 reader = readerDevice.getRFIDReader();
-                                if (!reader.isConnected()) {
+                                if (!reader.isConnected()  && gl != null) {
                                     // Establish connection to the RFID Reader
                                     reader.connect();
                                     ConfigureReader();
                                     return true;
+                                }
+                                else
+                                {
+                                    return false;
                                 }
                             }
                         }
@@ -143,7 +146,10 @@ public class ConteoRfid extends PBase {
                 super.onPostExecute(aBoolean);
                 if (aBoolean) {
                     //Toast.makeText(getApplicationContext(), "Reader Connected", Toast.LENGTH_LONG).show();
-                    textView.setText("RFID listo.");
+                    textView.setText("Lectura RFID lista.");
+                }
+                else{
+                    textView.setText("Lectura RFID no disponible.");
                 }
             }
         }.execute();
@@ -156,14 +162,16 @@ public class ConteoRfid extends PBase {
         addlog("ConteoRfid",""+du.getActDateTime(),gl.nombreusuario);
 
         lvConteoRFID = (ListView) findViewById(R.id.lvConteoRFID);
-        //pbar=(ProgressBar) findViewById(R.id.progressBar);pbar.setVisibility(View.INVISIBLE);
         txtBarra = (EditText) findViewById(R.id.txtBarra);
         txtUbic = (EditText) findViewById(R.id.txtNombre);
         regs = (TextView) findViewById(R.id.txtRegs);
         cb = (CheckBox) findViewById(R.id.cbConsolidar);
 
-        if(gl.tipoInv==1) scod = " INVENTARIO_CIEGO_RFID";
+        if(gl.tipoInv==1) scod = " INVENTARIO_CIEGO";
         if(gl.tipoInv==2 || gl.tipoInv==3) scod = " INVENTARIO_DETALLE";
+        if(gl.tipoInv==5) scod = " INVENTARIO_CIEGO_RFID";
+
+        if(gl.tipoInv== NULL) scod ="INVENTARIO_CIEGO";
 
         setHandlers();
 
@@ -176,10 +184,7 @@ public class ConteoRfid extends PBase {
 
     @Override
     public void onBackPressed() {
-        // super.onBackPressed();
-        //Toast.makeText(getApplicationContext(),"Cerando RFID",Toast.LENGTH_LONG).show();
         msgAskExit("Salir de RFID?");
-
     }
 
     private void ConfigureReader() {
@@ -242,21 +247,7 @@ public class ConteoRfid extends PBase {
         gl.validaLicDB=10;
         getCampos();
         //ComWS();
-
     }
-
-/*    public void guardar1(View view) {
-        ArrayList<String> arrlist = new ArrayList<String>();
-        int cantidad =0;
-        String etiqueta ="";
-        int ubicacion = 0;
-        for(int i=0;i<dadapter.getCount();i++){
-            if(i % 3 == 0){
-                etiqueta =(String) dadapter.getItem(i);
-                Log.d(TAG, "valor " + etiqueta);
-            }
-        }
-    }*/
 
     public class EventHandler implements RfidEventsListener {
 
@@ -372,17 +363,22 @@ public class ConteoRfid extends PBase {
     }
 
     public void insertaConteo(String tag){
-        clsInventario_ciego_RfidObj InvCiego = new clsInventario_ciego_RfidObj(this, Con, db);
+        clsInventario_ciego_RfidObj InvCiegoRfid = new clsInventario_ciego_RfidObj(this, Con, db);
         clsClasses.clsInventario_ciego_rfid item= new clsClasses.clsInventario_ciego_rfid();
         clsInventario_detalleObj InvDet = new clsInventario_detalleObj(this, Con, db);
         clsClasses.clsInventario_detalle itemDeta= clsCls.new clsInventario_detalle();
         clsRegistro_handheldObj regHH = new clsRegistro_handheldObj(this, Con, db);
 
+        clsInventario_ciegoObj InvCiego = new clsInventario_ciegoObj(this, Con, db);
+        clsClasses.clsInventario_ciego items;
+
         Long sfecha;
-        String  ff,ffe;
-        Integer fecha;
-        String codigo_tag = tag;
+        String  ff,ffe, ss;
+        Integer rg;
+        //String codigo_tag = tag;
+        Cod = tag;
         Integer cant = 1;
+        Cursor dt;
 
         currentTime = new SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(new Date());
 
@@ -390,9 +386,15 @@ public class ConteoRfid extends PBase {
 
             regHH.fill();
             gl.IDregistro = regHH.first().id_registro;
-            //Cod = Codigo.getText().toString().trim();
-            Cod = codigo_tag;
+            //Cod = codigo_tag;
             Ubic = "1";
+            items = new clsClasses.clsInventario_ciego();
+
+            //ss="SELECT CODIGO_BARRA FROM INVENTARIO_CIEGO WHERE ID_INVENTARIO_ENC="+ gl.idInvEnc +" AND ELIMINADO = 0 AND CODIGO_BARRA=" + '"+ barra + "';
+            ss= "SELECT CODIGO_BARRA FROM INVENTARIO_CIEGO WHERE CODIGO_BARRA = '"+ Cod + "' ";
+
+            dt=Con.OpenDT(ss);
+            rg = dt.getCount();
 
             sfecha=du.getActDate();
             ff = "20"+sfecha;
@@ -402,28 +404,12 @@ public class ConteoRfid extends PBase {
                 if(tipoArt.equals("S")){
                     canti = 1.0;
                 }else {
-                   /* if(Cantidad.getText().toString().isEmpty()){
-                        msgbox("Ingrese la cantidad");
-                        return;
-                    }else {
-                        canti = Double.parseDouble(Cantidad.getText().toString());
-                    }*/
                    canti = Double.parseDouble(String.valueOf(cant));
                 }
             }else {
-                /*if(Cantidad.getText().toString().isEmpty()){
-                    msgbox("Ingrese la cantidad");
-                    return;
-                }else {
-                    canti = Double.parseDouble(Cantidad.getText().toString());
-                }*/
+
                 canti = Double.parseDouble(String.valueOf(cant));
             }
-
-          /*  if(Codigo.getText().toString().isEmpty()){
-                msgbox("Ingrese el codigo");
-                return;
-            }*/
 
             if(canti==0){
                 msgbox("Ingrese una cantidad mayor a 0");
@@ -432,12 +418,9 @@ public class ConteoRfid extends PBase {
 
             if(gl.tipoInv==1) {
 
-            /*    Barra.setText(Codigo.getText().toString());
-                barra = Barra.getText().toString().trim();*/
-            //barra = listaTag.codigo_barra;
-                barra = codigo_tag;
+                barra = Cod;
 
-                item.id_inventario_enc =  gl.idInvEnc;
+               /* item.id_inventario_enc =  gl.idInvEnc;
                 item.codigo_barra = barra;
                 item.cantidad = canti;
                 item.comunicado = "N";
@@ -446,15 +429,34 @@ public class ConteoRfid extends PBase {
                 item.fecha = ffe;
                 item.hora = currentTime;
                 item.id_registro = gl.IDregistro;
-                item.eliminado = 0;
+                item.eliminado = 0;*/
 
+                items.id_inventario_enc = gl.idInvEnc;
+                items.codigo_barra = barra;
+                items.cantidad= canti;
+                items.comunicado = "N";
+                items.ubicacion = Ubic;
+                items.id_operador = gl.userid;
+                //items.fecha = ffe + " " + currentTime;
+                items.fecha = ffe;
+                items.id_registro = gl.IDregistro;
+                items.eliminado = 0;
 
                 try {
-                    InvCiego.add(item);
+
+                    if(rg == 0){
+                        //InvCiegoRfid.add(item);
+                        InvCiego.add(items);
+                    }
+                    else {
+                        /*sql="update Inventario_ciego_rfid set cantidad = cantidad + 1 WHERE CODIGO_BARRA = '"+ barra + "' ";*/
+                        sql="update Inventario_ciego set cantidad = cantidad + 1 WHERE CODIGO_BARRA = '"+ barra + "' ";
+                        db.execSQL(sql);
+                    }
+
                 } catch (Exception e) {
-                    //e.printStackTrace();
-                    sql="update Inventario_ciego_rfid set cantidad = cantidad + 1 WHERE CODIGO_BARRA = '"+ barra + "' ";
-                    db.execSQL(sql);
+                    addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "error_inv_ciego" + currentTime);
+                    msgbox("Error: "+e);
                 }
 
             }else if(gl.tipoInv==2 || gl.tipoInv==3){
@@ -472,7 +474,6 @@ public class ConteoRfid extends PBase {
 
                 InvDet.add(itemDeta);
             }
-            //Toast.makeText(this, "Agregado Correctamente", Toast.LENGTH_LONG).show();
 
         }catch (Exception e){
             addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "error_inv_ciego" + currentTime);
@@ -665,11 +666,6 @@ public class ConteoRfid extends PBase {
             }*/
 
             dt=Con.OpenDT(ss);
-            /* if (dt.getCount()==0) {
-                pbar.setVisibility(View.INVISIBLE);return;
-            }*/
-            //cc = dt.getColumnCount();
-
             rg = dt.getCount();
             if(rg>0){
                 regs.setText(""+rg);
@@ -677,16 +673,6 @@ public class ConteoRfid extends PBase {
 
             dt.moveToFirst();
             while (!dt.isAfterLast()) {
-                /*for (int i = 0; i < cc; i++) {
-                    try {
-                        ss=dt.getString(i);
-                    } catch (Exception e) {
-                        addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"ERROR_QUERY_RFID" + currentTime);
-                        ss="?";
-                    }
-                    dvalues.add(ss);
-                }
-*/
                 items= new clsClasses.clsInventario_ciego_rfid();
                 items.codigo_barra = dt.getString(0);
                 items.ubicacion = dt.getString(1);
@@ -714,8 +700,6 @@ public class ConteoRfid extends PBase {
 
             Integer registros = dadapter_rfid.getCount();
 
-          /*  Log.d("data ", String.valueOf(registros));*/
-
             if(registros <=0){
                 msgAskContinue("No hay data rfid registrada, ¿Seguro que desea continuar?");
                 result = 1; return;
@@ -732,7 +716,6 @@ public class ConteoRfid extends PBase {
     public void ComWS(){
         startActivity(new Intent(this, ComWS.class));
     }
-
 
     private void msgAskContinue(String msg) {
         AlertDialog.Builder dialog = new AlertDialog.Builder(this);

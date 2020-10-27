@@ -160,6 +160,107 @@ public class clsDataBuilder {
 		return true;
 	}
 
+	public boolean insertrfid(String tn, String ws){
+		Cursor PRG,DT;
+		String s,n,t,si;
+		int j,cc,ct,dd,ee;
+
+		tcol.clear();
+		String SQL_="INSERT INTO "+tn+" VALUES(";
+		String SS="SELECT ";
+
+		s="";
+
+		try {
+
+			dd=0;
+			ee=0;
+			if(tn.equals("temp_inventario_ciego_rfid")){
+				tn="inventario_ciego_rfid";
+				dd=1;ee=1;
+			} else if(tn.equals("temp_inventario_detalle")){
+				tn="inventario_detalle";
+				dd=1;ee=1;
+			}
+
+			String vSQL = "PRAGMA table_info('"+tn+"')";
+			PRG=db.rawQuery(vSQL, null);
+			cc=PRG.getCount();
+
+			PRG.moveToFirst();j=0;
+
+			while (!PRG.isAfterLast()) {
+
+				n=PRG.getString(PRG.getColumnIndex("name"));
+				t=PRG.getString(PRG.getColumnIndex("type"));
+				j+=1;
+
+				if(tn.equals("inventario_detalle")){
+					if(n.equals("comunicado")) {	dd=2;	}
+					if(n.equals("eliminado"))  {	dd=2; ee=2;	}
+				}else  {
+					if(n.equals("eliminado")) dd=2;
+				}
+
+				if(dd!=2){
+					ct=getCType(n,t);
+					tcol.add(ct);
+					s=s+n+"  "+ct+"\n";
+
+					SS=SS+n;
+					if (j<cc-ee) SS=SS+",";
+				}
+
+				dd=1;
+
+				PRG.moveToNext();
+			}
+
+		} catch (Exception e) {
+			err=e.getMessage();return false;
+		}
+
+		SS=SS+" FROM "+tn+" "+ws;
+
+		try {
+
+			DT=Con.OpenDT(SS);
+			if (DT.getCount()==0) return true;
+
+			DT.moveToFirst();
+			while (!DT.isAfterLast()) {
+
+				si=SQL_;
+
+				for (int i = 0; i < cc-ee; i++)
+				{
+
+					ct=tcol.get(i);
+
+					if (ct==0) s=""+DT.getDouble(i);
+					if (ct>0) s="'"+DT.getString(i)+"'";
+					//if (ct==2) s="'"+DU.univfechaext(DT.getInt(i))+"'";
+					//if (ct==3) s="'"+DU.univfechaext(DT.getInt(i))+"'";
+
+					if (i<cc-1-ee) s=s+",";
+					si=si+s;
+				}
+
+				si=si+");";
+				items.add(si);
+
+				DT.moveToNext();
+			}
+			if (DT!=null) DT.close();
+
+
+		} catch (Exception e) {
+			err=e.getMessage();return false;
+		}
+
+		return true;
+	}
+
 	public void clear(){
 		items.clear();
 	}

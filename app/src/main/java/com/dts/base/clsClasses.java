@@ -27,7 +27,7 @@ public class clsClasses {
         public String nombre;
     }
 
-    public class clsInventario_ciego {
+    public static class clsInventario_ciego {
         public int id_inventario_enc;
         public String codigo_barra;
         public double cantidad;

@@ -71,9 +71,9 @@ public class Inventario extends PBase {
     }
 
     public void doNext(View view) {
-        alertDialog();
+        //alertDialog();
+        msgAskContinue("Conteo de inventario");
         //startActivity(new Intent(this, Conteo.class));
-
         //break;
     }
 
@@ -178,6 +178,33 @@ public class Inventario extends PBase {
         });
         AlertDialog alertDialog=dialog.create();
         alertDialog.show();
+    }
+
+
+    private void msgAskContinue(String msg) {
+        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+
+        dialog.setCancelable(false);
+        dialog.setTitle("Tom");
+        dialog.setMessage(msg);
+
+        dialog.setPositiveButton("Inv. RFID", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+               // ComWS();
+                Toast.makeText(getApplicationContext(),"Inventario por RFID",Toast.LENGTH_LONG).show();
+                startActivity(new Intent(getApplicationContext(), ConteoRfid.class));
+            }
+        });
+
+        dialog.setNegativeButton("Inv. Manual", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                Toast.makeText(getApplicationContext(),"Inventario manual", Toast.LENGTH_LONG).show();
+                startActivity(new Intent(getApplicationContext(), Conteo.class));
+            }
+        });
+
+        dialog.show();
+
     }
 
     //endregion

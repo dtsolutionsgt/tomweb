@@ -245,16 +245,9 @@ public class Conteo extends PBase {
     }
 
     public void doNext(View view) {
+
         gl.validaLicDB=10;
-
         getCampos();
-
-        /*if(result==0){
-            ComWS();
-        }else if(result==1){
-            insertaConteo();
-            mostrarConteo();
-        }*/
     }
 
     @Override
@@ -298,7 +291,7 @@ public class Conteo extends PBase {
 
     public void insertaConteo(){
         clsInventario_ciegoObj InvCiego = new clsInventario_ciegoObj(this, Con, db);
-        clsClasses.clsInventario_ciego item=clsCls.new clsInventario_ciego();
+        clsClasses.clsInventario_ciego item= new clsClasses.clsInventario_ciego();
         clsInventario_detalleObj InvDet = new clsInventario_detalleObj(this, Con, db);
         clsClasses.clsInventario_detalle itemDeta=clsCls.new clsInventario_detalle();
 

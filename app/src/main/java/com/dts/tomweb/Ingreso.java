@@ -8,6 +8,7 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.zebra.rfid.api3.ENUM_TRANSPORT;
 import com.zebra.rfid.api3.InvalidUsageException;
@@ -45,6 +46,7 @@ public class Ingreso extends PBase {
         setContentView(R.layout.activity_ingreso);
 
         textView = findViewById(R.id.TagText);
+
         if (readers == null) {
             readers = new Readers(this, ENUM_TRANSPORT.SERVICE_SERIAL);
         }
@@ -82,7 +84,10 @@ public class Ingreso extends PBase {
                 super.onPostExecute(aBoolean);
                 if (aBoolean) {
                     //Toast.makeText(getApplicationContext(), "Reader Connected", Toast.LENGTH_LONG).show();
-                    textView.setText("Equipo compatible con RFID");
+                    textView.setText("Equipo con RFID listo");
+                }
+                else {
+                    textView.setText("Equipo con RFID no conectado.");
                 }
             }
         }.execute();
@@ -261,6 +266,39 @@ public class Ingreso extends PBase {
         }
 
     }
+
+    public void CerrarRFIF(){
+        try {
+            if (reader != null)
+            {
+                //reader.Events.removeEventsListener(eventHandler);
+                reader.disconnect();
+                Log.d(TAG, "RFID DESCONECTADO");
+                //Toast.makeText(getApplicationContext(), "RFID Desconectado.", Toast.LENGTH_LONG).show();
+                reader = null;
+                readers.Dispose();
+                readers = null;
+            }
+        }
+        catch (InvalidUsageException e)
+        {
+            e.printStackTrace();
+            addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"ERROR_RFID_DISCONNECT");
+        }
+        catch (OperationFailureException e)
+        {
+            e.printStackTrace();
+            addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"ERROR_RFID_DISCONNECT");
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"ERROR_RFID_DISCONNECT");
+        }
+
+        finish();
+    }
+
 
     // Aux
 

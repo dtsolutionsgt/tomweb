@@ -135,7 +135,7 @@ public class clsInventario_ciegoObj {
 
         while (!dt.isAfterLast()) {
 
-            item = clsCls.new clsInventario_ciego();
+            item = new clsClasses.clsInventario_ciego();
 
             item.id_inventario_enc=dt.getInt(0);
             item.codigo_barra=dt.getString(1);
