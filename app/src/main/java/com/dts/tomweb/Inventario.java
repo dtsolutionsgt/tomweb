@@ -71,10 +71,10 @@ public class Inventario extends PBase {
     }
 
     public void doNext(View view) {
-        //alertDialog();
+
+        //GT 11082021 este mensaje valida si, se requiere un inv con RFID o uno manual
         msgAskContinue("Conteo de inventario");
         //startActivity(new Intent(this, Conteo.class));
-        //break;
     }
 
     private void setHandlers(){

@@ -100,6 +100,8 @@ public class ConteoRfid extends PBase {
         textView = findViewById(R.id.TagText);
         pbar = findViewById(R.id.progressBar);
 
+        //CerrarRFIF();
+
         /************************************************/
         /******** variables y constantes rfid **********/
 
@@ -149,7 +151,7 @@ public class ConteoRfid extends PBase {
                     textView.setText("Lectura RFID lista.");
                 }
                 else{
-                    textView.setText("Lectura RFID no disponible.");
+                    textView.setText("Falta inventario registrado para lectura RFID.");
                 }
             }
         }.execute();
@@ -158,24 +160,36 @@ public class ConteoRfid extends PBase {
         /*************************************************************/
         /********** variables y constantes de grid *******************/
 
-        super.InitBase(savedInstanceState);
-        addlog("ConteoRfid",""+du.getActDateTime(),gl.nombreusuario);
+        try{
 
-        lvConteoRFID = (ListView) findViewById(R.id.lvConteoRFID);
-        txtBarra = (EditText) findViewById(R.id.txtBarra);
-        txtUbic = (EditText) findViewById(R.id.txtNombre);
-        regs = (TextView) findViewById(R.id.txtRegs);
-        cb = (CheckBox) findViewById(R.id.cbConsolidar);
+            super.InitBase(savedInstanceState);
+            addlog("ConteoRfid",""+du.getActDateTime(),gl.nombreusuario);
 
-        if(gl.tipoInv==1) scod = " INVENTARIO_CIEGO";
-        if(gl.tipoInv==2 || gl.tipoInv==3) scod = " INVENTARIO_DETALLE";
-        if(gl.tipoInv==5) scod = " INVENTARIO_CIEGO_RFID";
+            lvConteoRFID = (ListView) findViewById(R.id.lvConteoRFID);
+            txtBarra = (EditText) findViewById(R.id.txtBarra);
+            txtUbic = (EditText) findViewById(R.id.txtNombre);
+            regs = (TextView) findViewById(R.id.txtRegs);
+            cb = (CheckBox) findViewById(R.id.cbConsolidar);
 
-        if(gl.tipoInv== NULL) scod ="INVENTARIO_CIEGO";
+            if(gl.tipoInv==1) scod = " INVENTARIO_CIEGO";
+            if(gl.tipoInv==2 || gl.tipoInv==3) scod = " INVENTARIO_DETALLE";
+            if(gl.tipoInv==5) scod = " INVENTARIO_CIEGO_RFID";
 
-        setHandlers();
+            if(scod != null ){
+                showData(scod);
+            }
+            else{
+                pbar.setVisibility(View.INVISIBLE);
+            }
 
-        showData(scod);
+            //scod ="INVENTARIO_CIEGO";
+            setHandlers();
+
+
+        }catch (Exception e){
+            msgbox(new Object() {}.getClass().getEnclosingMethod().getName() + " . " + e.getMessage());
+            addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
+        }
     }
 
 

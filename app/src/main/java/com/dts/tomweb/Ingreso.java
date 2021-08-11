@@ -47,7 +47,7 @@ public class Ingreso extends PBase {
 
         textView = findViewById(R.id.TagText);
 
-        if (readers == null) {
+/*        if (readers == null) {
             readers = new Readers(this, ENUM_TRANSPORT.SERVICE_SERIAL);
         }
 
@@ -62,11 +62,11 @@ public class Ingreso extends PBase {
                                 // get first reader from list
                                 readerDevice = availableRFIDReaderList.get(0);
                                 reader = readerDevice.getRFIDReader();
-                                /*if (!reader.isConnected()) {
+                                *//*if (!reader.isConnected()) {
                                     reader.connect();
                                     ConfigureReader();
                                     return true;
-                                } */
+                                } *//*
                                 return true;
                             }
                         }
@@ -90,7 +90,7 @@ public class Ingreso extends PBase {
                     textView.setText("Equipo con RFID no conectado.");
                 }
             }
-        }.execute();
+        }.execute();*/
 
         try {
             super.InitBase(savedInstanceState);
@@ -107,6 +107,9 @@ public class Ingreso extends PBase {
             setHandlers();
 
             getDB();
+
+            //CerrarRFIF();
+
 
         } catch (Exception e) {
             msgbox(new Object() {}.getClass().getEnclosingMethod().getName() + " . " + e.getMessage());
@@ -254,7 +257,8 @@ public class Ingreso extends PBase {
                 msgbox("¡El usuario no existe o contraseña incorrecta!");txtUser.requestFocus();return;
             }
 
-
+            //GT 11082021: se cierra la conexión porque solo se abrio para validar la existencia del dispositivo
+            //CerrarRFIF();
             txtUser.setText("");txtPass.setText("");txtUser.requestFocus();
 
             callback =1;gl.exitapp=false;
