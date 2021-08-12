@@ -100,7 +100,6 @@ public class ConteoRfid extends PBase {
         textView = findViewById(R.id.TagText);
         pbar = findViewById(R.id.progressBar);
 
-        //CerrarRFIF();
 
         /************************************************/
         /******** variables y constantes rfid **********/
@@ -183,7 +182,7 @@ public class ConteoRfid extends PBase {
             }
 
             //scod ="INVENTARIO_CIEGO";
-            setHandlers();
+            //setHandlers();
 
 
         }catch (Exception e){
@@ -231,29 +230,7 @@ public class ConteoRfid extends PBase {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        try {
-            if (reader != null)
-            {
-                reader.Events.removeEventsListener(eventHandler);
-                reader.disconnect();
-                Toast.makeText(getApplicationContext(), "RFID Desconectado.", Toast.LENGTH_LONG).show();
-                reader = null;
-                readers.Dispose();
-                readers = null;
-            }
-        }
-        catch (InvalidUsageException e)
-        {
-            e.printStackTrace();
-        }
-        catch (OperationFailureException e)
-        {
-            e.printStackTrace();
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
+        CerrarRFIF();
     }
 
     public void doNext(View view) {
@@ -377,7 +354,8 @@ public class ConteoRfid extends PBase {
     }
 
     public void insertaConteo(String tag){
-        clsInventario_ciego_RfidObj InvCiegoRfid = new clsInventario_ciego_RfidObj(this, Con, db);
+
+        //clsInventario_ciego_RfidObj InvCiegoRfid = new clsInventario_ciego_RfidObj(this, Con, db);
         clsClasses.clsInventario_ciego_rfid item= new clsClasses.clsInventario_ciego_rfid();
         clsInventario_detalleObj InvDet = new clsInventario_detalleObj(this, Con, db);
         clsClasses.clsInventario_detalle itemDeta= clsCls.new clsInventario_detalle();
@@ -389,7 +367,6 @@ public class ConteoRfid extends PBase {
         Long sfecha;
         String  ff,ffe, ss;
         Integer rg;
-        //String codigo_tag = tag;
         Cod = tag;
         Integer cant = 1;
         Cursor dt;
@@ -400,7 +377,6 @@ public class ConteoRfid extends PBase {
 
             regHH.fill();
             gl.IDregistro = regHH.first().id_registro;
-            //Cod = codigo_tag;
             Ubic = "1";
             items = new clsClasses.clsInventario_ciego();
 
@@ -433,18 +409,6 @@ public class ConteoRfid extends PBase {
             if(gl.tipoInv==1) {
 
                 barra = Cod;
-
-               /* item.id_inventario_enc =  gl.idInvEnc;
-                item.codigo_barra = barra;
-                item.cantidad = canti;
-                item.comunicado = "N";
-                item.ubicacion = Ubic;
-                item.id_operador = gl.userid;
-                item.fecha = ffe;
-                item.hora = currentTime;
-                item.id_registro = gl.IDregistro;
-                item.eliminado = 0;*/
-
                 items.id_inventario_enc = gl.idInvEnc;
                 items.codigo_barra = barra;
                 items.cantidad= canti;
@@ -505,6 +469,7 @@ public class ConteoRfid extends PBase {
         dialog.setPositiveButton("Si", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 CerrarRFIF();
+                finish();
             }
         });
 
@@ -519,6 +484,7 @@ public class ConteoRfid extends PBase {
     }
 
     public void doExit(View view) {
+        CerrarRFIF();
         finish();
     }
 
@@ -550,7 +516,7 @@ public class ConteoRfid extends PBase {
             addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"ERROR_RFID_DISCONNECT"+ currentTime );
         }
 
-        finish();
+        //finish();
     }
 
 

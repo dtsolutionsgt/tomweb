@@ -10,6 +10,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+
 import com.zebra.rfid.api3.ENUM_TRANSPORT;
 import com.zebra.rfid.api3.InvalidUsageException;
 import com.zebra.rfid.api3.OperationFailureException;
@@ -47,7 +48,7 @@ public class Ingreso extends PBase {
 
         textView = findViewById(R.id.TagText);
 
-/*        if (readers == null) {
+        if (readers == null) {
             readers = new Readers(this, ENUM_TRANSPORT.SERVICE_SERIAL);
         }
 
@@ -55,23 +56,29 @@ public class Ingreso extends PBase {
             @Override
             protected Boolean doInBackground(Void... voids) {
                 try {
-                    if (readers != null) {
+                    if (readers != null ) {
                         if (readers.GetAvailableRFIDReaderList() != null) {
                             availableRFIDReaderList = readers.GetAvailableRFIDReaderList();
                             if (availableRFIDReaderList.size() != 0) {
                                 // get first reader from list
                                 readerDevice = availableRFIDReaderList.get(0);
                                 reader = readerDevice.getRFIDReader();
-                                *//*if (!reader.isConnected()) {
+                                if (!reader.isConnected()  && gl != null) {
+                                    // Establish connection to the RFID Reader
                                     reader.connect();
-                                    ConfigureReader();
+                                    //ConfigureReader();
                                     return true;
-                                } *//*
-                                return true;
+                                }
+                                else
+                                {
+                                    return false;
+                                }
                             }
                         }
                     }
                 } catch (InvalidUsageException e) {
+                    e.printStackTrace();
+                } catch (OperationFailureException e) {
                     e.printStackTrace();
                     Log.d(TAG, "OperationFailureException " + e.getVendorMessage());
                 }
@@ -90,7 +97,7 @@ public class Ingreso extends PBase {
                     textView.setText("Equipo con RFID no conectado.");
                 }
             }
-        }.execute();*/
+        }.execute();
 
         try {
             super.InitBase(savedInstanceState);
@@ -257,11 +264,11 @@ public class Ingreso extends PBase {
                 msgbox("¡El usuario no existe o contraseña incorrecta!");txtUser.requestFocus();return;
             }
 
-            //GT 11082021: se cierra la conexión porque solo se abrio para validar la existencia del dispositivo
-            //CerrarRFIF();
             txtUser.setText("");txtPass.setText("");txtUser.requestFocus();
-
             callback =1;gl.exitapp=false;
+
+            //GT 11082021: se cierra la conexión porque solo se abrio para validar la existencia del dispositivo
+            CerrarRFIF();
             startActivity(new Intent(this,MenuPrincipal.class));
 
         } catch (Exception e) {
@@ -300,11 +307,8 @@ public class Ingreso extends PBase {
             addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"ERROR_RFID_DISCONNECT");
         }
 
-        finish();
+        //finish();
     }
-
-
-    // Aux
 
 
     // Activity Events
@@ -314,6 +318,8 @@ public class Ingreso extends PBase {
         super.onResume();
 
         try{
+
+            CerrarRFIF();
 
             if (callback ==1) {
                 callback =0;
@@ -333,6 +339,14 @@ public class Ingreso extends PBase {
         }
 
     }
+
+    @Override
+    protected void onDestroy() {
+
+        super.onDestroy();
+       CerrarRFIF();
+    }
+
 
 }
 
