@@ -699,7 +699,7 @@ public class ComWS extends PBase {
                 return false;
             }
 
-        } catch (Exception e) {
+         } catch (Exception e) {
             fstr="Tab:"+TN+", "+ e.getMessage();idbg=idbg + e.getMessage();
             addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
             return false;
@@ -733,11 +733,19 @@ public class ComWS extends PBase {
         if (TN.equalsIgnoreCase("OPERADORES")) {
 
             invEnc.fill();
-            Com_Id_Inventario = invEnc.first().id_inventario_enc;
-            gl.tipoInv =  invEnc.first().tipo_inventario;
 
-            SQL = "SELECT A.* FROM OPERADORES A, INVENTARIO_OPERADOR B  WHERE A.ID_OPERADOR = B.ID_OPERADOR AND A.ID_EMPRESA ='" + Com_IdEmpresa +"' AND B.ID_INVENTARIO_ENC='" + Com_Id_Inventario +"'";
-            return SQL;
+            //#EJC20220323: Si no hay inventario creado, y la BD está vacía, esto genera error
+            //Por eso agregué que size sea mayor que 0.
+            //Si en el BOF tampoco hay inventario dará error en la carga con la tabla de operadores.
+            if (invEnc.items.size()>0){
+
+                Com_Id_Inventario = invEnc.first().id_inventario_enc;
+                gl.tipoInv =  invEnc.first().tipo_inventario;
+
+                SQL = "SELECT A.* FROM OPERADORES A, INVENTARIO_OPERADOR B  WHERE A.ID_OPERADOR = B.ID_OPERADOR AND A.ID_EMPRESA ='" + Com_IdEmpresa +"' AND B.ID_INVENTARIO_ENC='" + Com_Id_Inventario +"'";
+                return SQL;
+            }
+
         }
 
         if (TN.equalsIgnoreCase("ARTICULO")) {
@@ -837,6 +845,7 @@ public class ComWS extends PBase {
         @Override
         protected Void doInBackground(String... params) {
             try {
+                Looper.prepare();
                 wsExecute();
             } catch (Exception e) {
             }
@@ -899,6 +908,7 @@ public class ComWS extends PBase {
     }
 
     public void envCompleto(){
+
         clsInventario_encabezadoObj invEnc = new clsInventario_encabezadoObj(this, Con, db);
         clsInventario_ciegoObj invCiego = new clsInventario_ciegoObj(this, Con, db);
         clsInventario_detalleObj invDet = new clsInventario_detalleObj(this, Con, db);
@@ -947,10 +957,13 @@ public class ComWS extends PBase {
     }
 
     public boolean envioUsuarios() {
+
         String ss;
 
         fterr = "";
+
         try {
+
             dbld.clear();
             dbld.insert("Usuario", "WHERE 1=1");
 
@@ -986,14 +999,19 @@ public class ComWS extends PBase {
     }
 
     public boolean envioInvCiego() {
+
         String ss;
 
         fterr = "";
+
         try {
+
             sprog = "Inventario Ciego...";wsStask.onProgressUpdate();
 
             dbld.clear();
+
             if (dbld.insert("temp_inventario_ciego", "WHERE ELIMINADO=0 AND ID_INVENTARIO_ENC = '"+ gl.idInvEnc+"'")){
+
                 try {
                     //if (commitSQL() == 1) {
 
@@ -1030,13 +1048,17 @@ public class ComWS extends PBase {
     }
 
     public boolean envioInvDetalle() {
+
         String ss;
 
         fterr = "";
+
         try {
+
             sprog = "Detalle de Inventario...";wsStask.onProgressUpdate();
 
             dbld.clear();
+
             if(dbld.insert("temp_inventario_detalle", "WHERE ELIMINADO=0 AND ID_INVENTARIO_ENC = '"+ gl.idInvEnc+"'")){
                 try {
                     //if (commitSQL() == 1) {
@@ -1104,6 +1126,7 @@ public class ComWS extends PBase {
     }
 
     public void wsSendFinished(){
+
         Prg.setVisibility(View.INVISIBLE);
         prgBar.setVisibility(View.INVISIBLE);
 
@@ -1116,7 +1139,8 @@ public class ComWS extends PBase {
         isbusy=0;
     }
 
-    private class AsyncCallSend extends AsyncTask<String, Void, Void> {
+    private class
+    AsyncCallSend extends AsyncTask<String, Void, Void> {
 
         @Override
         protected Void doInBackground(String... params) {

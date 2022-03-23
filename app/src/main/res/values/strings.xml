@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Tom Web</string>
+    <string name="tom_web">TOM WEB</string>
+    <string name="usuario">Usuario</string>
 </resources>
