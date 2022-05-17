@@ -92,9 +92,11 @@ public class Ingreso extends PBase {
                 if (aBoolean) {
                     //Toast.makeText(getApplicationContext(), "Reader Connected", Toast.LENGTH_LONG).show();
                     textView.setText("Equipo con RFID listo");
+                    gl.rfid_activo = true;
                 }
                 else {
                     textView.setText("Equipo con RFID no conectado.");
+                    gl.rfid_activo = false;
                 }
             }
         }.execute();

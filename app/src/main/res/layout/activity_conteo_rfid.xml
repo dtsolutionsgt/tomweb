@@ -4,7 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:screenOrientation="portrait"
     tools:context=".ConteoRfid">
 
     <ProgressBar
@@ -28,7 +27,6 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="false"
             android:layout_alignParentRight="false"
-            android:layout_centerVertical="true"
             android:gravity="center_horizontal"
             android:paddingLeft="10dp"
             android:text="Lista de Conteos RFID"
@@ -94,10 +92,7 @@
         android:layout_marginTop="55dp"
         android:layout_marginStart="100dp"
         android:gravity="center_horizontal"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+         />
 
     <TextView
         android:id="@+id/textView28"
@@ -192,18 +187,79 @@
         android:layout_marginStart="21dp"
         android:layout_marginEnd="32dp"
         android:layout_marginBottom="10dp"
-        android:layout_toEndOf="@+id/imageView14"
         android:onClick="doNext"
         android:src="@drawable/arr_next" />
 
-    <ListView
-        android:id="@+id/lvConteoRFID"
+    <HorizontalScrollView
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="10dp"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@id/cbConsolidar"
-        android:layout_below="@id/txtNombre"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp" />
+        android:layout_below="@+id/textView29"
+        android:layout_above="@id/txtRegs"
+        >
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:background="@drawable/color_medium"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/lblNoLinea"
+                    android:layout_width="210dp"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:minHeight="50dp"
+                    android:paddingTop="5dp"
+                    android:paddingBottom="5dp"
+                    android:text="Código TAG"
+                    android:textColor="#FFFFFF"
+                    android:textSize="17sp"
+                    android:textStyle="bold"
+                    android:visibility="visible" />
+
+                <TextView
+                    android:id="@+id/lblCodigo"
+                    android:layout_width="90dp"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:minHeight="50dp"
+                    android:paddingTop="5dp"
+                    android:paddingBottom="5dp"
+                    android:text="Ubicación"
+                    android:textColor="#FFFFFF"
+                    android:textSize="17sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/lblProducto"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:minHeight="50dp"
+                    android:paddingStart="8dp"
+                    android:paddingTop="5dp"
+                    android:paddingBottom="5dp"
+                    android:text="Lecturas"
+                    android:textColor="#FFFFFF"
+                    android:textSize="17sp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+
+            <ListView
+                android:id="@+id/lvConteoRFID"
+                android:layout_width="395dp"
+                android:layout_height="match_parent" />
+
+        </LinearLayout>
+
+    </HorizontalScrollView>
 
 </RelativeLayout>

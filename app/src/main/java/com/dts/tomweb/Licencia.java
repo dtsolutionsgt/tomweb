@@ -58,7 +58,7 @@ public class Licencia extends PBase {
 
                 if(lic.length()>=serieL){
 
-                    msgbox("El usuario ingresó: "+ lic +"\n No serie es: "+ serie);
+                    //msgbox("El usuario ingresó: "+ lic +"\n No serie es: "+ serie);
 
                     if(lic.equals(gl.NoSerieHH)){
                         //crear archivo
@@ -70,7 +70,7 @@ public class Licencia extends PBase {
                     }
 
                 }else {
-                    msgbox("El usuario ingresó: "+ lic +" long: "+ lic.length() +"\n No serie es: "+ serie + " long: "+ serieL);
+                   // msgbox("El usuario ingresó: "+ lic +" long: "+ lic.length() +"\n No serie es: "+ serie + " long: "+ serieL);
                 }
 
 

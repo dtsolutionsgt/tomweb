@@ -142,8 +142,8 @@
         android:layout_height="wrap_content"
         android:layout_above="@+id/relBot"
         android:layout_alignParentStart="true"
-        android:layout_marginStart="55dp"
-        android:layout_marginBottom="199dp"
+        android:layout_marginStart="42dp"
+        android:layout_marginBottom="252dp"
         android:text="Su clave de activación es: " />
 
     <TextView
@@ -151,8 +151,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_above="@+id/relBot"
-        android:layout_marginStart="6dp"
-        android:layout_marginBottom="199dp"
+        android:layout_marginStart="18dp"
+        android:layout_marginBottom="251dp"
         android:layout_toEndOf="@+id/textView3"
         android:text="TextView" />
 

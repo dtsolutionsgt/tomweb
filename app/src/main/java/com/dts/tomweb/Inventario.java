@@ -190,9 +190,15 @@ public class Inventario extends PBase {
 
         dialog.setPositiveButton("Inv. RFID", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
-               // ComWS();
-                Toast.makeText(getApplicationContext(),"Inventario por RFID",Toast.LENGTH_LONG).show();
-                startActivity(new Intent(getApplicationContext(), ConteoRfid.class));
+
+                //#GT16052022_1144: desde login se valida la conexión al RFID, para que no se cargue layout sin el dispositivo.
+                if(gl.rfid_activo) {
+                    Toast.makeText(getApplicationContext(), "Inventario por RFID", Toast.LENGTH_LONG).show();
+                    startActivity(new Intent(getApplicationContext(), ConteoRfid.class));
+                }else{
+                    toastlong("RFID no detectado: valide si esta conectado a la pistola, y con carga en la bateria.");
+                }
+
             }
         });
 

@@ -6,23 +6,22 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.dts.base.clsClasses;
 import com.dts.tomweb.R;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public class LA_RFID extends BaseAdapter {
 
-    private static  ArrayList<clsClasses.clsInventario_ciego_rfid> items;
+    private static List<clsClasses.clsInventario_ciego_rfid> items;
 
     private int selectedIndex;
 
     private LayoutInflater l_Inflater;
 
-    public LA_RFID(Context applicationContext, ArrayList<clsClasses.clsInventario_ciego_rfid> dvalues) {
+    public LA_RFID(Context applicationContext, List<clsClasses.clsInventario_ciego_rfid> dvalues) {
         items = dvalues;
         l_Inflater = LayoutInflater.from(applicationContext);
         selectedIndex = -1;
@@ -66,7 +65,7 @@ public class LA_RFID extends BaseAdapter {
             holder = (ViewHolder) convertView.getTag();
         }
 
-        if (position==0) {
+       /* if (position==0) {
             holder.lblTag.setText("Código");
             holder.lblUbicacion.setText("Ubicación");
             holder.lblCantidad.setText("Lecturas");
@@ -74,7 +73,12 @@ public class LA_RFID extends BaseAdapter {
             holder.lblTag.setText(items.get(position).codigo_barra);
             holder.lblUbicacion.setText(items.get(position).ubicacion);
             holder.lblCantidad.setText(items.get(position).cantidad+"");
-        }
+        }*/
+
+
+        holder.lblTag.setText(items.get(position).codigo_barra);
+        holder.lblUbicacion.setText(items.get(position).ubicacion);
+        holder.lblCantidad.setText(items.get(position).cantidad+"");
 
 
         if(selectedIndex!= -1 && position == selectedIndex) {

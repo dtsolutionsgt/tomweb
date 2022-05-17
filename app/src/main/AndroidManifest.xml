@@ -15,7 +15,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".ConteoRfid"></activity>
+<!--        <activity android:name=".ConteoRfid"></activity>-->
         <activity android:name=".Tablas" />
         <activity
             android:name=".MainActivity"
@@ -71,6 +71,10 @@
             android:windowSoftInputMode="stateAlwaysVisible" />
         <activity
             android:name=".Inventario"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateAlwaysHidden" />
+        <activity
+            android:name=".ConteoRfid"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="stateAlwaysHidden" />
     </application>

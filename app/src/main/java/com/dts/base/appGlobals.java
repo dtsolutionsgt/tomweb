@@ -18,8 +18,10 @@ public class appGlobals extends Application {
 	public int validaLicDB, licExist, empresa, IDregistro, tipoInv,idInvEnc,cbck;
 
 	// Variables guardados al momento de botar la aplicacion
-
 	public int userid,rolid,itemid,itemidx;
+
+	//Variable para determinar si luego del login se puede cargar o no el layout RFID
+	public boolean rfid_activo = false;
 
 	public void saveInstance(Bundle savedInstanceState) {
 		try {

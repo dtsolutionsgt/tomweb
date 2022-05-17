@@ -1,22 +1,44 @@
 package com.dts.tomweb;
 
+import static com.dts.application.Application.UNIQUE_TAGS_CSV;
+import static com.dts.application.Application.inventoryList;
+import static com.dts.application.Application.inventoryMode;
+import static com.dts.application.Application.matchingTagsList;
+import static com.dts.application.Application.memoryBankId;
+import static com.dts.application.Application.missingTagsList;
+import static com.dts.application.Application.tagListMap;
+import static com.dts.application.Application.tagsReadForSearch;
+import static com.dts.application.Application.tagsReadInventory;
+import static com.dts.application.Application.unknownTagsList;
+import static com.dts.application.Application.UNIQUE_TAGS;
+import static com.dts.application.Application.TOTAL_TAGS;
+import static com.dts.application.Application.missedTags;
+import static com.dts.application.Application.matchingTags;
+import static com.dts.rfid.RFIDController.channelIndex;
+import static com.dts.rfid.RFIDController.pc;
+import static com.dts.rfid.RFIDController.phase;
+import static com.dts.rfid.RFIDController.rssi;
+import static com.dts.rfid.RFIDController.toneGenerator;
+
+
+
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
+import android.media.AudioManager;
+import android.media.ToneGenerator;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
-import android.widget.GridView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -24,15 +46,16 @@ import android.widget.Toast;
 
 import com.dts.base.clsClasses;
 import com.dts.classes.clsInventario_ciegoObj;
-import com.dts.classes.clsInventario_ciego_RfidObj;
 import com.dts.classes.clsInventario_detalleObj;
 import com.dts.classes.clsRegistro_handheldObj;
+import com.dts.inventory.InventoryListItem;
 import com.dts.listadapt.LA_RFID;
 import com.dts.listadapt.LA_Tablas;
-
 import com.dts.listadapt.LA_Tablas2;
 import com.zebra.rfid.api3.ACCESS_OPERATION_CODE;
 import com.zebra.rfid.api3.ACCESS_OPERATION_STATUS;
+import com.zebra.rfid.api3.BEEPER_VOLUME;
+import com.zebra.rfid.api3.Constants;
 import com.zebra.rfid.api3.ENUM_TRANSPORT;
 import com.zebra.rfid.api3.ENUM_TRIGGER_MODE;
 import com.zebra.rfid.api3.HANDHELD_TRIGGER_EVENT_TYPE;
@@ -54,10 +77,13 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 
-import static java.sql.Types.NULL;
 
-public class ConteoRfid extends PBase {
+public class ConteoRfid extends PBase  {
 
     private ListView lvConteoRFID;
     private ProgressBar pbar;
@@ -69,6 +95,7 @@ public class ConteoRfid extends PBase {
     private LA_Tablas adapter;
     private LA_Tablas2 dadapter;
     private LA_RFID dadapter_rfid;
+    private LA_RFID dadapter_rfid2;
 
     private int cw;
     private String scod;
@@ -84,13 +111,38 @@ public class ConteoRfid extends PBase {
     TextView textView;
     private EventHandler eventHandler;
 
-    private ArrayList<clsClasses.clsInventario_ciego_rfid> dvalues_rfid = new ArrayList<clsClasses.clsInventario_ciego_rfid>();
+    public ArrayList<clsClasses.clsInventario_ciego_rfid> dvalues_rfid = new ArrayList<clsClasses.clsInventario_ciego_rfid>();
+    ArrayList<String> codigos = new ArrayList<String>();
+    ArrayList<String> lista_limpia = new ArrayList<String>();
+    ArrayList<Map.Entry<String, Integer>> lista_limpia2 = new ArrayList<Map.Entry<String, Integer>>();
+
 
     /*********************************************/
     /*********  elementos para guardar ***********/
     private String Ubic, Cod, tipoArt, barra;
     private Double canti;
     String currentTime;
+    clsRegistro_handheldObj regHH;
+
+    Integer contador = 0;
+
+    //Beeper
+    public static BEEPER_VOLUME beeperVolume = BEEPER_VOLUME.HIGH_BEEP;
+    public static BEEPER_VOLUME sledBeeperVolume = BEEPER_VOLUME.HIGH_BEEP;
+
+
+
+    public Timer tbeep;
+    /**
+     * method to start a timer task to beep for locate functionality and configure the ON OFF duration.
+     */
+    public Timer locatebeep;
+
+
+    //for beep and LED
+    private boolean beepON = false;
+    private boolean beepONLocate = false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,6 +152,9 @@ public class ConteoRfid extends PBase {
         textView = findViewById(R.id.TagText);
         pbar = findViewById(R.id.progressBar);
 
+        codigos.clear();
+        dvalues_rfid.clear();
+
 
         /************************************************/
         /******** variables y constantes rfid **********/
@@ -107,6 +162,13 @@ public class ConteoRfid extends PBase {
         if (readers == null) {
             readers = new Readers(this, ENUM_TRANSPORT.SERVICE_SERIAL);
         }
+
+
+        /*********************************************************/
+        /*********** variables para tono y volumne del scanner ***/
+        int streamType = AudioManager.STREAM_DTMF;
+        toneGenerator = new ToneGenerator(streamType, 90);
+
 
         new AsyncTask<Void, Void, Boolean>() {
             @Override
@@ -150,7 +212,7 @@ public class ConteoRfid extends PBase {
                     textView.setText("Lectura RFID lista.");
                 }
                 else{
-                    textView.setText("Falta inventario registrado para lectura RFID.");
+                    textView.setText("Se ha perdido la comunicación al RFID.");
                 }
             }
         }.execute();
@@ -170,16 +232,27 @@ public class ConteoRfid extends PBase {
             regs = (TextView) findViewById(R.id.txtRegs);
             cb = (CheckBox) findViewById(R.id.cbConsolidar);
 
+            /*************************************************/
+            /**** obtengo la data del registro handheld ******/
+            regHH = new clsRegistro_handheldObj(this, Con, db);
+            regHH.fill();
+            gl.IDregistro = regHH.first().id_registro;
+
+
             if(gl.tipoInv==1) scod = " INVENTARIO_CIEGO";
             if(gl.tipoInv==2 || gl.tipoInv==3) scod = " INVENTARIO_DETALLE";
             if(gl.tipoInv==5) scod = " INVENTARIO_CIEGO_RFID";
 
+
             if(scod != null ){
-                showData(scod);
+                //showData(scod);
+                pbar.setVisibility(View.INVISIBLE);
             }
             else{
                 pbar.setVisibility(View.INVISIBLE);
             }
+
+            lvConteoRFID.setFocusable(true);
 
             //scod ="INVENTARIO_CIEGO";
             //setHandlers();
@@ -190,7 +263,6 @@ public class ConteoRfid extends PBase {
             addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
         }
     }
-
 
     /*********************************************************************/
     /************** configuración RFID  **********************************/
@@ -236,6 +308,8 @@ public class ConteoRfid extends PBase {
     public void doNext(View view) {
 
         gl.validaLicDB=10;
+        //Cerrar la comunicación
+        CerrarRFIF();
         getCampos();
         //ComWS();
     }
@@ -246,10 +320,8 @@ public class ConteoRfid extends PBase {
         @Override
         public void eventReadNotify(RfidReadEvents e) {
 
-            //datos_rfid.clear();
-            //dvalues.clear();
-
-            TagData[] myTags = reader.Actions.getReadTags(50);
+            TagData[] myTags = reader.Actions.getReadTags(30);
+            //TagDataArray myTags = reader.Actions.getReadTagsEx(30);
 
             if (myTags != null) {
 
@@ -257,29 +329,33 @@ public class ConteoRfid extends PBase {
                     Log.d(TAG, "Tag ID " + myTags[index].getTagID());
                     //Log.d(TAG, "Tag evento " + e);
                    final String tag = myTags[index].getTagID();
+                   final int tag_ = index;
 
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
 
-                        /*    listaTag = new clsClasses.clsInventario_ciego_rfid();
-                            listaTag.codigo_barra = tag;
-                            listaTag.cantidad= 1;
-                            listaTag.ubicacion = "1";
-                            datos_rfid.add(listaTag);
-                            dadapter_rfid = new LA_RFID(getApplicationContext(),datos_rfid);
-                            dgrid.setAdapter(dadapter_rfid);
-                            dadapter_rfid.notifyDataSetChanged();*/
+                            //FUNCION QUE GUARDA TAG EN TIEMPO REAL A LA MEMORIA INTERNA
+                              //insertaConteo(tag);
 
-                            insertaConteo(tag);
-                            /*dvalues.add(tag);
-                            dvalues.add("1");
-                            dvalues.add("1");
-                            dadapter= new LA_Tablas2(getApplicationContext(),dvalues);
-                            dgrid.setAdapter(dadapter);
-                            dadapter.notifyDataSetChanged();*/
+                            //new MatchingTagsResponseHandlerTask(myTags[tag_]).execute();
 
-                            //showData(scod);
+                            new ResponseHandlerTask(myTags[tag_]).execute();
+
+                            /*if(!codigos.contains(tag)){
+
+                                clsClasses.clsInventario_ciego_rfid items_nuevo= new clsClasses.clsInventario_ciego_rfid();
+                                items_nuevo.codigo_barra = tag;
+                                items_nuevo.ubicacion = "1";
+                                items_nuevo.cantidad = 1;
+                                //items_nuevo.id_inventario_enc=1;
+                                //items_nuevo.eliminado = 0;
+                                //items_nuevo.comunicado = "";
+                                codigos.add(items_nuevo.codigo_barra);
+                                dvalues_rfid.add(items_nuevo);
+                                dadapter_rfid = new LA_RFID(getApplicationContext(), dvalues_rfid);
+                                lvConteoRFID.setAdapter(dadapter_rfid);
+                            }*/
                         }
                     });
 
@@ -292,12 +368,6 @@ public class ConteoRfid extends PBase {
                     }
                 }
 
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        showData(scod);
-                    }
-                });
             }
         }
 
@@ -314,6 +384,7 @@ public class ConteoRfid extends PBase {
                         protected Void doInBackground(Void... voids) {
                             try {
                                 reader.Actions.Inventory.perform();
+
                             } catch (InvalidUsageException e) {
                                 e.printStackTrace();
                                 addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"failed_triger_rfid"+ currentTime );
@@ -334,6 +405,7 @@ public class ConteoRfid extends PBase {
                         protected Void doInBackground(Void... voids) {
                             try {
                                 reader.Actions.Inventory.stop();
+                                Log.d(TAG, "termina lectura: ");
                             }
                             catch (InvalidUsageException e)
                             {
@@ -346,9 +418,20 @@ public class ConteoRfid extends PBase {
                             return null;
                         }
                     }.execute();
+
                 }
 
+                   runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        GuardarLista(scod);
+                        showData(scod);
+                    }
+                });
+
             }
+
         }
 
     }
@@ -356,11 +439,14 @@ public class ConteoRfid extends PBase {
     public void insertaConteo(String tag){
 
         //clsInventario_ciego_RfidObj InvCiegoRfid = new clsInventario_ciego_RfidObj(this, Con, db);
-        clsClasses.clsInventario_ciego_rfid item= new clsClasses.clsInventario_ciego_rfid();
+        //clsRegistro_handheldObj regHH = new clsRegistro_handheldObj(this, Con, db);
+        //clsClasses.clsInventario_ciego_rfid item= new clsClasses.clsInventario_ciego_rfid();
+
+        /********** data de un inventario que no es ciego *************************************/
         clsInventario_detalleObj InvDet = new clsInventario_detalleObj(this, Con, db);
         clsClasses.clsInventario_detalle itemDeta= clsCls.new clsInventario_detalle();
-        clsRegistro_handheldObj regHH = new clsRegistro_handheldObj(this, Con, db);
 
+        /********** objetos de un inventario que es ciego o usa rfid *************************/
         clsInventario_ciegoObj InvCiego = new clsInventario_ciegoObj(this, Con, db);
         clsClasses.clsInventario_ciego items;
 
@@ -375,8 +461,9 @@ public class ConteoRfid extends PBase {
 
         try{
 
-            regHH.fill();
-            gl.IDregistro = regHH.first().id_registro;
+            /******lo valido en el oncreate, aca se repetiria n veces y lo manejara lento ****/
+            //regHH.fill();
+            //gl.IDregistro = regHH.first().id_registro;
             Ubic = "1";
             items = new clsClasses.clsInventario_ciego();
 
@@ -406,7 +493,7 @@ public class ConteoRfid extends PBase {
                 return;
             }
 
-            if(gl.tipoInv==1) {
+            if(gl.tipoInv==0) {
 
                 barra = Cod;
                 items.id_inventario_enc = gl.idInvEnc;
@@ -433,8 +520,8 @@ public class ConteoRfid extends PBase {
                     }
 
                 } catch (Exception e) {
-                    addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "error_inv_ciego" + currentTime);
-                    msgbox("Error: "+e);
+                    addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "error_insert_inv_ciego " + du.getActDate());
+                    msgbox("Error: "+e.getMessage());
                 }
 
             }else if(gl.tipoInv==2 || gl.tipoInv==3){
@@ -448,13 +535,12 @@ public class ConteoRfid extends PBase {
                 itemDeta.id_operador = gl.userid;
                 itemDeta.fecha = ffe;
                 itemDeta.id_registro = gl.IDregistro;
-                item.eliminado = 0;
-
+                itemDeta.eliminado =0;
                 InvDet.add(itemDeta);
             }
 
         }catch (Exception e){
-            addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "error_inv_ciego" + currentTime);
+            addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "error_insert_conteo " + du.getActDate());
             msgbox("Error: "+e);
         }
     }
@@ -498,22 +584,23 @@ public class ConteoRfid extends PBase {
                 reader = null;
                 readers.Dispose();
                 readers = null;
+
             }
         }
         catch (InvalidUsageException e)
         {
             e.printStackTrace();
-            addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"ERROR_RFID_DISCONNECT"+ currentTime );
+            addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"ERROR_RFID_DISCONNECT_1 " + du.getActDate() );
         }
         catch (OperationFailureException e)
         {
             e.printStackTrace();
-            addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"ERROR_RFID_DISCONNECT"+ currentTime );
+            addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"ERROR_RFID_DISCONNECT_2 " + du.getActDate() );
         }
         catch (Exception e)
         {
             e.printStackTrace();
-            addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"ERROR_RFID_DISCONNECT"+ currentTime );
+            addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"ERROR_RFID_DISCONNECT_3"+ du.getActDate() );
         }
 
         //finish();
@@ -624,29 +711,31 @@ public class ConteoRfid extends PBase {
 
     }
 
+
     private void showData(String tn) {
         Cursor dt;
         String ss = "";
         int cc,rg;
-        currentTime = new SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(new Date());
+        //currentTime = new SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(new Date());
         new clsClasses.clsInventario_ciego_rfid();
         clsClasses.clsInventario_ciego_rfid items;
 
         try {
 
-            dvalues_rfid.clear();
+            if (contador == 0){
+
+                dvalues_rfid.clear();
+                lvConteoRFID.setAdapter(null);
+
+
+            tn ="INVENTARIO_CIEGO";
 
             tn = tn +" WHERE ID_INVENTARIO_ENC="+ gl.idInvEnc +" AND ELIMINADO = 0";
             ss="SELECT CODIGO_BARRA, UBICACION, CANTIDAD FROM "+ tn;
 
-          /*  if(consol==true){
-                ss="SELECT CODIGO_BARRA, UBICACION, SUM(CANTIDAD) FROM "+ tn +" GROUP BY CODIGO_BARRA, UBICACION";
-            }else {
-                ss = "SELECT CODIGO_BARRA, UBICACION, CANTIDAD FROM " + tn;
-            }*/
-
             dt=Con.OpenDT(ss);
             rg = dt.getCount();
+            contador = dt.getCount();
             if(rg>0){
                 regs.setText(""+rg);
             }
@@ -660,19 +749,120 @@ public class ConteoRfid extends PBase {
                 dvalues_rfid.add(items);
                 dt.moveToNext();
             }
+
             if (dt!=null) dt.close();
 
-            dadapter_rfid= new LA_RFID(getApplicationContext(),dvalues_rfid);
+            dadapter_rfid= new LA_RFID(this,dvalues_rfid);
             lvConteoRFID.setAdapter(dadapter_rfid);
-
             pbar.setVisibility(View.INVISIBLE);
 
+
+            }
+
+
         } catch (Exception e) {
-            addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"ERROR_SHOWDATA_RFID" + currentTime);
-            msgbox("showData2: "+e);
+            addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"ERROR_SHOWDATA_RFID " + du.getActDate());
+            msgbox("showData: "+e.getMessage());
         }
 
 
+    }
+
+    private void GuardarLista(String tn){
+
+
+            /********** data de un inventario que no es ciego *************************************/
+            //clsInventario_detalleObj InvDet = new clsInventario_detalleObj(this, Con, db);
+            //clsClasses.clsInventario_detalle itemDeta= clsCls.new clsInventario_detalle();
+
+            /********** objetos de un inventario que es ciego o usa rfid *************************/
+            clsInventario_ciegoObj InvCiego = new clsInventario_ciegoObj(this, Con, db);
+            clsClasses.clsInventario_ciego items;
+
+            Long sfecha;
+            String  ff,ffe, ss;
+            Integer rg;
+            //Cod = "dsd";  //TAG
+            Integer cant = 1;
+            Cursor dt;
+
+            currentTime = new SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(new Date());
+            sfecha=du.getActDate();
+            ff = "20"+sfecha;
+            ffe= ff.substring(0,8);
+
+            try{
+
+                /******lo valido en el oncreate, aca se repetiria n veces y lo manejara lento ****/
+                //regHH.fill();
+                //gl.IDregistro = regHH.first().id_registro;
+                Ubic = "1";
+                items = new clsClasses.clsInventario_ciego();
+
+                if(gl.tipoInv!=1){
+                    /*if(tipoArt.equals("S")){
+                        canti = 1.0;
+                    }else {
+                        canti = Double.parseDouble(String.valueOf(cant));
+                    }*/
+                    canti = 1.0;
+
+                }else {
+
+                    canti = Double.parseDouble(String.valueOf(cant));
+                }
+
+
+                if(gl.tipoInv==1) {
+                    //GT16052022: itero la lista final que se usó en memoria
+                    for (int x = 0; x < inventoryList.size(); x++) {
+                        clsClasses.clsInventario_ciego_rfid p = dvalues_rfid.get(x);
+
+                        if (!lista_limpia.contains(p.codigo_barra)){
+                            lista_limpia.add(p.codigo_barra);
+
+                            ss= "SELECT CODIGO_BARRA FROM INVENTARIO_CIEGO WHERE CODIGO_BARRA = '"+ p.codigo_barra + "' ";
+                            dt=Con.OpenDT(ss);
+                            rg = dt.getCount();
+
+                            barra = p.codigo_barra;
+                            items.id_inventario_enc = gl.idInvEnc;
+                            items.codigo_barra = barra;
+                            //items.cantidad = canti;
+                            items.cantidad = p.cantidad;
+                            items.comunicado = "N";
+                            items.ubicacion = Ubic;
+                            items.id_operador = gl.userid;
+                            //items.fecha = ffe + " " + currentTime;
+                            items.fecha = ffe;
+                            items.id_registro = gl.IDregistro;
+                            items.eliminado = 0;
+
+                            try {
+
+                                if (rg == 0) {
+                                    InvCiego.add(items);
+                                } else {
+                                    /*sql="update Inventario_ciego_rfid set cantidad = cantidad + 1 WHERE CODIGO_BARRA = '"+ barra + "' ";*/
+                                    sql = "update Inventario_ciego set cantidad = cantidad + 1 WHERE CODIGO_BARRA = '" + barra + "' ";
+                                    db.execSQL(sql);
+
+                                }
+
+                            } catch (Exception e) {
+                                addlog(new Object() {
+                                }.getClass().getEnclosingMethod().getName(), e.getMessage(), "error_insert_inv_ciego " + du.getActDate());
+                                msgbox("Error: " + e.getMessage());
+                            }
+                        }
+
+                    }
+                }
+
+        }catch (Exception e){
+            addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "error_insert_inv_ciego " + du.getActDate());
+            //msgbox("Error: "+e.getMessage());
+        }
     }
 
     public void getCampos(){
@@ -719,5 +909,387 @@ public class ConteoRfid extends PBase {
         dialog.show();
 
     }
+
+    private class MatchingTagsResponseHandlerTask extends AsyncTask<Void, Void, Boolean> {
+
+        private TagData tagData;
+        private InventoryListItem inventoryItem;
+        private InventoryListItem oldObject;
+        private String memoryBank;
+        private String memoryBankData;
+
+        public MatchingTagsResponseHandlerTask(TagData tagData) {
+            this.tagData = tagData;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... voids) {
+
+            runOnUiThread(new Runnable() {
+                @SuppressLint("WrongConstant")
+                @Override
+                public void run() {
+                    boolean added = false;
+
+                    try {
+                        if (inventoryList.containsKey(tagData.getTagID())) {
+                            inventoryItem = new InventoryListItem(tagData.getTagID(), 1, null, null, null, null, null, null);
+                            int index = inventoryList.get(tagData.getTagID());
+                            if (index >= 0) {
+                                if (tagListMap.containsKey(tagData.getTagID()))
+                                    tagsReadInventory.get(index).setTagStatus("MATCH");
+                                else
+                                    tagsReadInventory.get(index).setTagStatus("UNKNOWN");
+                                TOTAL_TAGS++;
+                                //Tag is already present. Update the fields and increment the count
+                                if (tagData.getOpCode() != null)
+                                    if (tagData.getOpCode().toString().equalsIgnoreCase("ACCESS_OPERATION_READ")) {
+                                        memoryBank = tagData.getMemoryBank().toString();
+                                        memoryBankData = tagData.getMemoryBankData().toString();
+                                    }
+                                if (memoryBankId == 1) {  //matching tags
+                                    if (tagListMap.containsKey(tagData.getTagID()) && !matchingTagsList.contains(tagsReadInventory.get(index))) {
+                                        matchingTagsList.add(tagsReadInventory.get(index));
+                                        tagsReadForSearch.add(tagsReadInventory.get(index));
+                                        added = true;
+                                    }
+                                } else if (memoryBankId == 2 && tagListMap.containsKey(tagData.getTagID())) {
+                                    if (missingTagsList.contains(tagsReadInventory.get(index))) {
+                                        missingTagsList.remove(tagsReadInventory.get(index));
+                                        tagsReadForSearch.remove(tagsReadInventory.get(index));
+                                        added = true;
+                                    }
+                                }
+                                oldObject = tagsReadInventory.get(index);
+                                if (oldObject.getCount() == 0) {
+                                    missedTags--;
+                                    matchingTags++;
+                                    UNIQUE_TAGS++;
+                                }
+                                oldObject.incrementCount();
+                                if (oldObject.getMemoryBankData() != null && !oldObject.getMemoryBankData().equalsIgnoreCase(memoryBankData))
+                                    oldObject.setMemoryBankData(memoryBankData);
+                                //oldObject.setEPCId(inventoryItem.getEPCId());
+                                oldObject.setPC(Integer.toString(tagData.getPC()));
+                                oldObject.setPhase(Integer.toString(tagData.getPhase()));
+                                oldObject.setChannelIndex(Integer.toString(tagData.getChannelIndex()));
+                                oldObject.setRSSI(Integer.toString(tagData.getPeakRSSI()));
+                            }
+
+                        } else {
+                            //Tag is encountered for the first time. Add it.
+                            if (inventoryMode == 0 || (inventoryMode == 1 && UNIQUE_TAGS_CSV <= Constants.UNIQUE_TAG_LIMIT)) {
+                                int tagSeenCount = tagData.getTagSeenCount();
+                                if (tagSeenCount != 0) {
+                                    TOTAL_TAGS += tagSeenCount;
+                                    inventoryItem = new InventoryListItem(tagData.getTagID(), tagSeenCount, null, null, null, null, null, null);
+                                } else {
+                                    TOTAL_TAGS++;
+                                    inventoryItem = new InventoryListItem(tagData.getTagID(), 1, null, null, null, null, null, null);
+                                }
+                                if (tagListMap.containsKey(tagData.getTagID()))
+                                    inventoryItem.setTagStatus("MATCH");
+                                else
+                                    inventoryItem.setTagStatus("UNKNOWN");
+                                if (memoryBankId == 1)
+                                    tagsReadInventory.add(inventoryItem);
+                                else if (memoryBankId == 3) {
+                                    inventoryItem.setTagDetails("unknown");
+                                    added = tagsReadInventory.add(inventoryItem);
+                                    unknownTagsList.add(inventoryItem);
+                                    tagsReadForSearch.add(inventoryItem);
+                                } else {
+                                    if (inventoryItem.getTagDetails() == null) {
+                                        inventoryItem.setTagDetails("unknown");
+                                    }
+                                    added = tagsReadInventory.add(inventoryItem);
+                                    if (memoryBankId != 2)
+                                        tagsReadForSearch.add(inventoryItem);
+                                }
+                                if (added || memoryBankId == 1) {
+                                    inventoryList.put(tagData.getTagID(), UNIQUE_TAGS_CSV);
+                                    if (tagData.getOpCode() != null)
+                                        if (tagData.getOpCode().toString().equalsIgnoreCase("ACCESS_OPERATION_READ")) {
+                                            memoryBank = tagData.getMemoryBank().toString();
+                                            memoryBankData = tagData.getMemoryBankData().toString();
+                                        }
+                                    oldObject = tagsReadInventory.get(UNIQUE_TAGS_CSV);
+                                    oldObject.setMemoryBankData(memoryBankData);
+                                    oldObject.setMemoryBank(memoryBank);
+                                    oldObject.setPC(Integer.toString(tagData.getPC()));
+                                    oldObject.setPhase(Integer.toString(tagData.getPhase()));
+                                    oldObject.setChannelIndex(Integer.toString(tagData.getChannelIndex()));
+                                    oldObject.setRSSI(Integer.toString(tagData.getPeakRSSI()));
+                                    UNIQUE_TAGS++;
+                                    UNIQUE_TAGS_CSV++;
+                                }
+                            }
+                        }
+
+                        // beep on each tag read
+                        //startbeepingTimer();
+
+                    } catch (IndexOutOfBoundsException e) {
+                        addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(),"error_lectura " +TAG);
+                        oldObject = null;
+                        added = false;
+                    } catch (Exception e) {
+                        addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(),"error_lectura " +TAG);
+                        oldObject = null;
+                        added = false;
+                    }
+                    tagData = null;
+                    inventoryItem = null;
+                    memoryBank = null;
+                    memoryBankData = null;
+                }
+            });
+            return true;
+
+        }
+    }
+
+
+    /**
+     * Async Task, which will handle tag data response from reader. This task is used to check whether tag is in inventory list or not.
+     * If tag is not in the list then it will add the tag data to inventory list. If tag is there in inventory list then it will update the tag details in inventory list.
+     */
+    @SuppressLint("StaticFieldLeak")
+    public class ResponseHandlerTask extends AsyncTask<Void, Void, Boolean> {
+        private TagData tagData;
+        private InventoryListItem inventoryItem;
+        private InventoryListItem oldObject;
+        //private Fragment fragment;
+        private String memoryBank;
+        private String memoryBankData;
+
+        ResponseHandlerTask(TagData tagData) {
+            this.tagData = tagData;
+            //this.fragment = fragment;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... voids) {
+            boolean added = false;
+            try {
+                if (inventoryList.containsKey(tagData.getTagID())) {
+                    inventoryItem = new InventoryListItem(tagData.getTagID(), 1, null, null, null, null, null, null);
+                    int index = inventoryList.get(tagData.getTagID());
+                    if (index >= 0) {
+                        //Tag is already present. Update the fields and increment the count
+                        if (tagData.getOpCode() != null)
+                            if (tagData.getOpCode().toString().equalsIgnoreCase("ACCESS_OPERATION_READ")) {
+                                memoryBank = tagData.getMemoryBank().toString();
+                                memoryBankData = tagData.getMemoryBankData().toString();
+                            }
+                        oldObject = tagsReadInventory.get(index);
+                        int tagSeenCount = 0;
+                        if (Integer.toString(tagData.getTagSeenCount()) != null)
+                            tagSeenCount = tagData.getTagSeenCount();
+                        if (tagSeenCount != 0) {
+                            TOTAL_TAGS += tagSeenCount;
+                            oldObject.incrementCountWithTagSeenCount(tagSeenCount);
+                        } else {
+                            TOTAL_TAGS++;
+                            oldObject.incrementCount();
+                        }
+                        if (oldObject.getMemoryBankData() != null && !oldObject.getMemoryBankData().equalsIgnoreCase(memoryBankData))
+                            oldObject.setMemoryBankData(memoryBankData);
+                        if (pc)
+                            oldObject.setPC(Integer.toHexString(tagData.getPC()));
+                        if (phase)
+                            oldObject.setPhase(Integer.toString(tagData.getPhase()));
+                        if (channelIndex)
+                            oldObject.setChannelIndex(Integer.toString(tagData.getChannelIndex()));
+                        if (rssi)
+                            oldObject.setRSSI(Integer.toString(tagData.getPeakRSSI()));
+
+
+                      /*  clsClasses.clsInventario_ciego_rfid tags_read = new clsClasses.clsInventario_ciego_rfid();
+                        tags_read.codigo_barra = inventoryItem.getTagID();
+                        tags_read.ubicacion = "1";
+                        tags_read.cantidad = tagSeenCount;
+                        dvalues_rfid.add(tags_read);
+                        dadapter_rfid= new LA_RFID(getApplicationContext(),dvalues_rfid);
+                        lvConteoRFID.setAdapter(dadapter_rfid);*/
+
+                    }
+                } else {
+                    //Tag is encountered for the first time. Add it.
+                    if (inventoryMode == 0 || (inventoryMode == 1 && UNIQUE_TAGS <= Constants.UNIQUE_TAG_LIMIT)) {
+                        int tagSeenCount = 0;
+                        if (Integer.toString(tagData.getTagSeenCount()) != null)
+                            tagSeenCount = tagData.getTagSeenCount();
+                        if (tagSeenCount != 0) {
+                            TOTAL_TAGS += tagSeenCount;
+                            inventoryItem = new InventoryListItem(tagData.getTagID(), tagSeenCount, null, null, null, null, null, null);
+                        } else {
+                            TOTAL_TAGS++;
+                            inventoryItem = new InventoryListItem(tagData.getTagID(), 1, null, null, null, null, null, null);
+                        }
+                        added = tagsReadInventory.add(inventoryItem);
+                        if (added) {
+                            inventoryList.put(tagData.getTagID(), UNIQUE_TAGS);
+                            if (tagData.getOpCode() != null)
+                                if (tagData.getOpCode().toString().equalsIgnoreCase("ACCESS_OPERATION_READ")) {
+                                    memoryBank = tagData.getMemoryBank().toString();
+                                    memoryBankData = tagData.getMemoryBankData().toString();
+
+                                }
+                            oldObject = tagsReadInventory.get(UNIQUE_TAGS);
+                            oldObject.setMemoryBankData(memoryBankData);
+                            oldObject.setMemoryBank(memoryBank);
+                            if (pc)
+                                oldObject.setPC(Integer.toHexString(tagData.getPC()));
+                            if (phase)
+                                oldObject.setPhase(Integer.toString(tagData.getPhase()));
+                            if (channelIndex)
+                                oldObject.setChannelIndex(Integer.toString(tagData.getChannelIndex()));
+                            if (rssi)
+                                oldObject.setRSSI(Integer.toString(tagData.getPeakRSSI()));
+                            UNIQUE_TAGS++;
+
+                       /*     clsClasses.clsInventario_ciego_rfid tags_read = new clsClasses.clsInventario_ciego_rfid();
+                            tags_read.codigo_barra = tagData.getTagID();
+                            tags_read.ubicacion = "1";
+                            tags_read.cantidad = tagSeenCount;
+                            dvalues_rfid.add(tags_read);
+                            dadapter_rfid= new LA_RFID(getApplicationContext(),dvalues_rfid);
+                            lvConteoRFID.setAdapter(dadapter_rfid);*/
+                            //lvConteoRFID.notify();
+
+                        }
+                    }
+                }
+                // beep on each tag read
+                startbeepingTimer();
+            } catch (IndexOutOfBoundsException e) {
+                //logAsMessage(TYPE_ERROR, TAG, e.getMessage());
+                oldObject = null;
+                added = false;
+            } catch (Exception e) {
+                // logAsMessage(TYPE_ERROR, TAG, e.getMessage());
+                oldObject = null;
+                added = false;
+            }
+            inventoryItem = null;
+            memoryBank = null;
+            memoryBankData = null;
+            return added;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean result) {
+            cancel(true);
+/*            if (oldObject != null && fragment instanceof ResponseHandlerInterfaces.ResponseTagHandler)
+                ((ResponseHandlerInterfaces.ResponseTagHandler) fragment).handleTagResponse(oldObject, result);*/
+            oldObject = null;
+        }
+    }
+
+
+    public void startbeepingTimer() {
+
+        if (beeperVolume != BEEPER_VOLUME.QUIET_BEEP) {
+            if (!beepON) {
+                beepON = true;
+                beep();
+                if (tbeep == null) {
+                    TimerTask task = new TimerTask() {
+                        @Override
+                        public void run() {
+                            stopbeepingTimer();
+                            beepON = false;
+                        }
+                    };
+                    tbeep = new Timer();
+                    tbeep.schedule(task, 10);
+                }
+            }
+        }
+    }
+
+    /**
+     * method to stop timer
+     */
+    public void stopbeepingTimer() {
+        if (tbeep != null && toneGenerator != null) {
+            toneGenerator.stopTone();
+            tbeep.cancel();
+            tbeep.purge();
+        }
+        tbeep = null;
+    }
+
+    public void beep() {
+        if (toneGenerator != null) {
+            int toneType = ToneGenerator.TONE_PROP_BEEP;
+            toneGenerator.startTone(toneType);
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        //super.onRestart();
+        super.onResume();
+
+        try {
+
+            if (readers == null) {
+                readers = new Readers(this, ENUM_TRANSPORT.SERVICE_SERIAL);
+            }
+
+            new AsyncTask<Void, Void, Boolean>() {
+                @Override
+                protected Boolean doInBackground(Void... voids) {
+                    try {
+                        if (readers != null) {
+                            if (readers.GetAvailableRFIDReaderList() != null) {
+                                availableRFIDReaderList = readers.GetAvailableRFIDReaderList();
+                                if (availableRFIDReaderList.size() != 0) {
+                                    // get first reader from list
+                                    readerDevice = availableRFIDReaderList.get(0);
+                                    reader = readerDevice.getRFIDReader();
+                                    if (!reader.isConnected() && gl != null) {
+                                        // Establish connection to the RFID Reader
+                                        reader.connect();
+                                        ConfigureReader();
+                                        return true;
+                                    } else {
+                                        return false;
+                                    }
+                                }
+                            }
+                        }
+                    } catch (InvalidUsageException e) {
+                        e.printStackTrace();
+                    } catch (OperationFailureException e) {
+                        e.printStackTrace();
+                        Log.d(TAG, "OperationFailureException " + e.getVendorMessage());
+                    }
+                    return false;
+                }
+
+                @Override
+                protected void onPostExecute(Boolean aBoolean) {
+                    super.onPostExecute(aBoolean);
+                    if (aBoolean) {
+                        //Toast.makeText(getApplicationContext(), "Reader Connected", Toast.LENGTH_LONG).show();
+                        textView.setText("Lectura RFID lista.");
+                    } else {
+                        textView.setText("Se ha perdido la comunicación al RFID.");
+                    }
+                }
+            }.execute();
+
+
+        } catch (Exception e) {
+            addlog(new Object() {
+            }.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
+        }
+
+    }
+
+
 
 }
