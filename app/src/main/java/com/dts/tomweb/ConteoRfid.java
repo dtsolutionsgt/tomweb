@@ -461,7 +461,7 @@ public class ConteoRfid extends PBase  {
 
         try{
 
-            /******lo valido en el oncreate, aca se repetiria n veces y lo manejara lento ****/
+            /******lo valido en el oncreate, aca se repetiria n veces y lo manejara lento -- ****/
             //regHH.fill();
             //gl.IDregistro = regHH.first().id_registro;
             Ubic = "1";
