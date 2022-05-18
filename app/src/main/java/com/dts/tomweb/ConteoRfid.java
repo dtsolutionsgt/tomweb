@@ -1104,15 +1104,6 @@ public class ConteoRfid extends PBase  {
                         if (rssi)
                             oldObject.setRSSI(Integer.toString(tagData.getPeakRSSI()));
 
-
-                      /*  clsClasses.clsInventario_ciego_rfid tags_read = new clsClasses.clsInventario_ciego_rfid();
-                        tags_read.codigo_barra = inventoryItem.getTagID();
-                        tags_read.ubicacion = "1";
-                        tags_read.cantidad = tagSeenCount;
-                        dvalues_rfid.add(tags_read);
-                        dadapter_rfid= new LA_RFID(getApplicationContext(),dvalues_rfid);
-                        lvConteoRFID.setAdapter(dadapter_rfid);*/
-
                     }
                 } else {
                     //Tag is encountered for the first time. Add it.
