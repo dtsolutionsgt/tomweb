@@ -1,0 +1,4 @@
+configurations.maybeCreate("default")
+
+dependencies {
+    artifacts.add("default", file('API3_LIB-release.aar'))}
