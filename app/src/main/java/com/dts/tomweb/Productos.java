@@ -232,7 +232,9 @@ public class Productos extends PBase {
                 if (!nomb.isEmpty() && !barra.isEmpty()) {
                     tn = tn + " WHERE CODIGO_BARRA = " + barra + " AND UBICACION =" + nomb + " AND ELIMINADO = 0 AND ID_INVENTARIO_ENC = "+gl.idInvEnc;
                 } else if (!barra.isEmpty()) {
-                    tn = tn + " WHERE CODIGO_BARRA = " + barra + " AND ELIMINADO = 0 AND ID_INVENTARIO_ENC = "+gl.idInvEnc;
+                    //#GT19052022: al hacer busqueda en el inventario, se filtra por like
+                    //tn = tn + " WHERE CODIGO_BARRA LIKE '"+ barra + "' AND ELIMINADO = 0 AND ID_INVENTARIO_ENC = "+gl.idInvEnc;
+                    tn = tn + " WHERE CODIGO_BARRA LIKE '%" + barra + "%' AND ELIMINADO = 0 AND ID_INVENTARIO_ENC = "+gl.idInvEnc;
                 } else if (!nomb.isEmpty()) {
                     tn = tn + " WHERE UBICACION = " + nomb + " AND ELIMINADO = 0 AND ID_INVENTARIO_ENC = "+gl.idInvEnc;
                 }else{
@@ -332,7 +334,28 @@ public class Productos extends PBase {
                 values.add("TIPO CONTEO");
             }
 
+
+            //#GT20052022_1005: le aplico el mismo estilo de grid que en lista_conteos
             ViewGroup.LayoutParams dlayoutParams = dgrid.getLayoutParams();
+            dlayoutParams.width =((int) (cw*cc))+25;
+            dgrid.setLayoutParams(dlayoutParams);
+            dgrid.setNumColumns(3);
+
+            dadapter=new LA_Tablas2(this,dvalues);
+            dgrid.setAdapter(dadapter);
+
+
+            ViewGroup.LayoutParams layoutParams = grid.getLayoutParams();
+            layoutParams.width =((int) (cw*cc))+25;
+            grid.setLayoutParams(layoutParams);
+            grid.setNumColumns(3);
+
+            adapter=new LA_Tablas(this,values);
+            grid.setAdapter(adapter);
+
+
+            //#GT20052022:Se omite estos sets, porque el grid queda mal distribuido visualmente
+     /*       ViewGroup.LayoutParams dlayoutParams = dgrid.getLayoutParams();
             dlayoutParams.width =((int) (cw*cc))+25;
             dgrid.setLayoutParams(dlayoutParams);
 
@@ -353,7 +376,7 @@ public class Productos extends PBase {
             grid.setNumColumns(cc);
 
             adapter=new LA_Tablas(this,values);
-            grid.setAdapter(adapter);
+            grid.setAdapter(adapter);*/
 
             pbar.setVisibility(View.INVISIBLE);
         } catch (Exception e) {

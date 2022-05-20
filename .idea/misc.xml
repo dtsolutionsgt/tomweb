@@ -3,22 +3,32 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Proyectos_DTS_2020/tomweb/app/src/main/res/drawable/color_dark.xml" value="0.17604166666666668" />
+        <entry key="..\:/Proyectos_DTS_2020/tomweb/app/src/main/res/drawable/color_light.xml" value="0.17604166666666668" />
+        <entry key="..\:/Proyectos_DTS_2020/tomweb/app/src/main/res/drawable/color_medium.xml" value="0.17604166666666668" />
+        <entry key="..\:/Proyectos_DTS_2020/tomweb/app/src/main/res/drawable/color_medium_2.xml" value="0.17604166666666668" />
+        <entry key="..\:/Proyectos_DTS_2020/tomweb/app/src/main/res/drawable/frame_rect.xml" value="0.17604166666666668" />
+        <entry key="..\:/Proyectos_DTS_2020/tomweb/app/src/main/res/drawable/frame_round.xml" value="0.17604166666666668" />
+        <entry key="..\:/Proyectos_DTS_2020/tomweb/app/src/main/res/drawable/ic_launcher_background.xml" value="0.17604166666666668" />
         <entry key="..\:/Proyectos_DTS_2020/tomweb/app/src/main/res/layout/activity_com_ws.xml" value="0.15416666666666667" />
-        <entry key="..\:/Proyectos_DTS_2020/tomweb/app/src/main/res/layout/activity_conteo.xml" value="0.15208333333333332" />
+        <entry key="..\:/Proyectos_DTS_2020/tomweb/app/src/main/res/layout/activity_conteo.xml" value="0.2" />
         <entry key="..\:/Proyectos_DTS_2020/tomweb/app/src/main/res/layout/activity_conteo_rfid.xml" value="0.176" />
         <entry key="..\:/Proyectos_DTS_2020/tomweb/app/src/main/res/layout/activity_ingreso.xml" value="0.15208333333333332" />
         <entry key="..\:/Proyectos_DTS_2020/tomweb/app/src/main/res/layout/activity_inventario.xml" value="0.2" />
         <entry key="..\:/Proyectos_DTS_2020/tomweb/app/src/main/res/layout/activity_licencia.xml" value="0.264" />
-        <entry key="..\:/Proyectos_DTS_2020/tomweb/app/src/main/res/layout/activity_lista_conteos.xml" value="0.13177083333333334" />
+        <entry key="..\:/Proyectos_DTS_2020/tomweb/app/src/main/res/layout/activity_lista_conteos.xml" value="0.2" />
         <entry key="..\:/Proyectos_DTS_2020/tomweb/app/src/main/res/layout/activity_main.xml" value="0.10416666666666667" />
         <entry key="..\:/Proyectos_DTS_2020/tomweb/app/src/main/res/layout/activity_menu_principal.xml" value="0.264" />
         <entry key="..\:/Proyectos_DTS_2020/tomweb/app/src/main/res/layout/activity_pbase.xml" value="0.16041666666666668" />
-        <entry key="..\:/Proyectos_DTS_2020/tomweb/app/src/main/res/layout/activity_productos.xml" value="0.15416666666666667" />
+        <entry key="..\:/Proyectos_DTS_2020/tomweb/app/src/main/res/layout/activity_productos.xml" value="0.2" />
         <entry key="..\:/Proyectos_DTS_2020/tomweb/app/src/main/res/layout/activity_tablas.xml" value="0.15208333333333332" />
         <entry key="..\:/Proyectos_DTS_2020/tomweb/app/src/main/res/layout/activity_tipo_conteo.xml" value="0.16041666666666668" />
         <entry key="..\:/Proyectos_DTS_2020/tomweb/app/src/main/res/layout/activity_usuario.xml" value="0.15208333333333332" />
         <entry key="..\:/Proyectos_DTS_2020/tomweb/app/src/main/res/layout/activity_usuario_lista.xml" value="0.16041666666666668" />
+        <entry key="..\:/Proyectos_DTS_2020/tomweb/app/src/main/res/layout/grid_cell.xml" value="0.1" />
+        <entry key="..\:/Proyectos_DTS_2020/tomweb/app/src/main/res/layout/grid_cell_head.xml" value="0.1" />
         <entry key="..\:/Proyectos_DTS_2020/tomweb/app/src/main/res/layout/grid_rfid.xml" value="0.15885416666666666" />
+        <entry key="..\:/Proyectos_DTS_2020/tomweb/app/src/main/res/layout/lv_menu.xml" value="0.1" />
         <entry key="..\:/Proyectos_DTS_2020/tomweb/app/src/main/res/layout/lv_usuario.xml" value="0.16041666666666668" />
         <entry key="..\:/Proyectos_DTS_2020/tomweb/app/src/main/res/layout/popup_window.xml" value="0.16041666666666668" />
       </map>
