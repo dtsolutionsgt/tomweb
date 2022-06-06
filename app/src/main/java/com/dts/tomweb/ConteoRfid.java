@@ -114,7 +114,7 @@ public class ConteoRfid extends PBase  {
     public ArrayList<clsClasses.clsInventario_ciego_rfid> dvalues_rfid = new ArrayList<clsClasses.clsInventario_ciego_rfid>();
     ArrayList<String> codigos = new ArrayList<String>();
     ArrayList<String> lista_limpia = new ArrayList<String>();
-    ArrayList<Map.Entry<String, Integer>> lista_limpia2 = new ArrayList<Map.Entry<String, Integer>>();
+    //ArrayList<Map.Entry<String, Integer>> lista_limpia2 = new ArrayList<Map.Entry<String, Integer>>();
 
 
     /*********************************************/
@@ -778,6 +778,7 @@ public class ConteoRfid extends PBase  {
             /********** objetos de un inventario que es ciego o usa rfid *************************/
             clsInventario_ciegoObj InvCiego = new clsInventario_ciegoObj(this, Con, db);
             clsClasses.clsInventario_ciego items;
+            clsClasses.clsInventario_ciego_rfid item_rfid;
 
             Long sfecha;
             String  ff,ffe, ss;
@@ -814,22 +815,35 @@ public class ConteoRfid extends PBase  {
 
 
                 if(gl.tipoInv==1) {
+
+                    Set<Map.Entry<String, Integer>> entrySet
+                            = inventoryList.entrySet();
+
+                    Map.Entry<Integer, String>[] entryArray
+                            = entrySet.toArray(
+                            new Map.Entry[entrySet.size()]);
+
+
                     //GT16052022: itero la lista final que se usó en memoria
                     for (int x = 0; x < inventoryList.size(); x++) {
-                        clsClasses.clsInventario_ciego_rfid p = dvalues_rfid.get(x);
 
-                        if (!lista_limpia.contains(p.codigo_barra)){
-                            lista_limpia.add(p.codigo_barra);
+                        String p_codigo_barra ="";
+                        p_codigo_barra = String.valueOf(entryArray[x].getKey());
 
-                            ss= "SELECT CODIGO_BARRA FROM INVENTARIO_CIEGO WHERE CODIGO_BARRA = '"+ p.codigo_barra + "' ";
+                        if (!lista_limpia.contains(p_codigo_barra)){
+
+                            lista_limpia.add(p_codigo_barra);
+
+                            ss= "SELECT CODIGO_BARRA FROM INVENTARIO_CIEGO WHERE CODIGO_BARRA = '"+ p_codigo_barra + "' ";
                             dt=Con.OpenDT(ss);
                             rg = dt.getCount();
 
-                            barra = p.codigo_barra;
+                            barra = p_codigo_barra;
                             items.id_inventario_enc = gl.idInvEnc;
                             items.codigo_barra = barra;
                             //items.cantidad = canti;
-                            items.cantidad = p.cantidad;
+                            //items.cantidad = p.cantidad;
+                            items.cantidad = 1;
                             items.comunicado = "N";
                             items.ubicacion = Ubic;
                             items.id_operador = gl.userid;
@@ -838,14 +852,19 @@ public class ConteoRfid extends PBase  {
                             items.id_registro = gl.IDregistro;
                             items.eliminado = 0;
 
+
+                            item_rfid = new clsClasses.clsInventario_ciego_rfid();
+                            item_rfid.codigo_barra =  p_codigo_barra;
+                            dvalues_rfid.add(item_rfid);
+
                             try {
 
                                 if (rg == 0) {
                                     InvCiego.add(items);
                                 } else {
                                     /*sql="update Inventario_ciego_rfid set cantidad = cantidad + 1 WHERE CODIGO_BARRA = '"+ barra + "' ";*/
-                                    sql = "update Inventario_ciego set cantidad = cantidad + 1 WHERE CODIGO_BARRA = '" + barra + "' ";
-                                    db.execSQL(sql);
+                                    //sql = "update Inventario_ciego set cantidad = cantidad + 1 WHERE CODIGO_BARRA = '" + barra + "' ";
+                                    //db.execSQL(sql);
 
                                 }
 
