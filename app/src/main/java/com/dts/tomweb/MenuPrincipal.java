@@ -92,7 +92,9 @@ public class MenuPrincipal extends PBase {
     }
 
     public void finito(){
-        super.finish();
+        //#GT16062022_2234: finish cierra, super.finish reabre la app
+        finish();
+        //super.finish();
     }
 
     //endregion

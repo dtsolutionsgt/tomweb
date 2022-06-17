@@ -309,7 +309,9 @@ public class ConteoRfid extends PBase  {
 
         gl.validaLicDB=10;
         //Cerrar la comunicación
-        CerrarRFIF();
+        //#GT16062022: CerrarRFIF se aplica dentro de getCampos, con data para sincronizar
+        //sin nada que sincronizar, se queda abierto el RFID porque aun estamos en el layout
+        //CerrarRFIF();
         getCampos();
         //ComWS();
     }
@@ -887,13 +889,20 @@ public class ConteoRfid extends PBase  {
     public void getCampos(){
         try{
 
-            Integer registros = dadapter_rfid.getCount();
+            if(dadapter_rfid != null){
 
-            if(registros <=0){
-                msgAskContinue("No hay data rfid registrada, ¿Seguro que desea continuar?");
-                result = 1; return;
+                Integer registros = dadapter_rfid.getCount();
+
+                if(registros <=0){
+                    msgAskContinue("No hay data con rfid registrada, ¿Seguro que desea continuar?");
+                    result = 1; return;
+                }else{
+
+                    CerrarRFIF();
+                    ComWS();
+                }
             }else{
-                ComWS();
+                msgbox("No hay data que sincronizar");
             }
 
         }catch (Exception e){
