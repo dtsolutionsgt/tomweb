@@ -1,5 +1,7 @@
 package com.dts.tomweb;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
@@ -14,6 +16,7 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.GridView;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -32,6 +35,7 @@ public class ListaConteos extends PBase {
     private EditText txtUbic;
     private TextView regs;
     private CheckBox cb;
+    private ImageView imgEliminar;
 
     private ArrayList<String> spinlist = new ArrayList<String>();
     private ArrayList<String> values=new ArrayList<String>();
@@ -42,6 +46,7 @@ public class ListaConteos extends PBase {
     private int cw;
     private String scod;
     private boolean consol;
+    private int idConteo = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,12 +64,14 @@ public class ListaConteos extends PBase {
         txtUbic = (EditText) findViewById(R.id.txtNombre);
         regs = (TextView) findViewById(R.id.txtRegs);
         cb = (CheckBox) findViewById(R.id.cbConsolidar);
+        imgEliminar = (ImageView) findViewById(R.id.imgEliminar);
 
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         cw = (int) ((displayMetrics.widthPixels-22)/5)-1;
 
         cb.setChecked(false);
+        imgEliminar.setVisibility(View.VISIBLE);
         consol=false;
 
         if(gl.tipoInv==1) scod = " INVENTARIO_CIEGO";
@@ -87,7 +94,7 @@ public class ListaConteos extends PBase {
 
         try{
 
-            tx="-Busqueda: La busqueda se puede hacer por código de barra, ubicación, o ambos.\n\n" +
+            tx="-Búsqueda: La búsqueda se puede hacer por código de barra, ubicación, o ambos.\n\n" +
                     "-Regs: Muestra la cantidad de registros, o de conteos realizados.\n\n" +
                     "-Consolidar: Consolida y muestra los registros según código de barra y ubicación.";
 
@@ -107,8 +114,16 @@ public class ListaConteos extends PBase {
             cb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    if (cb.isChecked()==true) consol = true; showData(scod);
-                    if (cb.isChecked()==false) consol = false; showData(scod);
+                    if (cb.isChecked()==true)  {
+                        consol = true;
+                        showData(scod);
+                        imgEliminar.setVisibility(View.INVISIBLE);
+                    }
+                    if (cb.isChecked()==false){
+                        consol = false;
+                        showData(scod);
+                        imgEliminar.setVisibility(View.VISIBLE);
+                    }
                 }
             });
 
@@ -136,8 +151,10 @@ public class ListaConteos extends PBase {
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
                     try {
-                        Object lvObj = dgrid.getItemAtPosition(position);
+                        idConteo = 0;
+                        Object lvObj = dgrid.getItemAtPosition(position - (position % 4));
                         String item = (String) lvObj;
+                        idConteo = Integer.valueOf(item);
 
                         dadapter.setSelectedIndex(position);
                         toast(item);
@@ -219,21 +236,36 @@ public class ListaConteos extends PBase {
             ubic = txtUbic.getText().toString().trim();
 
             if(!ubic.isEmpty() && !barra.isEmpty()){
-                tn = tn +" WHERE CODIGO_BARRA = '"+ barra + "' AND UBICACION = '" + ubic + "' AND ID_INVENTARIO_ENC="+ gl.idInvEnc +" AND ELIMINADO = 0";
+                tn = tn +" WHERE CODIGO_BARRA = '"+ barra + "' " +
+                        " AND UBICACION = '" + ubic + "' " +
+                        " AND ID_INVENTARIO_ENC="+ gl.idInvEnc +"" +
+                        " AND ELIMINADO = 0 " +
+                        " AND COMUNICADO = 'N' ";
             }else if(!barra.isEmpty()){
-                tn = tn +" WHERE CODIGO_BARRA = '"+ barra + "' AND ID_INVENTARIO_ENC="+ gl.idInvEnc +" AND ELIMINADO = 0";
+                tn = tn +" WHERE CODIGO_BARRA = '"+ barra + "' " +
+                        " AND ID_INVENTARIO_ENC="+ gl.idInvEnc +" " +
+                        " AND ELIMINADO = 0 " +
+                        " AND COMUNICADO = 'N' ";
             }else if(!ubic.isEmpty()) {
-                tn = tn+ " WHERE UBICACION = '" + ubic + "' AND ID_INVENTARIO_ENC="+ gl.idInvEnc +" AND ELIMINADO = 0";
+                tn = tn+ " WHERE UBICACION = '" + ubic + "' " +
+                         " AND ID_INVENTARIO_ENC="+ gl.idInvEnc +" " +
+                         " AND ELIMINADO = 0" +
+                         " AND COMUNICADO = 'N' ";
             }else {
-                tn = tn + " WHERE ID_INVENTARIO_ENC="+ gl.idInvEnc +" AND ELIMINADO = 0";
+                tn = tn + " WHERE ID_INVENTARIO_ENC="+ gl.idInvEnc +"" +
+                          " AND ELIMINADO = 0" +
+                          " AND COMUNICADO = 'N' ";;
             }
 
             if(consol==true){
-                ss="SELECT CODIGO_BARRA, UBICACION, SUM(CANTIDAD) FROM "+ tn +" GROUP BY CODIGO_BARRA, UBICACION";
+                ss="SELECT 0, CODIGO_BARRA, UBICACION, SUM(CANTIDAD) FROM "+ tn +" GROUP BY CODIGO_BARRA, UBICACION";
             }else {
-                ss="SELECT CODIGO_BARRA, UBICACION, CANTIDAD FROM "+ tn;
+                if (gl.tipoInv==1){
+                    ss="SELECT ID_REGISTRO, CODIGO_BARRA, UBICACION, CANTIDAD FROM "+ tn;
+                }else if (gl.tipoInv==2){
+                    ss="SELECT ID_INVENTARIO_DET, CODIGO_BARRA, UBICACION, CANTIDAD FROM "+ tn;
+                }
             }
-
 
             dt=Con.OpenDT(ss);
             if (dt.getCount()==0) {
@@ -262,6 +294,7 @@ public class ListaConteos extends PBase {
             }
             if (dt!=null) dt.close();
 
+            values.add("ID");
             values.add("CODIGO");
             values.add("UBICACION");
             values.add("CANTIDAD");
@@ -272,7 +305,7 @@ public class ListaConteos extends PBase {
 
             //dgrid.setColumnWidth(cw);
             //dgrid.setStretchMode(GridView.NO_STRETCH);
-            dgrid.setNumColumns(3);
+            dgrid.setNumColumns(4);
 
             dadapter=new LA_Tablas2(this,dvalues);
             dgrid.setAdapter(dadapter);
@@ -284,7 +317,7 @@ public class ListaConteos extends PBase {
 
             //grid.setColumnWidth(cw);
             //grid.setStretchMode(GridView.NO_STRETCH);
-            grid.setNumColumns(3);
+            grid.setNumColumns(4);
 
             adapter=new LA_Tablas(this,values);
             grid.setAdapter(adapter);
@@ -295,6 +328,104 @@ public class ListaConteos extends PBase {
             msgbox("showData2: "+e);
         }
 
+
+    }
+
+    public void doDelete (View view){
+        Cursor dt;
+        String ss = "",codigo="",ubic="";
+        int cc,rg;
+        double cantidad = 0;
+
+        try{
+
+            if (idConteo!=0){
+                if (gl.tipoInv==1){
+                    ss=" SELECT CODIGO_BARRA, UBICACION, CANTIDAD FROM Inventario_ciego " +
+                       " WHERE ID_REGISTRO = '"+ idConteo + "' ";
+                }else if (gl.tipoInv==2){
+                    ss=" SELECT CODIGO_BARRA, UBICACION, CANTIDAD FROM Inventario_detalle" +
+                       " WHERE ID_INVENTARIO_DET = '"+ idConteo + "' " ;
+                }
+
+                dt=Con.OpenDT(ss);
+
+                if (dt.getCount()!=0) {
+
+                    if(dt.getCount()>0){
+                        dt.moveToFirst();
+
+                        ubic = dt.getString(1);
+                        codigo = dt.getString(0);
+                        cantidad = dt.getDouble(2);
+
+                    }
+
+                    if (dt!=null) dt.close();
+
+                    if(!ubic.isEmpty() && !codigo.isEmpty()){
+
+                        msgAskDelete("Seguro que desea eliminar el conteo del producto "+  codigo +
+                                " en la ubicación "+ubic+" y con cantidad "+ cantidad +"");
+                    }
+
+                }else{
+                    msgbox("No se pudo eliminar ningún conteo");
+                }
+
+            }else{
+                msgbox("Debe seleccionar el conteo a eliminar");
+            }
+
+
+        }catch (Exception e){
+            addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"");
+            msgbox("Error: " + new Object(){}.getClass().getEnclosingMethod().getName() + " " + e.getMessage());
+        }
+    }
+
+    private void msgAskDelete(String msg) {
+        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+
+        dialog.setCancelable(false);
+        dialog.setTitle("Tom");
+        dialog.setMessage("¿"+msg+"?");
+
+        dialog.setPositiveButton("Si", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+               eliminar();
+            }
+        });
+
+        dialog.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+
+            }
+        });
+
+        dialog.show();
+
+    }
+
+    private void eliminar(){
+        try{
+
+            if (gl.tipoInv==1){
+                sql = " UPDATE INVENTARIO_CIEGO SET ELIMINADO = 1, COMUNICADO = 'N' " +
+                        " WHERE id_inventario_det = " + idConteo ;
+            }else{
+                sql = " UPDATE INVENTARIO_DETALLE SET ELIMINADO = 1, COMUNICADO = 'N' " +
+                        " WHERE id_inventario_det = " + idConteo ;
+            }
+
+            db.execSQL(sql);
+
+        }catch (Exception e){
+            addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"");
+            msgbox("Error: " + new Object(){}.getClass().getEnclosingMethod().getName() + " " + e.getMessage());
+        }
+
+        showData(scod);
 
     }
 

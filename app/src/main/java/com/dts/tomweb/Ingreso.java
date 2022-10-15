@@ -16,7 +16,7 @@ public class Ingreso extends PBase {
     private EditText txtUser,txtPass;
     private TextView lblTitle,lblVer;
 
-    private String version="Ver: 1.0.0 - 12/06/19";
+    private String version="Ver: 2.0.0 - 14-oct-2022";
 
 
     @Override
@@ -34,7 +34,7 @@ public class Ingreso extends PBase {
             lblTitle = (TextView) findViewById(R.id.textView2);
             lblVer = (TextView) findViewById(R.id.Productos);lblVer.setText(version);
 
-            txtUser.setText("1");txtPass.setText("1");txtPass.requestFocus();
+            //txtUser.setText("1");txtPass.setText("1");txtPass.requestFocus();
 
             setHandlers();
 

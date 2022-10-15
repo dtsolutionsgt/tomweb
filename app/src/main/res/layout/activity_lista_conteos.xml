@@ -36,27 +36,24 @@ tools:context="com.dts.tomweb.ListaConteos">
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="fill_parent"
-            android:stretchColumns="1">
+            android:layout_height="match_parent">
 
             <GridView
                 android:id="@+id/gridview1"
                 android:layout_width="wrap_content"
                 android:layout_height="40dp"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentRight="true">
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp">
 
             </GridView>
 
             <GridView
                 android:id="@+id/gridview2"
                 android:layout_width="match_parent"
-                android:layout_height="420dp"
+                android:layout_height="wrap_content"
                 android:layout_below="@+id/gridview1"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentTop="false"
-                android:layout_alignParentRight="true"
-                android:layout_alignParentBottom="true">
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp">
 
             </GridView>
 
@@ -141,8 +138,8 @@ tools:context="com.dts.tomweb.ListaConteos">
         android:layout_height="wrap_content"
         android:layout_below="@+id/relTop"
         android:layout_alignParentStart="true"
-        android:layout_marginStart="38dp"
-        android:layout_marginTop="31dp"
+        android:layout_marginStart="45dp"
+        android:layout_marginTop="21dp"
         android:text="Barra:"
         android:textSize="24sp" />
 
@@ -153,7 +150,7 @@ tools:context="com.dts.tomweb.ListaConteos">
         android:layout_below="@+id/textView28"
         android:layout_alignParentStart="true"
         android:layout_marginStart="39dp"
-        android:layout_marginTop="23dp"
+        android:layout_marginTop="18dp"
         android:text="Ubicacion:"
         android:textSize="24sp" />
 
@@ -190,6 +187,19 @@ tools:context="com.dts.tomweb.ListaConteos">
         android:layout_marginBottom="76dp"
         android:text="Consolidar"
         android:textSize="24sp" />
+
+    <ImageView
+        android:id="@+id/imgEliminar"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:layout_above="@+id/relBot"
+        android:layout_marginStart="34dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="25dp"
+        android:layout_toStartOf="@+id/textView31"
+        android:layout_toEndOf="@+id/cbConsolidar"
+        android:onClick="doDelete"
+        android:src="@drawable/delete_64" />
 
     <TextView
         android:id="@+id/txtRegs"

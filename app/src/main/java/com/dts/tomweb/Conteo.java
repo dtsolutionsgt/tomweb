@@ -241,7 +241,8 @@ public class Conteo extends PBase {
             msgbox("Ingrese el código del producto a eliminar, y presione enter para actualizar la barra");return;
         }
 
-        msgAskDelete("Seguro que desea eliminar el conteo de el producto: '"+ desc +" - "+ Cod +"' En la ubicación: '"+Ubic+"' y código de barra: '"+ barra +"'");
+        msgAskDelete("Seguro que desea eliminar el conteo de el producto "+ desc +" - "+ Cod +" " +
+                     "En la ubicación "+Ubic+" y código de barra: "+ barra);
     }
 
     public void doNext(View view) {
@@ -404,6 +405,7 @@ public class Conteo extends PBase {
         clsInventario_detalleObj InvDetalle = new clsInventario_detalleObj(this, Con, db);
         String tabla="";
         Integer cc=0;
+        Integer idConteo=0;
 
         try{
             if(barra == null){
@@ -416,13 +418,29 @@ public class Conteo extends PBase {
             if(gl.tipoInv==1){
                 tabla = "INVENTARIO_CIEGO";
 
-                InvCiego.fill(" WHERE CODIGO_BARRA = '"+ barra + "' AND UBICACION = '"+ Ubic +"' AND ID_INVENTARIO_ENC = '"+ gl.idInvEnc +"'");
+                InvCiego.fill(" WHERE CODIGO_BARRA = '"+ barra + "'" +
+                              " AND UBICACION = '"+ Ubic +"' " +
+                              " AND ID_INVENTARIO_ENC = '"+ gl.idInvEnc +"'" +
+                              " AND ELIMINADO= 0 " +
+                              " AND COMUNICADO = 'N'" +
+                              " ORDER BY Id_registro DESC ");
                 cc = InvCiego.count;
+                if (cc>0){
+                    idConteo = InvCiego.first().id_registro;
+                }
             } else if(gl.tipoInv==2 || gl.tipoInv==3) {
                 tabla = "INVENTARIO_DETALLE";
 
-                InvDetalle.fill(" WHERE CODIGO_BARRA = '"+ barra + "' AND UBICACION = '"+ Ubic +"' AND ID_INVENTARIO_ENC = '"+ gl.idInvEnc +"'");
+                InvDetalle.fill(" WHERE CODIGO_BARRA = '"+ barra + "' " +
+                                " AND UBICACION = '"+ Ubic +"' " +
+                                " AND ID_INVENTARIO_ENC = '"+ gl.idInvEnc +"' " +
+                                " AND ELIMINADO= 0 " +
+                                " AND COMUNICADO = 'N'" +
+                                " ORDER BY id_inventario_det DESC ");
                 cc = InvDetalle.count;
+                if (cc>0){
+                    idConteo = InvDetalle.first().id_inventario_det;
+                }
             }
 
             if(cc==0){
@@ -430,7 +448,10 @@ public class Conteo extends PBase {
                 return;
             }
 
-            sql = "UPDATE "+ tabla +" SET ELIMINADO = 1, COMUNICADO = 'N' WHERE CODIGO_BARRA = '"+ barra + "' AND UBICACION = '"+ Ubic +"' AND ID_INVENTARIO_ENC = '"+ gl.idInvEnc +"'";
+            sql = " UPDATE "+ tabla +" SET ELIMINADO = 1, COMUNICADO = 'N' " +
+                  " WHERE CODIGO_BARRA = '"+ barra + "' AND UBICACION = '"+ Ubic +"' " +
+                  " AND ID_INVENTARIO_ENC = '"+ gl.idInvEnc +"' " +
+                  " AND id_inventario_det = " + idConteo ;
             db.execSQL(sql);
             limpiaCampos3();
 
@@ -543,7 +564,7 @@ public class Conteo extends PBase {
                     return;
                 }else{
                     Desc.setText(desc);
-                    Barra.setText(barra);
+                    Barra.setText(desc);
                 }
 
             }else if(gl.tipoInv==3){
@@ -559,7 +580,7 @@ public class Conteo extends PBase {
                     return;
                 }else{
                     Desc.setText(desc);
-                    Barra.setText(barra);
+                    Barra.setText(desc);
                 }
 
             }
