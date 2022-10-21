@@ -109,7 +109,6 @@ public class Conteo extends PBase {
                                 if(!existencia()) return false;
                             }
 
-
                             mostrarConteo();
 
                             if(gl.tipoInv==2 || gl.tipoInv==3){
@@ -117,7 +116,8 @@ public class Conteo extends PBase {
                                 if(tipoArt.equals("S")) {
                                     Cantidad.setFocusable(false);
                                     insertaConteo();
-                                    mostrarConteo();
+                                    //#CKFK20221021 Agregué el mostrar conteo en el insertar por eso lo pongo en comentario
+                                    //mostrarConteo();
                                     Codigo.clearFocus();
                                     Codigo.requestFocus();
                                     return true;
@@ -129,7 +129,8 @@ public class Conteo extends PBase {
 
                             }
 
-                            mostrarConteo();
+                            //#CKFK20221021 Agregué el mostrar conteo en el insertar por eso lo pongo en comentario
+                            //mostrarConteo();
                             //Cantidad.requestFocus();
 
                             return true;
@@ -149,7 +150,8 @@ public class Conteo extends PBase {
                             gl.ubicacion = Ubicacion.getText().toString().trim();
                             if (gl.tipoInv==1){
                                 barra = Codigo.getText().toString().trim();
-                                Barra.setText(barra);
+                                //#CKFK20221021 Puse esto en comentario
+                               // Barra.setText(barra);
                             }else {
                                 barra = Barra.getText().toString().trim();
                             }
@@ -164,7 +166,8 @@ public class Conteo extends PBase {
                                 if(tipoArt.equals("S")) {
                                     Cantidad.setFocusable(false);
                                     insertaConteo();
-                                    mostrarConteo();
+                                    //#CKFK20221021 Agregué el mostrar conteo en el insertar por eso lo pongo en comentario
+                                    //mostrarConteo();
                                     Ubicacion.requestFocus();
                                     return true;
                                 } else {
@@ -173,9 +176,7 @@ public class Conteo extends PBase {
                                 }
                             }
 
-
                             insertaConteo();
-                            mostrarConteo();
 
                             return true;
                     }
@@ -392,6 +393,8 @@ public class Conteo extends PBase {
 
             Toast.makeText(this, "Agregado Correctamente", Toast.LENGTH_LONG).show();
 
+            //#CKFK20221021 Agregué el mostrar conteo en el insertar
+            mostrarConteo();
             if(gl.tipoInv==1) limpiaCampos2(); else if (tipoArt.equals("F")) limpiaCampos2();
 
         }catch (Exception e){
@@ -565,6 +568,7 @@ public class Conteo extends PBase {
                 }else{
                     Desc.setText(desc);
                     Barra.setText(desc);
+                    Codigo2.setText(barra);
                 }
 
             }else if(gl.tipoInv==3){
@@ -581,6 +585,7 @@ public class Conteo extends PBase {
                 }else{
                     Desc.setText(desc);
                     Barra.setText(desc);
+                    Codigo2.setText(barra);
                 }
 
             }
@@ -629,7 +634,7 @@ public class Conteo extends PBase {
             c3 = Cantidad.getText().toString().trim();
 
             if(!c1.isEmpty() || !c2.isEmpty() || !c3.isEmpty()){
-                msgAskContinue("A dejado algunos campos con valores, ¿Seguro que desea continuar?");
+                msgAskContinue("Ha dejado algunos campos con valores, ¿Seguro que desea continuar?");
                 result = 1; return;
             }else{
                 ComWS();

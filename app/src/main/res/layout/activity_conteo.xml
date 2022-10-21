@@ -115,6 +115,90 @@
 
     </TableRow>
 
+    <TableRow
+        android:id="@+id/trDatosConteo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/trCantidad"
+        android:layout_marginTop="10dp">
+
+        <RelativeLayout
+            android:id="@+id/relShow"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:background="@drawable/color_medium_2">
+
+            <TextView
+                android:id="@+id/textView26"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/textView37"
+                android:layout_alignParentStart="true"
+                android:layout_marginStart="5dp"
+                android:layout_marginTop="13dp"
+                android:text="Desc:"
+                android:textSize="24sp" />
+
+            <TextView
+                android:id="@+id/textView38"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/textView26"
+                android:layout_alignParentStart="true"
+                android:layout_marginStart="5dp"
+                android:layout_marginTop="13dp"
+                android:text="Cantidad:"
+                android:textSize="24sp" />
+
+            <TextView
+                android:id="@+id/textView37"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_marginStart="5dp"
+                android:text="Código:"
+                android:textSize="24sp" />
+
+            <TextView
+                android:id="@+id/txtCodigo2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_marginStart="35dp"
+                android:layout_toEndOf="@+id/textView37"
+                android:onClick="showToast"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/txtCantidad2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/txtDesc"
+                android:layout_alignParentEnd="true"
+                android:layout_marginStart="21dp"
+                android:layout_marginTop="13dp"
+                android:layout_toEndOf="@+id/textView38"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/txtDesc"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/txtCodigo2"
+                android:layout_alignParentEnd="true"
+                android:layout_marginStart="53dp"
+                android:layout_marginTop="11dp"
+                android:layout_toEndOf="@+id/textView26"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+
+        </RelativeLayout>
+    </TableRow>
+
     <RelativeLayout
         android:id="@+id/relTop"
         android:layout_width="match_parent"
@@ -185,103 +269,13 @@
 
     </RelativeLayout>
 
-    <RelativeLayout
-        android:id="@+id/relBrap"
-        android:layout_width="417dp"
-        android:layout_height="226dp"
-        android:layout_below="@id/txtCantidad"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentBottom="true"
-        android:layout_marginLeft="0dp"
-        android:layout_marginTop="244dp"
-        android:layout_marginRight="-6dp"
-        android:layout_marginBottom="261dp">
-
-        <RelativeLayout
-            android:id="@+id/relShow"
-            android:layout_width="381dp"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:background="@drawable/color_medium_2">
-
-            <TextView
-                android:id="@+id/textView26"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/textView37"
-                android:layout_alignParentStart="true"
-                android:layout_marginStart="5dp"
-                android:layout_marginTop="13dp"
-                android:text="Desc:"
-                android:textSize="24sp" />
-
-            <TextView
-                android:id="@+id/textView38"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/textView26"
-                android:layout_alignParentStart="true"
-                android:layout_marginStart="5dp"
-                android:layout_marginTop="13dp"
-                android:text="Cantidad:"
-                android:textSize="24sp" />
-
-            <TextView
-                android:id="@+id/textView37"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:layout_marginStart="5dp"
-                android:text="Código:"
-                android:textSize="24sp" />
-
-            <TextView
-                android:id="@+id/txtCodigo2"
-                android:layout_width="159dp"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_marginStart="35dp"
-                android:layout_toEndOf="@+id/textView37"
-                android:onClick="showToast"
-                android:textSize="24sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/txtCantidad2"
-                android:layout_width="162dp"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/txtDesc"
-                android:layout_alignParentEnd="true"
-                android:layout_marginStart="21dp"
-                android:layout_marginTop="13dp"
-                android:layout_toEndOf="@+id/textView38"
-                android:textSize="24sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/txtDesc"
-                android:layout_width="160dp"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/txtCodigo2"
-                android:layout_alignParentEnd="true"
-                android:layout_marginStart="53dp"
-                android:layout_marginTop="11dp"
-                android:layout_toEndOf="@+id/textView26"
-                android:textSize="24sp"
-                android:textStyle="bold" />
-
-        </RelativeLayout>
-    </RelativeLayout>
-
     <ImageView
         android:id="@+id/imageView14"
         android:layout_width="62dp"
         android:layout_height="57dp"
         android:layout_above="@+id/relBot"
-        android:layout_marginStart="14dp"
-        android:layout_marginBottom="28dp"
+        android:layout_marginStart="25dp"
+        android:layout_marginBottom="35dp"
         android:layout_toEndOf="@+id/imageView16"
         android:onClick="doListaProductos"
         android:src="@drawable/consultasblanco_gris" />
@@ -292,9 +286,9 @@
         android:layout_height="wrap_content"
         android:layout_above="@+id/relBot"
         android:layout_alignParentEnd="true"
-        android:layout_marginStart="32dp"
-        android:layout_marginEnd="18dp"
-        android:layout_marginBottom="29dp"
+        android:layout_marginStart="31dp"
+        android:layout_marginEnd="19dp"
+        android:layout_marginBottom="32dp"
         android:layout_toEndOf="@+id/imageView14"
         android:onClick="doNext"
         android:src="@drawable/arr_next" />
@@ -304,8 +298,8 @@
         android:layout_width="74dp"
         android:layout_height="wrap_content"
         android:layout_above="@+id/relBot"
-        android:layout_marginStart="15dp"
-        android:layout_marginBottom="23dp"
+        android:layout_marginStart="22dp"
+        android:layout_marginBottom="31dp"
         android:layout_toEndOf="@+id/imageView17"
         android:onClick="doListaConteos"
         android:src="@drawable/mnupedido" />
@@ -316,8 +310,8 @@
         android:layout_height="54dp"
         android:layout_above="@+id/relBot"
         android:layout_alignParentStart="true"
-        android:layout_marginStart="22dp"
-        android:layout_marginBottom="31dp"
+        android:layout_marginStart="30dp"
+        android:layout_marginBottom="38dp"
         android:onClick="doDelete"
         android:src="@drawable/delete_64" />
 

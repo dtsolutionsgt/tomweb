@@ -79,35 +79,13 @@
     </RelativeLayout>
 
     <TextView
-        android:id="@+id/textView13"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/relTop"
-        android:layout_alignParentStart="true"
-        android:layout_marginStart="52dp"
-        android:layout_marginTop="30dp"
-        android:text="Correlativo:"
-        android:textSize="24sp" />
-
-    <TextView
-        android:id="@+id/textView15"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/textView13"
-        android:layout_alignParentStart="true"
-        android:layout_marginStart="52dp"
-        android:layout_marginTop="31dp"
-        android:text="Empresa:"
-        android:textSize="24sp" />
-
-    <TextView
         android:id="@+id/textView19"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/textView15"
         android:layout_alignParentStart="true"
         android:layout_marginStart="52dp"
-        android:layout_marginTop="30dp"
+        android:layout_marginTop="15dp"
         android:text="Estado:"
         android:textSize="24sp" />
 
@@ -118,7 +96,7 @@
         android:layout_below="@+id/textView19"
         android:layout_alignParentStart="true"
         android:layout_marginStart="52dp"
-        android:layout_marginTop="31dp"
+        android:layout_marginTop="15dp"
         android:text="Fecha Inv:"
         android:textSize="24sp" />
 
@@ -129,7 +107,7 @@
         android:layout_below="@+id/textView20"
         android:layout_alignParentStart="true"
         android:layout_marginStart="52dp"
-        android:layout_marginTop="30dp"
+        android:layout_marginTop="15dp"
         android:text="Descripción:"
         android:textSize="24sp" />
 
@@ -140,7 +118,7 @@
         android:layout_below="@+id/textView21"
         android:layout_alignParentStart="true"
         android:layout_marginStart="52dp"
-        android:layout_marginTop="45dp"
+        android:layout_marginTop="15dp"
         android:text="Tipo Inv:"
         android:textSize="24sp" />
 
@@ -150,11 +128,22 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/txtCorrel"
         android:layout_marginStart="44dp"
-        android:layout_marginTop="34dp"
+        android:layout_marginTop="15dp"
         android:layout_toEndOf="@+id/textView15"
         android:text="TextView"
         android:textSize="24sp"
         android:textStyle="bold|italic" />
+
+    <TextView
+        android:id="@+id/textView15"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textView13"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="52dp"
+        android:layout_marginTop="15dp"
+        android:text="Empresa:"
+        android:textSize="24sp" />
 
     <TextView
         android:id="@+id/txtEstado"
@@ -162,7 +151,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/txtEmpresa"
         android:layout_marginStart="64dp"
-        android:layout_marginTop="28dp"
+        android:layout_marginTop="15dp"
         android:layout_toEndOf="@+id/textView19"
         android:text="TextView"
         android:textSize="24sp"
@@ -174,7 +163,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/txtEstado"
         android:layout_marginStart="39dp"
-        android:layout_marginTop="33dp"
+        android:layout_marginTop="15dp"
         android:layout_toEndOf="@+id/textView20"
         android:text="TextView"
         android:textSize="24sp"
@@ -186,11 +175,22 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/relTop"
         android:layout_marginStart="26dp"
-        android:layout_marginTop="29dp"
+        android:layout_marginTop="22dp"
         android:layout_toEndOf="@+id/textView13"
         android:text="TextView"
         android:textSize="24sp"
         android:textStyle="bold|italic" />
+
+    <TextView
+        android:id="@+id/textView13"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/relTop"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="54dp"
+        android:layout_marginTop="23dp"
+        android:text="Correlativo:"
+        android:textSize="24sp" />
 
     <TextView
         android:id="@+id/txtTipoInv"
@@ -198,7 +198,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/txtDescripcion"
         android:layout_marginStart="47dp"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="15dp"
         android:layout_toEndOf="@+id/textView22"
         android:text="TextView"
         android:textSize="24sp"
@@ -207,10 +207,10 @@
     <TextView
         android:id="@+id/txtDescripcion"
         android:layout_width="129dp"
-        android:layout_height="61dp"
+        android:layout_height="wrap_content"
         android:layout_below="@+id/txtFecha"
         android:layout_marginStart="20dp"
-        android:layout_marginTop="28dp"
+        android:layout_marginTop="15dp"
         android:layout_toEndOf="@+id/textView21"
         android:scrollbarAlwaysDrawHorizontalTrack="true"
         android:scrollbarAlwaysDrawVerticalTrack="true"
