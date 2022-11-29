@@ -16,7 +16,7 @@ public class Ingreso extends PBase {
     private EditText txtUser,txtPass;
     private TextView lblTitle,lblVer;
 
-    private String version="Ver: 2.0.0 - 20-oct-2022";
+    private String version="Ver: 2.0.0 - 15-nov-2022";
 
 
     @Override
