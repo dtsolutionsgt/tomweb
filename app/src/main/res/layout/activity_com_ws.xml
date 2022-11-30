@@ -186,10 +186,10 @@
             android:layout_height="43dp"
             android:layout_above="@+id/relEnvio"
             android:layout_marginStart="2dp"
-            android:layout_marginTop="135dp"
+            android:layout_marginTop="5dp"
             android:layout_marginBottom="15dp"
             android:layout_toEndOf="@+id/progressBar2"
-            android:textSize="24sp" />
+            android:textSize="10sp" />
 
         <TextView
             android:id="@+id/lblProgress2"
@@ -200,7 +200,7 @@
             android:layout_marginTop="135dp"
             android:layout_marginBottom="-33dp"
             android:layout_toEndOf="@+id/lblProgress"
-            android:textSize="18sp" />
+            android:textSize="10sp" />
 
         <ProgressBar
             android:id="@+id/progressBar2"

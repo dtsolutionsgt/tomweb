@@ -80,9 +80,9 @@ public class clsArticulo_codigo_barraObj {
 
         ins.init("Articulo_codigo_barra");
 
-        ins.add("id_empresa", item.id_empresa);
         ins.add("id_articulo", item.id_articulo);
         ins.add("codigo_barra", item.codigo_barra);
+        ins.add("id_empresa", item.id_empresa);
 
         db.execSQL(ins.sql());
 

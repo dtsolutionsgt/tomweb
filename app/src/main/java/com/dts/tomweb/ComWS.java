@@ -8,6 +8,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
 import android.provider.ContactsContract;
@@ -104,6 +105,7 @@ public class ComWS extends PBase {
         Prg.setText("");
         prgBar.setVisibility(View.INVISIBLE);
 
+        //URL="http://52.41.114.122/wsTomWeb/wstomwebws.asmx";
         URL="http://52.41.114.122/wsTomWeb/wstomwebws.asmx";
 
         envCompleto();
@@ -263,7 +265,7 @@ public class ComWS extends PBase {
                     str = ((SoapObject) result.getProperty(0)).getPropertyAsString(i);
 
                 }catch (Exception e){
-                    mu.msgbox("error: " + e.getMessage());
+                    //mu.msgbox("error: " + e.getMessage());
                     addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
                 }
 
@@ -632,9 +634,11 @@ public class ComWS extends PBase {
                 try {
                     sql = listItems.get(i);
                     dbT.execSQL(sql);
-                    if (i % 10==0) SystemClock.sleep(20);
+                    if (i % 10==0) {
+                       SystemClock.sleep(300);
+                    }
                 } catch (Exception e) {
-                    addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), sql);
+                    addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "Contador: " +  i +  sql);
                     Log.e("z", e.getMessage());
                 }
             }
@@ -664,6 +668,7 @@ public class ComWS extends PBase {
 
             return true;
         } catch (Exception e) {
+            dbT.endTransaction();
             Log.e("Error",e.getMessage());
             addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"");
             try {

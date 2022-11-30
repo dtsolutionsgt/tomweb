@@ -47,10 +47,10 @@ public class BaseDatosScript {
 			db.execSQL(sql);
 
 			sql = "CREATE TABLE [Articulo_codigo_barra] (" +
-					"id_empresa INTEGER NOT NULL," +
 					"id_articulo TEXT NOT NULL," +
 					"codigo_barra TEXT NOT NULL," +
-					"PRIMARY KEY ([id_empresa])" +
+					"id_empresa INTEGER NOT NULL," +
+					"PRIMARY KEY ([id_empresa],[codigo_barra],[id_articulo])" +
 					");";
 			db.execSQL(sql);
 
