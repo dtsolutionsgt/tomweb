@@ -177,9 +177,7 @@ public class Conteo extends PBase {
             } catch (Exception e) {
                 addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "Enter_Conteo");
             }
-
             return false;
-
         });
     }
 

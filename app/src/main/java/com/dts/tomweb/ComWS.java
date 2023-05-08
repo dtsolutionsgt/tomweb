@@ -153,19 +153,8 @@ public class ComWS extends PBase {
         dialog.setCancelable(false);
         dialog.setTitle("Envio");
         dialog.setMessage("¿Enviar datos?");
-
-        dialog.setPositiveButton("Enviar", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                runSend();
-            }
-        });
-
-        dialog.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                prgBar.setVisibility(View.INVISIBLE);
-            }
-        });
-
+        dialog.setPositiveButton("Enviar", (dialog1, which) -> runSend());
+        dialog.setNegativeButton("Cancelar", (dialog12, which) -> prgBar.setVisibility(View.INVISIBLE));
         dialog.show();
 
     }
@@ -211,11 +200,17 @@ public class ComWS extends PBase {
 
     private void runSend() {
 
-        if (isbusy==1) return;
-        isbusy=1;
+        try {
 
-        wsStask = new AsyncCallSend();
-        wsStask.execute();
+            if (isbusy==1) return;
+            isbusy=1;
+
+            wsStask = new AsyncCallSend();
+            wsStask.execute();
+
+        } catch (Exception e) {
+            addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "runSend");
+        }
 
     }
 
@@ -226,7 +221,6 @@ public class ComWS extends PBase {
     }
 
     // Web Service Methods
-
     public int fillTable(String value,String delcmd) {
         int rc;
         String s,ss;
@@ -304,6 +298,7 @@ public class ComWS extends PBase {
     }
 
     public boolean Procesar_Inventario_Ciego(Integer Id_Inventario_Enc,Integer Id_Registro) {
+
         int rc;
         String s,ss;
 
@@ -352,7 +347,9 @@ public class ComWS extends PBase {
             if (s.equalsIgnoreCase("#")) return true;
 
             sstr = s;
+
             return false;
+
         } catch (Exception e) {
             addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"");
             sstr = e.getMessage();
@@ -362,6 +359,7 @@ public class ComWS extends PBase {
     }
 
     public boolean Procesar_Inventario_Ciego_Rfid(Integer Id_Inventario_Enc,Integer Id_Registro) {
+
         int rc;
         String s,ss;
 
@@ -411,6 +409,7 @@ public class ComWS extends PBase {
 
             sstr = s;
             return false;
+
         } catch (Exception e) {
             addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"");
             sstr = e.getMessage();
@@ -422,6 +421,7 @@ public class ComWS extends PBase {
 
 
     public boolean Procesar_Inventario_Detalle(Integer Id_Inventario_Enc, Integer Id_Registro) {
+
         int rc;
         String s,ss;
 
@@ -471,6 +471,7 @@ public class ComWS extends PBase {
 
             sstr = s;
             return false;
+
         } catch (Exception e) {
             addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"");
             sstr = e.getMessage();
@@ -480,6 +481,7 @@ public class ComWS extends PBase {
     }
 
     public int commitSQL() {
+
         int rc;
         String s,ss;
 
@@ -519,7 +521,9 @@ public class ComWS extends PBase {
 
             errflag=true;
             sstr = s;
+
             return 0;
+
         } catch (Exception e) {
             addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"");
             errflag=true;
@@ -530,10 +534,9 @@ public class ComWS extends PBase {
     }
 
     public int OpenDTt(String sql) {
+
         int rc;
-
         METHOD_NAME = "OpenDT";
-
         results.clear();
 
         try {
@@ -573,6 +576,7 @@ public class ComWS extends PBase {
             }
 
             return 1;
+
         } catch (Exception e) {
             addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"");
             sstr=e.getMessage();
@@ -600,14 +604,13 @@ public class ComWS extends PBase {
             envelope.setOutputSoapObject(request);
 
             HttpTransportSE transport = new HttpTransportSE(URL);
-
             transport.call(NAMESPACE+METHOD_NAME, envelope);
-
             SoapPrimitive response = (SoapPrimitive) envelope.getResponse();
 
             sstr = response.toString()+"..";
 
             return 1;
+
         } catch (Exception e) {
             addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"");
             sstr=e.getMessage();
@@ -627,14 +630,13 @@ public class ComWS extends PBase {
         ftmsg="";ftflag=false;
 
         try {
+
             if (!AddTable("REGISTRO_HANDHELD")) return false;
             if (!saveData())return false;
-
             if(gl.licExist==0) return false;
             if (!AddTable("ESTADO_INVENTARIO")) return false;
             if (!AddTable("INVENTARIO_ENCABEZADO")) return false;
             if (!saveData())return false;
-
             if (!AddTable("OPERADORES")) return false;
             if (!saveData())return false;
 
@@ -659,7 +661,6 @@ public class ComWS extends PBase {
 
             if (!saveData())return false;
 
-
          } catch (Exception e) {
             addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"");
             return false;
@@ -676,10 +677,12 @@ public class ComWS extends PBase {
     }
 
     private boolean saveData(){
+
         int rc;
         ferr="";
         clsRegistro_handheldObj registroHH =new clsRegistro_handheldObj(this,Con,db);
         clsInventario_ciegoObj invC =new clsInventario_ciegoObj(this,Con,db);
+
         try {
 
             rc=listItems.size();reccnt=rc;
@@ -716,6 +719,7 @@ public class ComWS extends PBase {
                 }
 
                 regHH=0;
+
             }else if(regHH==2){
                 invC.fill();
 
@@ -726,6 +730,7 @@ public class ComWS extends PBase {
             }
 
             return true;
+
         } catch (Exception e) {
             Log.e("Error",e.getMessage());
             addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"");
@@ -742,6 +747,7 @@ public class ComWS extends PBase {
     }
 
     private boolean AddTable(String TN) {
+
         String SQL;
 
         try {
@@ -770,6 +776,7 @@ public class ComWS extends PBase {
     }
 
     private String getTableSQL(String TN) {
+
         String SQL = "";
         clsRegistro_handheldObj registroHH =new clsRegistro_handheldObj(this,Con,db);
         clsInventario_encabezadoObj invEnc =new clsInventario_encabezadoObj(this,Con,db);
