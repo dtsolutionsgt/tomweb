@@ -124,11 +124,9 @@ public class ComWS extends PBase {
         dialog.setTitle("Recepción");
         dialog.setMessage("¿Recibir datos nuevos?");
 
-        dialog.setPositiveButton("Recibir", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                runRecep();
-                prgBar.setVisibility(View.VISIBLE);
-            }
+        dialog.setPositiveButton("Recibir", (dialog1, which) -> {
+            runRecep();
+            prgBar.setVisibility(View.VISIBLE);
         });
 
         dialog.setNegativeButton("Cancelar", null);
@@ -545,6 +543,7 @@ public class ComWS extends PBase {
             sstr = response.toString()+"..";
 
             return 1;
+
         } catch (Exception e) {
             addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"");
             sstr=e.getMessage();
@@ -567,6 +566,7 @@ public class ComWS extends PBase {
         ftmsg="";ftflag=false;
 
         try {
+
             if (!AddTable("REGISTRO_HANDHELD")) return false;
             if (!saveData())return false;
 
@@ -707,6 +707,7 @@ public class ComWS extends PBase {
     }
 
     private String getTableSQL(String TN) {
+
         String SQL = "";
         clsRegistro_handheldObj registroHH =new clsRegistro_handheldObj(this,Con,db);
         clsInventario_encabezadoObj invEnc =new clsInventario_encabezadoObj(this,Con,db);
@@ -743,9 +744,12 @@ public class ComWS extends PBase {
                 gl.tipoInv =  invEnc.first().tipo_inventario;
 
                 SQL = "SELECT A.* FROM OPERADORES A, INVENTARIO_OPERADOR B  WHERE A.ID_OPERADOR = B.ID_OPERADOR AND A.ID_EMPRESA ='" + Com_IdEmpresa +"' AND B.ID_INVENTARIO_ENC='" + Com_Id_Inventario +"'";
-                return SQL;
-            }
 
+                return SQL;
+
+            }else{
+                fstr="No hay inventario activo: ";
+            }
         }
 
         if (TN.equalsIgnoreCase("ARTICULO")) {
@@ -787,6 +791,8 @@ public class ComWS extends PBase {
 
         wsRtask.onProgressUpdate();
 
+        fstr="El dispositivo no tiene licencia";
+
         try {
             if (getTest()==1) scon=1;
             idbg=idbg + sstr;
@@ -805,7 +811,7 @@ public class ComWS extends PBase {
         } catch (Exception e) {
             scon=0;
             fstr="No se puede conectar al web service. "+e.getMessage();
-            addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
+            addlog(new Object() {}.getClass().getEnclosingMethod().getName(), fstr, "Error_En_WS");
         }
 
     }

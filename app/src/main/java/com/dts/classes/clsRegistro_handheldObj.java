@@ -77,7 +77,6 @@ public class clsRegistro_handheldObj {
     private void addItem(clsClasses.clsRegistro_handheld item) {
 
         ins.init("Registro_handheld");
-
         ins.add("id_registro", item.id_registro);
         ins.add("id_empresa", item.id_empresa);
         ins.add("fecha_registro", item.fecha_registro);
@@ -85,7 +84,6 @@ public class clsRegistro_handheldObj {
         ins.add("id_estatus", item.id_estatus);
         ins.add("id_pais", item.id_pais);
         ins.add("descripcion", item.descripcion);
-
         db.execSQL(ins.sql());
 
     }

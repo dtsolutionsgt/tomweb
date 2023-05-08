@@ -16,7 +16,7 @@ public class Ingreso extends PBase {
     private EditText txtUser,txtPass;
     private TextView lblTitle,lblVer;
 
-    private String version="Ver: 1.0.2 - 22/03/22";
+    private String version="Ver: 1.0.3 - 291122";
 
 
     @Override
@@ -107,8 +107,11 @@ public class Ingreso extends PBase {
     // Main
 
     public void getDB(){
+
         clsInventario_encabezadoObj invEnc = new clsInventario_encabezadoObj(this, Con, db);
+
         try{
+
             invEnc.fill();
 
             if(invEnc.count == 0) {
@@ -118,16 +121,17 @@ public class Ingreso extends PBase {
                 getLic();
             }
 
-
         }catch (Exception e){
             addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
         }
     }
 
     private void getLic(){
+
         clsRegistro_handheldObj LicHH = new clsRegistro_handheldObj(this, Con, db);
 
         try {
+
             LicHH.fill();
 
             if(LicHH.count==0){
@@ -135,23 +139,24 @@ public class Ingreso extends PBase {
                 startActivity(new Intent(this, Licencia.class));
             }else{
                 LicHH.fill("WHERE id_estatus = 1");
-
                 if(LicHH.count==0) {
                     startActivity(new Intent(this, Licencia.class));
                 }
             }
+
         }catch (Exception e){
             addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
-
         }
     }
 
     private void processLogIn() {
+
         String user,pass,su,sp;
         clsOperadoresObj opr =new clsOperadoresObj(this,Con,db);
         boolean flag;
 
         try {
+
             user=txtUser.getText().toString();
             if (emptystr(user)) {
                 toast("Falta usuario.");txtUser.requestFocus();return;
@@ -162,7 +167,6 @@ public class Ingreso extends PBase {
                 toast("Falta clave.");txtUser.requestFocus();return;
             }
             user = user;pass = pass;
-
 
             opr.fill();
             if (opr.count == 0) {
@@ -185,7 +189,6 @@ public class Ingreso extends PBase {
             if (!flag) {
                 msgbox("¡El usuario no existe o contraseña incorrecta!");txtUser.requestFocus();return;
             }
-
 
             txtUser.setText("");txtPass.setText("");txtUser.requestFocus();
 
