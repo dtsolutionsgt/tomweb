@@ -51,21 +51,20 @@ public class Conteo extends PBase {
 
         addlog("Conteo",""+du.getActDateTime(),gl.nombreusuario);
 
-        Codigo = (EditText) findViewById(R.id.txtCodigo);
-        Barra = (EditText) findViewById(R.id.txtBarra);
-        Cantidad = (EditText) findViewById(R.id.txtCantidad);
-        Ubicacion = (EditText) findViewById(R.id.txtUbicacion);
+        Codigo = findViewById(R.id.txtCodigo);
+        Barra = findViewById(R.id.txtBarra);
+        Cantidad = findViewById(R.id.txtCantidad);
+        Ubicacion = findViewById(R.id.txtUbicacion);
 
-        Codigo2 = (TextView) findViewById(R.id.txtCodigo2);
-        Cant2 = (TextView) findViewById(R.id.txtCantidad2);
-        Desc = (TextView) findViewById(R.id.txtDesc);
-        eliminar = (ImageView) findViewById(R.id.imageView17);
+        Codigo2 = findViewById(R.id.txtCodigo2);
+        Cant2 = findViewById(R.id.txtCantidad2);
+        Desc = findViewById(R.id.txtDesc);
+        eliminar = findViewById(R.id.imageView17);
 
         //eliminar.setVisibility(View.INVISIBLE);
 
         Ubicacion.requestFocus();
         Barra.setFocusable(false);
-
         limpiaCampos();
         setHandlers();
     }
@@ -75,23 +74,20 @@ public class Conteo extends PBase {
 
     private void setHandlers() {
 
-        Ubicacion.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View arg0, int arg1, KeyEvent arg2) {
-                if (arg2.getAction() == KeyEvent.ACTION_DOWN) {
-                    switch (arg1) {
-                        case KeyEvent.KEYCODE_ENTER:
-                            gl.ubicacion = Ubicacion.getText().toString().trim();
-                            return true;
-                    }
+        Ubicacion.setOnKeyListener((arg0, arg1, arg2) -> {
+            if (arg2.getAction() == KeyEvent.ACTION_DOWN) {
+                switch (arg1) {
+                    case KeyEvent.KEYCODE_ENTER:
+                        gl.ubicacion = Ubicacion.getText().toString().trim();
+                        return true;
                 }
-                return false;
             }
+            return false;
         });
 
-        Codigo.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View arg0, int arg1, KeyEvent arg2) {
+        Codigo.setOnKeyListener((arg0, arg1, arg2) -> {
+
+            try {
                 if (arg2.getAction() == KeyEvent.ACTION_DOWN) {
                     switch (arg1) {
                         case KeyEvent.KEYCODE_ENTER:
@@ -125,8 +121,6 @@ public class Conteo extends PBase {
                                     Cantidad.setFocusableInTouchMode(true);
                                     Cantidad.setFocusable(true);
                                 }
-
-
                             }
 
                             mostrarConteo();
@@ -135,14 +129,16 @@ public class Conteo extends PBase {
                             return true;
                     }
                 }
-                return false;
+            } catch (Exception e) {
+                addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "setOnKeyListener");
             }
+
+            return false;
         });
 
+        Cantidad.setOnKeyListener((arg0, arg1, arg2) -> {
 
-        Cantidad.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View arg0, int arg1, KeyEvent arg2) {
+            try {
                 if (arg2.getAction() == KeyEvent.ACTION_DOWN) {
                     switch (arg1) {
                         case KeyEvent.KEYCODE_ENTER:
@@ -173,20 +169,22 @@ public class Conteo extends PBase {
                                 }
                             }
 
-
                             insertaConteo();
                             mostrarConteo();
-
                             return true;
                     }
                 }
-                return false;
+            } catch (Exception e) {
+                addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "Enter_Conteo");
             }
-        });
 
+            return false;
+
+        });
     }
 
     public boolean getBarra(){
+
         clsInventario_ciegoObj InvCiego = new clsInventario_ciegoObj(this, Con, db);
 
         try {

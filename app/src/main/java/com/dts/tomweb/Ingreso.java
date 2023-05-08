@@ -29,7 +29,7 @@ public class Ingreso extends PBase {
     private EditText txtUser,txtPass;
     private TextView lblTitle,lblVer;
 
-    private String version="Ver: 1.0.0 - 12/06/19";
+    private String version="Ver: 1.0.1 - 08/05/23";
 
     /************************************************************************/
     /******** variables para validar la existencia de lector rfid **********/
@@ -106,11 +106,10 @@ public class Ingreso extends PBase {
 
             addlog("Ingreso",""+du.getActDateTime(),gl.nombreusuario);
 
-            txtUser = (EditText) findViewById(R.id.editText2);txtUser.requestFocus();
-            txtPass = (EditText) findViewById(R.id.editText3);
-            lblTitle = (TextView) findViewById(R.id.textView2);
-            lblVer = (TextView) findViewById(R.id.Productos);lblVer.setText(version);
-
+            txtUser = findViewById(R.id.editText2);txtUser.requestFocus();
+            txtPass = findViewById(R.id.editText3);
+            lblTitle = findViewById(R.id.textView2);
+            lblVer = findViewById(R.id.Productos);lblVer.setText(version);
             txtUser.setText("2");txtPass.setText("gustav");txtPass.requestFocus();
 
             setHandlers();
@@ -167,18 +166,15 @@ public class Ingreso extends PBase {
             }
         });
 
-        txtPass.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View arg0, int arg1, KeyEvent arg2) {
-                if (arg2.getAction() == KeyEvent.ACTION_DOWN) {
-                    switch (arg1) {
-                        case KeyEvent.KEYCODE_ENTER:
-                            processLogIn();
-                            return true;
-                    }
+        txtPass.setOnKeyListener((arg0, arg1, arg2) -> {
+            if (arg2.getAction() == KeyEvent.ACTION_DOWN) {
+                switch (arg1) {
+                    case KeyEvent.KEYCODE_ENTER:
+                        processLogIn();
+                        return true;
                 }
-                return false;
             }
+            return false;
         });
 
     }
@@ -308,7 +304,6 @@ public class Ingreso extends PBase {
             e.printStackTrace();
             addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"ERROR_RFID_DISCONNECT");
         }
-
         //finish();
     }
 
@@ -349,6 +344,4 @@ public class Ingreso extends PBase {
        CerrarRFIF();
     }
 
-
 }
-

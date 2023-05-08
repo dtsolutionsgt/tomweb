@@ -104,68 +104,52 @@ public class ListaConteos extends PBase {
 
         try{
 
-            cb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    if (cb.isChecked()==true) consol = true; showData(scod);
-                    if (cb.isChecked()==false) consol = false; showData(scod);
+            cb.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                if (cb.isChecked()==true) consol = true; showData(scod);
+                if (cb.isChecked()==false) consol = false; showData(scod);
+            });
+
+            grid.setOnItemClickListener((parent, view, position, id) -> {
+
+                try {
+                    Object lvObj = grid.getItemAtPosition(position);
+                    String item = (String) lvObj;
+
+                    adapter.setSelectedIndex(position);
+                    toast(item);
+                } catch (Exception e) {
+                    addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"");
+                    msgbox("Error setHandler: "+e);
                 }
             });
 
-            grid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            dgrid.setOnItemClickListener((parent, view, position, id) -> {
 
-                    try {
-                        Object lvObj = grid.getItemAtPosition(position);
-                        String item = (String) lvObj;
+                try {
+                    Object lvObj = dgrid.getItemAtPosition(position);
+                    String item = (String) lvObj;
 
-                        adapter.setSelectedIndex(position);
-                        toast(item);
-                    } catch (Exception e) {
-                        addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"");
-                        msgbox("Error setHandler: "+e);
-                    }
+                    dadapter.setSelectedIndex(position);
+                    toast(item);
+                } catch (Exception e) {
+                    addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"");
+                    msgbox("Error setHandler: "+e);
                 }
-
-                ;
             });
 
-            dgrid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            dgrid.setOnItemLongClickListener((parent, view, position, id) -> {
 
-                    try {
-                        Object lvObj = dgrid.getItemAtPosition(position);
-                        String item = (String) lvObj;
+                try {
+                    Object lvObj = dgrid.getItemAtPosition(position);
+                    String item = (String) lvObj;
 
-                        dadapter.setSelectedIndex(position);
-                        toast(item);
-                    } catch (Exception e) {
-                        addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"");
-                        msgbox("Error setHandler: "+e);
-                    }
+                    adapter.setSelectedIndex(position);
+                    msgbox(item);
+                } catch (Exception e) {
+                    addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"");
+                    msgbox("Error setHandler: "+e);
                 }
-
-                ;
-            });
-
-            dgrid.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-                @Override
-                public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-
-                    try {
-                        Object lvObj = dgrid.getItemAtPosition(position);
-                        String item = (String) lvObj;
-
-                        adapter.setSelectedIndex(position);
-                        msgbox(item);
-                    } catch (Exception e) {
-                        addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"");
-                        msgbox("Error setHandler: "+e);
-                    }
-                    return true;
-                }
+                return true;
             });
 
             txtBarra.addTextChangedListener(new TextWatcher() {
@@ -199,7 +183,6 @@ public class ListaConteos extends PBase {
             addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"");
             msgbox("Error setHandler: "+e);
         }
-
     }
 
     //endregion
@@ -207,11 +190,13 @@ public class ListaConteos extends PBase {
     //region Main
 
     private void showData(String tn) {
+
         Cursor dt;
         String ss = "",barra,ubic;
         int cc,rg;
 
         try {
+
             dvalues.clear();
             values.clear();
 
@@ -233,7 +218,6 @@ public class ListaConteos extends PBase {
             }else {
                 ss="SELECT CODIGO_BARRA, UBICACION, CANTIDAD FROM "+ tn;
             }
-
 
             dt=Con.OpenDT(ss);
             if (dt.getCount()==0) {
@@ -269,33 +253,24 @@ public class ListaConteos extends PBase {
             ViewGroup.LayoutParams dlayoutParams = dgrid.getLayoutParams();
             dlayoutParams.width =((int) (cw*cc))+25;
             dgrid.setLayoutParams(dlayoutParams);
-
-            //dgrid.setColumnWidth(cw);
-            //dgrid.setStretchMode(GridView.NO_STRETCH);
             dgrid.setNumColumns(3);
-
             dadapter=new LA_Tablas2(this,dvalues);
             dgrid.setAdapter(dadapter);
-
 
             ViewGroup.LayoutParams layoutParams = grid.getLayoutParams();
             layoutParams.width =((int) (cw*cc))+25;
             grid.setLayoutParams(layoutParams);
-
-            //grid.setColumnWidth(cw);
-            //grid.setStretchMode(GridView.NO_STRETCH);
             grid.setNumColumns(3);
 
             adapter=new LA_Tablas(this,values);
             grid.setAdapter(adapter);
 
             pbar.setVisibility(View.INVISIBLE);
+
         } catch (Exception e) {
             addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"");
             msgbox("showData2: "+e);
         }
-
-
     }
 
     //endregion

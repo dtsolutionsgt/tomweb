@@ -34,12 +34,12 @@ public class Inventario extends PBase {
 
         addlog("Inventario",""+du.getActDateTime(),gl.nombreusuario);
 
-        Correlativo = (TextView) findViewById(R.id.txtCorrel);
-        Empresa = (TextView) findViewById(R.id.txtEmpresa);
-        Estado = (TextView) findViewById(R.id.txtEstado);
-        FechaInv = (TextView) findViewById(R.id.txtFecha);
-        Descrip = (TextView) findViewById(R.id.txtDescripcion);
-        TipoInv = (TextView) findViewById(R.id.txtTipoInv);
+        Correlativo = findViewById(R.id.txtCorrel);
+        Empresa = findViewById(R.id.txtEmpresa);
+        Estado = findViewById(R.id.txtEstado);
+        FechaInv = findViewById(R.id.txtFecha);
+        Descrip = findViewById(R.id.txtDescripcion);
+        TipoInv = findViewById(R.id.txtTipoInv);
 
         Filltxt();
 
@@ -90,12 +90,14 @@ public class Inventario extends PBase {
     //region Main
 
     public void Filltxt(){
+
         clsInventario_encabezadoObj invEnc = new clsInventario_encabezadoObj(this, Con, db);
         clsClasses.clsInventario_encabezado item=clsCls.new clsInventario_encabezado();
 
         String sfecha;
 
         try{
+
             invEnc.fill();
 
             if(invEnc.count == 0) return;
@@ -162,19 +164,13 @@ public class Inventario extends PBase {
         dialog.setMessage("Seleccione una opción");
         dialog.setTitle("Conteo de inventario");
         dialog.setPositiveButton("Inv. RFID",
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog,
-                                        int which) {
-                        Toast.makeText(getApplicationContext(),"Inventario por RFID",Toast.LENGTH_LONG).show();
-                        startActivity(new Intent(getApplicationContext(), ConteoRfid.class));
-                    }
+                (dialog1, which) -> {
+                    Toast.makeText(getApplicationContext(),"Inventario por RFID",Toast.LENGTH_LONG).show();
+                    startActivity(new Intent(getApplicationContext(), ConteoRfid.class));
                 });
-        dialog.setNegativeButton("Inv. Manual",new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                Toast.makeText(getApplicationContext(),"Inventario manual", Toast.LENGTH_LONG).show();
-                startActivity(new Intent(getApplicationContext(), Conteo.class));
-            }
+        dialog.setNegativeButton("Inv. Manual", (dialog12, which) -> {
+            Toast.makeText(getApplicationContext(),"Inventario manual", Toast.LENGTH_LONG).show();
+            startActivity(new Intent(getApplicationContext(), Conteo.class));
         });
         AlertDialog alertDialog=dialog.create();
         alertDialog.show();
@@ -188,25 +184,21 @@ public class Inventario extends PBase {
         dialog.setTitle("Tom");
         dialog.setMessage(msg);
 
-        dialog.setPositiveButton("Inv. RFID", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
+        dialog.setPositiveButton("Inv. RFID", (dialog1, which) -> {
 
-                //#GT16052022_1144: desde login se valida la conexión al RFID, para que no se cargue layout sin el dispositivo.
-                if(gl.rfid_activo) {
-                    Toast.makeText(getApplicationContext(), "Inventario por RFID", Toast.LENGTH_LONG).show();
-                    startActivity(new Intent(getApplicationContext(), ConteoRfid.class));
-                }else{
-                    toastlong("RFID no detectado: valide si esta conectado a la pistola, y con carga en la bateria.");
-                }
-
+            //#GT16052022_1144: desde login se valida la conexión al RFID, para que no se cargue layout sin el dispositivo.
+            if(gl.rfid_activo) {
+                Toast.makeText(getApplicationContext(), "Inventario por RFID", Toast.LENGTH_LONG).show();
+                startActivity(new Intent(getApplicationContext(), ConteoRfid.class));
+            }else{
+                toastlong("RFID no detectado: valide si esta conectado a la pistola, y con carga en la bateria.");
             }
+
         });
 
-        dialog.setNegativeButton("Inv. Manual", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                Toast.makeText(getApplicationContext(),"Inventario manual", Toast.LENGTH_LONG).show();
-                startActivity(new Intent(getApplicationContext(), Conteo.class));
-            }
+        dialog.setNegativeButton("Inv. Manual", (dialog12, which) -> {
+            Toast.makeText(getApplicationContext(),"Inventario manual", Toast.LENGTH_LONG).show();
+            startActivity(new Intent(getApplicationContext(), Conteo.class));
         });
 
         dialog.show();
