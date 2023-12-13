@@ -61,6 +61,7 @@
             android:paddingTop="8dp"
             android:paddingRight="10dp"
             android:paddingBottom="7dp"
+            android:contentDescription="Salir"
             android:src="@drawable/exitapp" />
     </RelativeLayout>
 

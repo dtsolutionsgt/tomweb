@@ -30,7 +30,7 @@ public class MenuPrincipal extends PBase {
 
         super.InitBase(savedInstanceState);
 
-        listView = (ListView) findViewById(R.id.listView1);
+        //listView = (ListView) findViewById(R.id.listView1);
         lblTitle = (TextView) findViewById(R.id.Productos);lblTitle.setText(gl.nombreusuario);
 
     }
@@ -38,7 +38,11 @@ public class MenuPrincipal extends PBase {
     //region Events
 
     public void doInventario(View view) {
-        startActivity(new Intent(this,Inventario.class));
+        try{
+            startActivity(new Intent(this,Inventario.class));
+        }catch (Exception e){
+            addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
+        }
     }
 
     public void doCom(View view) {

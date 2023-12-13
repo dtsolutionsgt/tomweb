@@ -120,7 +120,12 @@ public class Inventario extends PBase {
 
             sfecha = item.fecha_inicio;
 
-            if(item.tipo_inventario == 4){
+            if(item.tipo_inventario == 5){
+
+                gl.tipoInv=5;
+                tipoinv = "Inventario ciego_rfid";
+            }
+            else if(item.tipo_inventario == 4){
 
                 gl.tipoInv=4;
                 tipoinv = "Inventario Comparativo";

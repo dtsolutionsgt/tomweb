@@ -1,6 +1,7 @@
 package com.dts.tomweb;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
@@ -64,9 +65,11 @@ public class Licencia extends PBase {
                         //crear archivo
                         Crear_Registro_Licencia();
                         msgbox("Se ha regitrado correctamente la licencia del dispositivo");
+                        startActivity(new Intent(this,MenuPrincipal.class));
                         //return a comws
                     }else if(!lic.equals(gl.NoSerieHH)){
                         msgbox("Clave de activacion incorrecta");
+
                     }
 
                 }else {

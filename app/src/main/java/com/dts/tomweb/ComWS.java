@@ -40,6 +40,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class ComWS extends PBase {
 
@@ -191,11 +192,15 @@ public class ComWS extends PBase {
     // Main
 
     private void runRecep() {
-        if (isbusy==1) return;
-        isbusy=1;
+        try{
+            if (isbusy==1) return;
+            isbusy=1;
 
-        wsRtask = new AsyncCallRec();
-        wsRtask.execute();
+            wsRtask = new AsyncCallRec();
+            wsRtask.execute();
+        }catch (Exception e){
+            addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
+        }
     }
 
     private void runSend() {
@@ -801,13 +806,15 @@ public class ComWS extends PBase {
         }
 
         if (TN.equalsIgnoreCase("OPERADORES")) {
-
             invEnc.fill();
-            Com_Id_Inventario = invEnc.first().id_inventario_enc;
-            gl.tipoInv =  invEnc.first().tipo_inventario;
-
-            SQL = "SELECT A.* FROM OPERADORES A, INVENTARIO_OPERADOR B  WHERE A.ID_OPERADOR = B.ID_OPERADOR AND A.ID_EMPRESA ='" + Com_IdEmpresa +"' AND B.ID_INVENTARIO_ENC='" + Com_Id_Inventario +"'";
-            return SQL;
+            if (invEnc.count>0) {
+                Com_Id_Inventario = invEnc.first().id_inventario_enc;
+                gl.tipoInv =  invEnc.first().tipo_inventario;
+                SQL = "SELECT A.* FROM OPERADORES A, INVENTARIO_OPERADOR B  WHERE A.ID_OPERADOR = B.ID_OPERADOR AND A.ID_EMPRESA ='" + Com_IdEmpresa +"' AND B.ID_INVENTARIO_ENC='" + Com_Id_Inventario +"'";
+                return SQL;
+            }else{
+                return  "SELECT A.* FROM OPERADORES A, INVENTARIO_OPERADOR B  WHERE A.ID_OPERADOR = B.ID_OPERADOR";
+            }
         }
 
         if (TN.equalsIgnoreCase("ARTICULO")) {
@@ -908,7 +915,8 @@ public class ComWS extends PBase {
         protected Void doInBackground(String... params) {
             try {
                 wsExecute();
-            } catch (Exception e) {
+            } catch (Exception e){
+                //addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
             }
 
             return null;

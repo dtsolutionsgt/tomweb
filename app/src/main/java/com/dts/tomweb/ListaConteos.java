@@ -69,6 +69,7 @@ public class ListaConteos extends PBase {
 
         if(gl.tipoInv==1) scod = " INVENTARIO_CIEGO";
         if(gl.tipoInv==2 || gl.tipoInv==3) scod = " INVENTARIO_DETALLE";
+        if(gl.tipoInv==5) scod = " INVENTARIO_CIEGO_RFID";
 
         setHandlers();
 

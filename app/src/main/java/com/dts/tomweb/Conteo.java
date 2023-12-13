@@ -24,12 +24,15 @@ import com.dts.classes.clsInventario_ciegoObj;
 import com.dts.classes.clsInventario_detalleObj;
 import com.dts.classes.clsInventario_teoricoObj;
 import com.dts.classes.clsRegistro_handheldObj;
-
+import com.dts.classes.clsInventario_ciego_RfidObj;
 import org.w3c.dom.Text;
 
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Objects;
+import java.util.TimeZone;
 
 public class Conteo extends PBase {
 
@@ -157,15 +160,18 @@ public class Conteo extends PBase {
                             mostrarConteo();
 
                             if(gl.tipoInv!=1){
-                                if(tipoArt.equals("S")) {
-                                    Cantidad.setFocusable(false);
-                                    insertaConteo();
-                                    mostrarConteo();
-                                    Ubicacion.requestFocus();
-                                    return true;
-                                } else {
-                                    Cantidad.setFocusableInTouchMode(true);
-                                    Cantidad.setFocusable(true);
+
+                                if(!Objects.isNull(tipoArt)){
+                                    if(tipoArt.equals("S")) {
+                                        Cantidad.setFocusable(false);
+                                        insertaConteo();
+                                        mostrarConteo();
+                                        Ubicacion.requestFocus();
+                                        return true;
+                                    } else {
+                                        Cantidad.setFocusableInTouchMode(true);
+                                        Cantidad.setFocusable(true);
+                                    }
                                 }
                             }
 
@@ -290,8 +296,11 @@ public class Conteo extends PBase {
         clsClasses.clsInventario_ciego item= new clsClasses.clsInventario_ciego();
         clsInventario_detalleObj InvDet = new clsInventario_detalleObj(this, Con, db);
         clsClasses.clsInventario_detalle itemDeta=clsCls.new clsInventario_detalle();
-
         clsRegistro_handheldObj regHH = new clsRegistro_handheldObj(this, Con, db);
+        clsInventario_ciego_RfidObj InvCiegoRfid = new clsInventario_ciego_RfidObj(this,Con,db);
+        clsClasses.clsInventario_ciego_rfid item_rfid = new clsClasses.clsInventario_ciego_rfid();
+
+
 
         Long sfecha;
         String  ff,ffe;
@@ -314,9 +323,18 @@ public class Conteo extends PBase {
             ffe= ff.substring(0,8);
 
             if(gl.tipoInv!=1){
-                if(tipoArt.equals("S")){
-                    canti = 1.0;
-                }else {
+                if(!Objects.isNull(tipoArt)){
+                    if(tipoArt.equals("S")){
+                        canti = 1.0;
+                    }else {
+                        if(Cantidad.getText().toString().isEmpty()){
+                            msgbox("Ingrese la cantidad");
+                            return;
+                        }else {
+                            canti = Double.parseDouble(Cantidad.getText().toString());
+                        }
+                    }
+                } else {
                     if(Cantidad.getText().toString().isEmpty()){
                         msgbox("Ingrese la cantidad");
                         return;
@@ -376,11 +394,36 @@ public class Conteo extends PBase {
 
                 InvDet.add(itemDeta);
 
+            }else if(gl.tipoInv==5){
+
+                Barra.setText(Codigo.getText().toString());
+                barra = Barra.getText().toString().trim();
+
+                DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                sdf = new SimpleDateFormat("HH:mm");
+                sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+
+                Date result;
+                //result = df.parse(ffe);
+
+                item_rfid.id_inventario_enc =  gl.idInvEnc;
+                item_rfid.codigo_barra = barra;
+                item_rfid.cantidad = canti;
+                item_rfid.id=1;
+                item_rfid.comunicado = "N";
+                item_rfid.ubicacion = Ubic;
+                item_rfid.id_operador = gl.userid;
+                item_rfid.fecha = ffe;
+                item_rfid.hora = "10:00"; //sdf.format(result);
+                item_rfid.id_registro = gl.IDregistro;
+                item_rfid.eliminado = 0;
+                InvCiegoRfid.add(item_rfid);
             }
 
             Toast.makeText(this, "Agregado Correctamente", Toast.LENGTH_LONG).show();
 
-            if(gl.tipoInv==1) limpiaCampos2(); else if (tipoArt.equals("F")) limpiaCampos2();
+            if(gl.tipoInv==1 || gl.tipoInv==5) limpiaCampos2(); else if (tipoArt.equals("F")) limpiaCampos2();
 
         }catch (Exception e){
             addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
@@ -505,6 +548,8 @@ public class Conteo extends PBase {
     public void mostrarConteo(){
         clsInventario_teoricoObj teorico = new clsInventario_teoricoObj(this, Con, db);
         clsArticuloObj articulo = new clsArticuloObj(this, Con, db);
+        clsInventario_ciego_RfidObj inv_rfid = new clsInventario_ciego_RfidObj(this,Con,db);
+
         Cursor dt;
         Double cant2;
         String Tabla="", codBck;
@@ -551,6 +596,25 @@ public class Conteo extends PBase {
                     Barra.setText(barra);
                 }
 
+            }else if(gl.tipoInv==5){
+
+                int cantidad = 0;
+                Tabla = "INVENTARIO_CIEGO_RFID";
+
+                inv_rfid.fill(" WHERE CODIGO_BARRA ='"+ Cod +"'");
+                if(inv_rfid.count >0){
+                    barra = inv_rfid.first().codigo_barra;
+                    cantidad = (int) inv_rfid.first().cantidad;
+
+                    if(Objects.isNull(desc)){
+                        msgAskArt("Agregar como no encontrado");
+                        return;
+                    }else{
+                        //Desc.setText(desc);
+                        Barra.setText(barra);
+                        Cantidad.setText(cantidad);
+                    }
+                }
             }
 
             if(!Cod.isEmpty()){
