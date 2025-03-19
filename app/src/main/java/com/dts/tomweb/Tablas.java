@@ -116,7 +116,8 @@ public class Tablas extends PBase {
                             processTable();
                         }
                     } catch (Exception e) {
-                        mu.msgbox(e.getMessage());
+                        //mu.msgbox(e.getMessage());
+                        toastlong(e.getMessage());
                     }
 
                 }
@@ -139,7 +140,8 @@ public class Tablas extends PBase {
                         adapter.setSelectedIndex(position);
                         toast(item);
                     } catch (Exception e) {
-                        mu.msgbox(e.getMessage());
+                        //mu.msgbox(e.getMessage());
+                        toastlong(e.getMessage());
                     }
                 }
 
@@ -157,7 +159,8 @@ public class Tablas extends PBase {
                         dadapter.setSelectedIndex(position);
                         toast(item);
                     } catch (Exception e) {
-                        mu.msgbox(e.getMessage());
+                        //mu.msgbox(e.getMessage());
+                        toastlong(e.getMessage());
                     }
                 }
 
@@ -349,7 +352,8 @@ public class Tablas extends PBase {
                 }
                 if (DT!=null) DT.close();
             } catch (Exception e) {
-                mu.msgbox(e.getMessage());
+                //mu.msgbox(e.getMessage());
+                toastlong(e.getMessage());
             }
 
             ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, spinlist);
@@ -357,6 +361,7 @@ public class Tablas extends PBase {
 
             spin.setAdapter(dataAdapter);
         }catch (Exception e){
+            toastlong(e.getMessage());
         }
 
     }

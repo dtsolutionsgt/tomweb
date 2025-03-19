@@ -75,18 +75,27 @@ public class PBase extends Activity {
 
         selid=-1;selidx=-1;
         callback =0;
-
         holdInstance(savedInstanceState);
-
     }
 
     public void opendb() {
         try {
+
+            //#GT13022025: si la db es null, no intentar acceder a ella
+            //if(Con.vDatabase!=null){
+             //   db = Con.getWritableDatabase();
+             //   Con.vDatabase =db;
+             //   active=1;
+            //}else{
+            //    active= 0;
+            //}
+
             db = Con.getWritableDatabase();
             Con.vDatabase =db;
-            active=1;
+
         } catch (Exception e) {
-            mu.msgbox(e.getMessage());
+            //mu.msgbox(e.getMessage());
+            //toastlong("No se pudo acceder a la BD.");
             active= 0;
         }
     }
@@ -126,6 +135,7 @@ public class PBase extends Activity {
 
         } catch (Exception e) {
             msgbox("Error " + e.getMessage());
+            //addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
         }
     }
 
@@ -172,15 +182,15 @@ public class PBase extends Activity {
     }
 
     protected void msgbox(String msg){
-        mu.msgbox(msg);
+       // mu.msgbox(msg);
     }
 
     protected void msgbox(int val){
-        mu.msgbox(""+val);
+        //mu.msgbox(""+val);
     }
 
     protected void msgbox(double val){
-        mu.msgbox(""+val);
+        //mu.msgbox(""+val);
     }
 
     public void PopUp(String tx){

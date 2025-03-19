@@ -16,9 +16,12 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.dts.classes.clsInventario_Rfid;
 import com.dts.classes.clsInventario_encabezadoObj;
 
 import com.dts.base.clsClasses;
+import com.dts.tomweb.Conteo_RFID.Ingreso_rfid;
+import com.dts.tomweb.Conteo_RFID.Inventario_rfid;
 
 public class Inventario extends PBase {
 
@@ -73,8 +76,16 @@ public class Inventario extends PBase {
     public void doNext(View view) {
 
         //GT 11082021 este mensaje valida si, se requiere un inv con RFID o uno manual
-        msgAskContinue("Conteo de inventario");
-        //startActivity(new Intent(this, Conteo.class));
+        //msgAskContinue("Conteo de inventario");
+
+        //GT 14032025: no preguntar, ir directo al inventario por rfid
+        if(gl.rfid_activo) {
+            startActivity(new Intent(this, Inventario_rfid.class));
+        }else{
+            toastlong("RFID no detectado: valide si esta conectado a la pistola, y con carga en la bateria.");
+        }
+
+
     }
 
     private void setHandlers(){
@@ -171,7 +182,8 @@ public class Inventario extends PBase {
         dialog.setPositiveButton("Inv. RFID",
                 (dialog1, which) -> {
                     Toast.makeText(getApplicationContext(),"Inventario por RFID",Toast.LENGTH_LONG).show();
-                    startActivity(new Intent(getApplicationContext(), ConteoRfid.class));
+                    //startActivity(new Intent(getApplicationContext(), ConteoRfid.class));
+                    startActivity(new Intent(getApplicationContext(), Inventario_rfid.class));
                 });
         dialog.setNegativeButton("Inv. Manual", (dialog12, which) -> {
             Toast.makeText(getApplicationContext(),"Inventario manual", Toast.LENGTH_LONG).show();
@@ -194,7 +206,8 @@ public class Inventario extends PBase {
             //#GT16052022_1144: desde login se valida la conexión al RFID, para que no se cargue layout sin el dispositivo.
             if(gl.rfid_activo) {
                 Toast.makeText(getApplicationContext(), "Inventario por RFID", Toast.LENGTH_LONG).show();
-                startActivity(new Intent(getApplicationContext(), ConteoRfid.class));
+                //startActivity(new Intent(getApplicationContext(), ConteoRfid.class));
+                startActivity(new Intent(getApplicationContext(), Inventario_rfid.class));
             }else{
                 toastlong("RFID no detectado: valide si esta conectado a la pistola, y con carga en la bateria.");
             }

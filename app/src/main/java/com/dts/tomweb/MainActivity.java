@@ -11,12 +11,11 @@ import android.os.Handler;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.widget.Toast;
-import android.support.v4.app.ActivityCompat;
-
+import androidx.core.app.ActivityCompat;
 import com.dts.base.MiscUtils;
 import com.dts.base.appGlobals;
 import com.dts.base.clsClasses;
-
+import com.dts.tomweb.Conteo_RFID.Inventario_rfid;
 
 public class MainActivity extends Activity {
 
@@ -109,6 +108,7 @@ public class MainActivity extends Activity {
             public void run() {
 
                 Intent intent=new Intent(MainActivity.this,Ingreso.class);
+                //Intent intent=new Intent(MainActivity.this, Inventario_rfid.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
                 startActivity(intent);
                 gl.NoSerieHH = androidid();

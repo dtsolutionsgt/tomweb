@@ -265,7 +265,7 @@ public class ComWS extends PBase {
                     str = ((SoapObject) result.getProperty(0)).getPropertyAsString(i);
 
                 }catch (Exception e){
-                    mu.msgbox("error: " + e.getMessage());
+                    //mu.msgbox("error: " + e.getMessage());
                     addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
                 }
 
@@ -468,8 +468,16 @@ public class ComWS extends PBase {
             HttpTransportSE transport = new HttpTransportSE(URL);
             transport.call(NAMESPACE+METHOD_NAME, envelope);
 
-            SoapPrimitive resSoap =(SoapPrimitive) envelope.getResponse();
-            s = resSoap.toString();
+            if (envelope.getResponse() != null) {
+                SoapPrimitive resSoap = (SoapPrimitive) envelope.getResponse();
+                s = resSoap.toString();
+            } else {
+                // Manejo de la respuesta vacía o nula
+                return false;
+            }
+
+            //SoapPrimitive resSoap =(SoapPrimitive) envelope.getResponse();
+            //s = resSoap.toString();
 
             sstr = "#";
             if (s.equalsIgnoreCase("#")) return true;
@@ -894,7 +902,8 @@ public class ComWS extends PBase {
                     msgLic("No hay licencia existente de este dispositivo, validarla en BOF, su número de activación es: "+ gl.NoSerieHH);
 
                 }else{
-                    mu.msgbox("Ocurrió error : \n"+fstr+" ("+reccnt+") " + ferr);
+                    //mu.msgbox("Ocurrió error : \n"+fstr+" ("+reccnt+") " + ferr);
+                    toastlong("Ocurrió error : \n"+fstr+" ("+reccnt+") " + ferr);
                     gl.licExist=0;
                     isbusy=0;
                     return;
@@ -1215,6 +1224,7 @@ public class ComWS extends PBase {
                 if (!sendData()) {
                     fterr="Envio incompleto : "+sstr;
                 } else {
+                    fterr="Sync OK";
                 }
             } else {
                 fterr="No se puede conectar al web service : "+sstr;
@@ -1234,7 +1244,8 @@ public class ComWS extends PBase {
         prgBar.setVisibility(View.INVISIBLE);
 
         if (errflag) {
-            mu.msgbox(fterr);
+            //mu.msgbox(fterr);
+            toastlong(fterr);
         }else{
             msgAskExit("Envio completo");
         }

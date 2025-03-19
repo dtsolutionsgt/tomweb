@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_inventario_rfid">
+
+    <!-- 🔵 MENÚ SUPERIOR -->
+    <LinearLayout
+        android:id="@+id/menuSuperior"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="10dp"
+        android:background="@drawable/bg_header_inventario_rfid"
+        android:layout_alignParentTop="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/imgTomWeb"
+                android:layout_width="70dp"
+                android:layout_height="50dp"
+                android:layout_marginEnd="0dp"
+                android:layout_marginBottom="0dp"
+                android:clickable="false"
+                android:src="@drawable/tomweb" />
+
+
+            <TextView
+                android:id="@+id/txtEncabezado"
+                android:layout_width="266dp"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:text="Inventario RFID"
+                android:textColor="#E6E2E2"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <ImageView
+                android:id="@+id/imgHelp"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="0dp"
+                android:layout_marginBottom="0dp"
+                android:clickable="true"
+                android:onClick="Help"
+                android:padding="8dp"
+                android:src="@drawable/help" />
+        </LinearLayout>
+
+        <!-- Texto debajo del título para mostrar lecturas -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/txtTotal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Esperado: 0"
+                android:textSize="12sp"
+                android:textColor="#E6E2E2"
+                android:textAlignment="textStart"/>
+
+            <TextView
+                android:id="@+id/txtLecturas"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Conteo: 0"
+                android:textSize="12sp"
+                android:textColor="#E6E2E2"
+                android:textAlignment="textStart"/>
+
+        </LinearLayout>
+
+        <!--bodega o almacen -->
+     <!--   <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:layout_marginBottom="5dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="Ubicación: almacen centro"
+                android:textSize="20sp"
+                android:textColor="#E6E2E2"
+                android:textAlignment="textStart">
+            </TextView>
+
+        </LinearLayout>-->
+
+    </LinearLayout>
+
+    <!-- 🟢 CONTENIDO PRINCIPAL -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rcListaLecturasRFID"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/menuSuperior"
+        android:layout_above="@id/menuInferior"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:padding="10dp"/>
+
+    <!-- 🔴 MENÚ INFERIOR -->
+    <LinearLayout
+        android:id="@+id/menuInferior"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="10dp"
+        android:background="@drawable/bg_botton_inventario_rfid"
+        android:layout_alignParentBottom="true">
+
+        <Button
+            android:id="@+id/btnRegresar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_buttonolor_inventario_rfid"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:textSize="11sp"
+            android:textColor="#FFFFFF"
+            android:text="Regresar"
+            android:layout_weight="1"/>
+
+        <Button
+            android:id="@+id/btnLimpiar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:background="@drawable/bg_buttonolor_inventario_rfid"
+            android:textSize="11sp"
+            android:textColor="#FFFFFF"
+            android:text="Limpiar"
+            android:layout_weight="1"/>
+
+        <Button
+            android:id="@+id/btnListarConteo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:background="@drawable/bg_buttonolor_inventario_rfid"
+            android:textSize="11sp"
+            android:textColor="#FFFFFF"
+            android:text="Mostrar"
+            android:layout_weight="1"/>
+
+        <Button
+            android:id="@+id/IdEnviarConteo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:background="@drawable/bg_buttonolor_inventario_rfid"
+            android:textSize="11sp"
+            android:textColor="#FFFFFF"
+            android:text="Enviar"
+            android:layout_weight="1"/>
+    </LinearLayout>
+
+</RelativeLayout>

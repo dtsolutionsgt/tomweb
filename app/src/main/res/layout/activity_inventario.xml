@@ -39,6 +39,8 @@
             android:clickable="true"
             android:onClick="doHelp"
             android:padding="7dp"
+            android:hint="ayuda"
+            android:contentDescription="botón de ayuda"
             android:src="@drawable/help" />
 
     </RelativeLayout>
@@ -59,10 +61,12 @@
             android:adjustViewBounds="true"
             android:clickable="true"
             android:onClick="doExit"
-            android:paddingLeft="8dp"
+            android:paddingStart="8dp"
             android:paddingTop="8dp"
-            android:paddingRight="10dp"
+            android:paddingEnd="10dp"
             android:paddingBottom="7dp"
+            android:hint="regresar"
+            android:contentDescription="botón de retorno"
             android:src="@drawable/arr_prev" />
 
         <ImageView
@@ -85,9 +89,9 @@
         android:layout_below="@+id/relTop"
         android:layout_alignParentStart="true"
         android:layout_marginStart="52dp"
-        android:layout_marginTop="30dp"
+        android:layout_marginTop="20dp"
         android:text="Correlativo:"
-        android:textSize="20sp" />
+        android:textSize="15sp" />
 
     <TextView
         android:id="@+id/textView15"
@@ -96,9 +100,9 @@
         android:layout_below="@+id/textView13"
         android:layout_alignParentStart="true"
         android:layout_marginStart="52dp"
-        android:layout_marginTop="31dp"
+        android:layout_marginTop="20dp"
         android:text="Empresa:"
-        android:textSize="20sp" />
+        android:textSize="15sp" />
 
     <TextView
         android:id="@+id/textView19"
@@ -107,9 +111,9 @@
         android:layout_below="@+id/textView15"
         android:layout_alignParentStart="true"
         android:layout_marginStart="52dp"
-        android:layout_marginTop="30dp"
+        android:layout_marginTop="20dp"
         android:text="Estado:"
-        android:textSize="20sp" />
+        android:textSize="15sp" />
 
     <TextView
         android:id="@+id/textView20"
@@ -118,9 +122,9 @@
         android:layout_below="@+id/textView19"
         android:layout_alignParentStart="true"
         android:layout_marginStart="52dp"
-        android:layout_marginTop="31dp"
+        android:layout_marginTop="20dp"
         android:text="Fecha Inv:"
-        android:textSize="20sp" />
+        android:textSize="15sp" />
 
     <TextView
         android:id="@+id/textView21"
@@ -129,9 +133,9 @@
         android:layout_below="@+id/textView20"
         android:layout_alignParentStart="true"
         android:layout_marginStart="52dp"
-        android:layout_marginTop="30dp"
+        android:layout_marginTop="20dp"
         android:text="Descripción:"
-        android:textSize="20sp" />
+        android:textSize="15sp" />
 
     <TextView
         android:id="@+id/textView22"
@@ -140,20 +144,21 @@
         android:layout_below="@+id/textView21"
         android:layout_alignParentStart="true"
         android:layout_marginStart="52dp"
-        android:layout_marginTop="45dp"
+        android:layout_marginTop="20dp"
         android:text="Tipo Inv:"
-        android:textSize="20sp" />
+        android:textSize="15sp" />
 
     <TextView
         android:id="@+id/txtEmpresa"
+
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/txtCorrel"
-        android:layout_marginStart="44dp"
-        android:layout_marginTop="34dp"
+        android:layout_marginStart="36dp"
+        android:layout_marginTop="23dp"
         android:layout_toEndOf="@+id/textView15"
         android:text="TextView"
-        android:textSize="20sp"
+        android:textSize="12sp"
         android:textStyle="bold|italic" />
 
     <TextView
@@ -161,11 +166,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/txtEmpresa"
-        android:layout_marginStart="64dp"
-        android:layout_marginTop="28dp"
+        android:layout_marginStart="46dp"
+        android:layout_marginTop="25dp"
         android:layout_toEndOf="@+id/textView19"
         android:text="TextView"
-        android:textSize="20sp"
+        android:textSize="12sp"
         android:textStyle="bold|italic" />
 
     <TextView
@@ -173,11 +178,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/txtEstado"
-        android:layout_marginStart="39dp"
-        android:layout_marginTop="33dp"
+        android:layout_marginStart="28dp"
+        android:layout_marginTop="20dp"
         android:layout_toEndOf="@+id/textView20"
         android:text="TextView"
-        android:textSize="20sp"
+        android:textSize="12sp"
         android:textStyle="bold|italic" />
 
     <TextView
@@ -185,37 +190,37 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/relTop"
-        android:layout_marginStart="26dp"
-        android:layout_marginTop="29dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="23dp"
         android:layout_toEndOf="@+id/textView13"
         android:text="TextView"
-        android:textSize="20sp"
+        android:textSize="12sp"
         android:textStyle="bold|italic" />
 
     <TextView
         android:id="@+id/txtTipoInv"
-        android:layout_width="143dp"
-        android:layout_height="wrap_content"
+        android:layout_width="183dp"
+        android:layout_height="27dp"
         android:layout_below="@+id/txtDescripcion"
-        android:layout_marginStart="47dp"
+        android:layout_marginStart="40dp"
         android:layout_marginTop="12dp"
         android:layout_toEndOf="@+id/textView22"
         android:text="TextView"
-        android:textSize="20sp"
+        android:textSize="12sp"
         android:textStyle="bold|italic" />
 
     <TextView
         android:id="@+id/txtDescripcion"
-        android:layout_width="129dp"
-        android:layout_height="61dp"
+        android:layout_width="186dp"
+        android:layout_height="28dp"
         android:layout_below="@+id/txtFecha"
-        android:layout_marginStart="20dp"
+        android:layout_marginStart="18dp"
         android:layout_marginTop="28dp"
         android:layout_toEndOf="@+id/textView21"
         android:scrollbarAlwaysDrawHorizontalTrack="true"
         android:scrollbarAlwaysDrawVerticalTrack="true"
         android:text="TextView"
-        android:textSize="20sp"
+        android:textSize="12sp"
         android:textStyle="bold|italic" />
 
     <Button
@@ -229,7 +234,7 @@
         android:background="@drawable/frame_round"
         android:onClick="doNext"
         android:text="Conteo"
-        android:textSize="24sp"
+        android:textSize="20sp"
         android:textStyle="italic" />
 
 </RelativeLayout>

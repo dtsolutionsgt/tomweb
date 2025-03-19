@@ -1188,6 +1188,8 @@ public class ConteoRfid extends PBase  {
             return added;
         }
 
+
+
         @Override
         protected void onPostExecute(Boolean result) {
             cancel(true);

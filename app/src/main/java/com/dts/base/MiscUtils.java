@@ -113,7 +113,7 @@ public class MiscUtils {
 		}
 	}
 	
-	public void msgbox(String msg) {
+/*	public void msgbox(String msg) {
 		
 		if (msg==null || msg.isEmpty()) {return;}
 		
@@ -132,9 +132,9 @@ public class MiscUtils {
     	});
 		dialog.show();
 	
-	}   
+	}*/
 	
-	public void msgbox(int v) {
+/*	public void msgbox(int v) {
 		AlertDialog.Builder dialog = new AlertDialog.Builder(cont);
 
 		dialog.setCancelable(false);
@@ -148,7 +148,7 @@ public class MiscUtils {
     	});
 		dialog.show();
 	
-	}   
+	} */
 	
 	public void toast(String msg) {
 		Toast.makeText(cont,msg, Toast.LENGTH_SHORT).show();

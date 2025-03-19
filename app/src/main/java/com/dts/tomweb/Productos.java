@@ -401,7 +401,9 @@ public class Productos extends PBase {
             spinnCon.setAdapter(dataAdapter);
 
             spinnCon.setAdapter(dataAdapter);
-        }catch (Exception e){}
+        }catch (Exception e){
+            msgbox("Error setHandler: "+e.getMessage());
+        }
 
     }
 

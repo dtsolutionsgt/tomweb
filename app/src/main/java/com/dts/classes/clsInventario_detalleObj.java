@@ -42,6 +42,10 @@ public class clsInventario_detalleObj {
         addItem(item);
     }
 
+    public void DeleteAll() {
+        deleteAll();
+    }
+
     public void update(clsClasses.clsInventario_detalle item) {
         updateItem(item);
     }
@@ -123,6 +127,12 @@ public class clsInventario_detalleObj {
 
     private void deleteItem(int id) {
         sql="DELETE FROM Inventario_detalle WHERE id=" + id;
+        db.execSQL(sql);
+    }
+
+    //GT13032025: limpiar la tabla si desde lectura RFID
+    private void deleteAll(){
+        sql="DELETE FROM Inventario_detalle";
         db.execSQL(sql);
     }
 

@@ -40,7 +40,7 @@ public class clsDataBuilder {
 			db = Con.getWritableDatabase();
 		 	Con.vDatabase =db;
 	    } catch (Exception e) {
-	    	MU.msgbox(e.getMessage());
+	    	//MU.msgbox(e.getMessage());
 	    }
 		
 		System.setProperty("line.separator","\r\n");

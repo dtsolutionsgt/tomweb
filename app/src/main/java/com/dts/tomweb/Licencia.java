@@ -26,9 +26,11 @@ public class Licencia extends PBase {
         addlog("Licencia",""+du.getActDateTime(),gl.nombreusuario);
 
         if(gl.validaLicDB==1){
-            mu.msgbox("Este dispositivo no tiene una licencia registrada");
+            //mu.msgbox("Este dispositivo no tiene una licencia registrada");
+            toastlong("Este dispositivo no tiene una licencia registrada");
         }else if (gl.validaLicDB==2) {
-            mu.msgbox("Este dispositivo no tiene una licencia activa");
+            //mu.msgbox("Este dispositivo no tiene una licencia activa");
+            toastlong("Este dispositivo no tiene una licencia activa");
         }
 
         Lic = (EditText) findViewById(R.id.txtLic);

@@ -111,7 +111,8 @@ public class UsuarioLista extends PBase {
             adapter=new LA_Usuario(this,this, users.items);
             listView.setAdapter(adapter);
         } catch (Exception e) {
-            mu.msgbox(e.getMessage());
+            //mu.msgbox(e.getMessage());
+            toastlong(e.getMessage());
         }
     }
 

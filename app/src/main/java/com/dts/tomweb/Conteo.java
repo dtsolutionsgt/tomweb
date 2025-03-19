@@ -390,7 +390,7 @@ public class Conteo extends PBase {
                 itemDeta.id_operador = gl.userid;
                 itemDeta.fecha = ffe;
                 itemDeta.id_registro = gl.IDregistro;
-                item.eliminado = 0;
+                itemDeta.eliminado = 0;
 
                 InvDet.add(itemDeta);
 
