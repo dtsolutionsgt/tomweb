@@ -180,6 +180,7 @@ public class Inventario_rfid extends PBase{
         rcListaLecturasRfid.setLayoutManager(new LinearLayoutManager(this));
 
         //*** lectura demo rfid ********************************************************//
+        //**#GT02042025****
        /* for (int i=1;i<encontrados+1;i=i+1){
             clsInventario_Rfid Registro_Rfid_Demo = new clsInventario_Rfid();
             Registro_Rfid_Demo.tag = "tag: " + "aaaaaaaaa" + i;
