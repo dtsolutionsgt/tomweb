@@ -76,7 +76,6 @@ public class clsInventario_teoricoObj {
     private void addItem(clsClasses.clsInventario_teorico item) {
 
         ins.init("Inventario_teorico");
-
         ins.add("id_empresa",item.id_empresa);
         ins.add("id_articulo",item.id_articulo);
         ins.add("descripcion",item.descripcion);
@@ -85,7 +84,6 @@ public class clsInventario_teoricoObj {
         ins.add("costo",item.costo);
         ins.add("tipo_conteo",item.tipo_conteo);
         ins.add("id_inventario_enc",item.id_inventario_enc);
-
         db.execSQL(ins.sql());
 
     }
@@ -93,15 +91,12 @@ public class clsInventario_teoricoObj {
     private void updateItem(clsClasses.clsInventario_teorico item) {
 
         upd.init("Inventario_teorico");
-
         upd.add("descripcion",item.descripcion);
         upd.add("cantidad",item.cantidad);
         upd.add("costo",item.costo);
         upd.add("tipo_conteo",item.tipo_conteo);
         upd.add("id_inventario_enc",item.id_inventario_enc);
-
         upd.Where("(id_empresa="+item.id_empresa+") AND (id_articulo='"+item.id_articulo+"') AND (codigo_barra='"+item.codigo_barra+"')");
-
         db.execSQL(upd.sql());
 
         //Toast toast= Toast.makeText(cont,upd.sql(), Toast.LENGTH_LONG);toast.show();
@@ -131,7 +126,6 @@ public class clsInventario_teoricoObj {
         while (!dt.isAfterLast()) {
 
             item = clsCls.new clsInventario_teorico();
-
             item.id_empresa=dt.getInt(0);
             item.id_articulo=dt.getString(1);
             item.descripcion=dt.getString(2);
@@ -140,7 +134,6 @@ public class clsInventario_teoricoObj {
             item.costo=dt.getDouble(5);
             item.tipo_conteo=dt.getString(6);
             item.id_inventario_enc=dt.getInt(7);
-
             items.add(item);
 
             dt.moveToNext();
@@ -168,7 +161,6 @@ public class clsInventario_teoricoObj {
     public String addItemSql(clsClasses.clsInventario_teorico item) {
 
         ins.init("Inventario_teorico");
-
         ins.add("id_empresa",item.id_empresa);
         ins.add("id_articulo",item.id_articulo);
         ins.add("descripcion",item.descripcion);
@@ -177,7 +169,6 @@ public class clsInventario_teoricoObj {
         ins.add("costo",item.costo);
         ins.add("tipo_conteo",item.tipo_conteo);
         ins.add("id_inventario_enc",item.id_inventario_enc);
-
         return ins.sql();
 
     }
@@ -185,13 +176,11 @@ public class clsInventario_teoricoObj {
     public String updateItemSql(clsClasses.clsInventario_teorico item) {
 
         upd.init("Inventario_teorico");
-
         upd.add("descripcion",item.descripcion);
         upd.add("cantidad",item.cantidad);
         upd.add("costo",item.costo);
         upd.add("tipo_conteo",item.tipo_conteo);
         upd.add("id_inventario_enc",item.id_inventario_enc);
-
         upd.Where("(id_empresa="+item.id_empresa+") AND (id_articulo='"+item.id_articulo+"') AND (codigo_barra='"+item.codigo_barra+"')");
 
         return upd.sql();

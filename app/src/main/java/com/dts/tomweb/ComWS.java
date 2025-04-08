@@ -1,6 +1,5 @@
 package com.dts.tomweb;
 
-
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -10,13 +9,11 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Looper;
 import android.os.SystemClock;
-import android.provider.ContactsContract;
 import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.dts.base.BaseDatos;
 import com.dts.base.DateUtils;
@@ -34,13 +31,7 @@ import org.ksoap2.serialization.SoapPrimitive;
 import org.ksoap2.serialization.SoapSerializationEnvelope;
 import org.ksoap2.transport.HttpTransportSE;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Objects;
 
 public class ComWS extends PBase {
 
@@ -56,9 +47,6 @@ public class ComWS extends PBase {
 
     private ArrayList<String> listItems=new ArrayList<String>();
     private ArrayList<String> results=new ArrayList<String>();
-
-    //private ArrayList<clsClasses.clsEnvio> items=new ArrayList<clsClasses.clsEnvio>();
-    //private ListAdaptEnvio adapter;
 
     private clsDataBuilder dbld;
     private DateUtils DU;
@@ -94,11 +82,11 @@ public class ComWS extends PBase {
 
         dbld=new clsDataBuilder(this);
 
-        relEnv = (RelativeLayout) findViewById(R.id.relEnv);
-        relRec = (RelativeLayout) findViewById(R.id.relRec);
-        Prg = (TextView) findViewById(R.id.lblProgress);
-        Prg2 = (TextView) findViewById(R.id.lblProgress2);
-        prgBar = (ProgressBar) findViewById(R.id.progressBar2);
+        relEnv = findViewById(R.id.relEnv);
+        relRec = findViewById(R.id.relRec);
+        Prg = findViewById(R.id.lblProgress);
+        Prg2 = findViewById(R.id.lblProgress2);
+        prgBar = findViewById(R.id.progressBar2);
 
         isbusy=0;
         count=0;
@@ -107,8 +95,6 @@ public class ComWS extends PBase {
         prgBar.setVisibility(View.INVISIBLE);
 
         URL="http://52.41.114.122/wsTomWeb/wstomwebws.asmx";
-
-
 
         envCompleto();
     }
@@ -123,20 +109,14 @@ public class ComWS extends PBase {
         }
 
         AlertDialog.Builder dialog = new AlertDialog.Builder(this);
-
         dialog.setCancelable(false);
         dialog.setTitle("Recepción");
         dialog.setMessage("¿Recibir datos nuevos?");
-
-        dialog.setPositiveButton("Recibir", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                runRecep();
-                prgBar.setVisibility(View.VISIBLE);
-            }
+        dialog.setPositiveButton("Recibir", (dialog1, which) -> {
+            runRecep();
+            prgBar.setVisibility(View.VISIBLE);
         });
-
         dialog.setNegativeButton("Cancelar", null);
-
         dialog.show();
 
     }
@@ -227,6 +207,7 @@ public class ComWS extends PBase {
 
     // Web Service Methods
     public int fillTable(String value,String delcmd) {
+
         int rc;
         String s,ss;
 
@@ -260,12 +241,13 @@ public class ComWS extends PBase {
             s="";
 
             for (int i = 0; i < rc; i++) {
+
                 String str = "";
+
                 try {
                     str = ((SoapObject) result.getProperty(0)).getPropertyAsString(i);
 
                 }catch (Exception e){
-                    //mu.msgbox("error: " + e.getMessage());
                     addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
                 }
 
@@ -294,6 +276,7 @@ public class ComWS extends PBase {
             }
 
             return 1;
+
         } catch (Exception e) {
 
             idbg=idbg+" ERR "+e.getMessage();

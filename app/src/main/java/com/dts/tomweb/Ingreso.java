@@ -179,18 +179,15 @@ public class Ingreso extends PBase {
     }
     private void setHandlers() {
 
-        txtUser.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View arg0, int arg1, KeyEvent arg2) {
-                if (arg2.getAction() == KeyEvent.ACTION_DOWN) {
-                    switch (arg1) {
-                        case KeyEvent.KEYCODE_ENTER:
-                            txtPass.requestFocus();
-                            return true;
-                    }
+        txtUser.setOnKeyListener((arg0, arg1, arg2) -> {
+            if (arg2.getAction() == KeyEvent.ACTION_DOWN) {
+                switch (arg1) {
+                    case KeyEvent.KEYCODE_ENTER:
+                        txtPass.requestFocus();
+                        return true;
                 }
-                return false;
             }
+            return false;
         });
 
         txtPass.setOnKeyListener((arg0, arg1, arg2) -> {

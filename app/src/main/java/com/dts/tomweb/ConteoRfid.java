@@ -1,19 +1,9 @@
 package com.dts.tomweb;
 
-import static com.dts.application.Application.UNIQUE_TAGS_CSV;
 import static com.dts.application.Application.inventoryList;
-import static com.dts.application.Application.inventoryMode;
-import static com.dts.application.Application.matchingTagsList;
-import static com.dts.application.Application.memoryBankId;
-import static com.dts.application.Application.missingTagsList;
-import static com.dts.application.Application.tagListMap;
-import static com.dts.application.Application.tagsReadForSearch;
 import static com.dts.application.Application.tagsReadInventory;
-import static com.dts.application.Application.unknownTagsList;
 import static com.dts.application.Application.UNIQUE_TAGS;
 import static com.dts.application.Application.TOTAL_TAGS;
-import static com.dts.application.Application.missedTags;
-import static com.dts.application.Application.matchingTags;
 import static com.dts.rfid.RFIDController.channelIndex;
 import static com.dts.rfid.RFIDController.pc;
 import static com.dts.rfid.RFIDController.phase;
@@ -21,16 +11,14 @@ import static com.dts.rfid.RFIDController.rssi;
 import static com.dts.rfid.RFIDController.toneGenerator;
 
 
-
-import android.annotation.SuppressLint;
 import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.media.AudioManager;
 import android.media.ToneGenerator;
-import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -55,7 +43,6 @@ import com.dts.listadapt.LA_Tablas2;
 import com.zebra.rfid.api3.ACCESS_OPERATION_CODE;
 import com.zebra.rfid.api3.ACCESS_OPERATION_STATUS;
 import com.zebra.rfid.api3.BEEPER_VOLUME;
-import com.zebra.rfid.api3.Constants;
 import com.zebra.rfid.api3.ENUM_TRANSPORT;
 import com.zebra.rfid.api3.ENUM_TRIGGER_MODE;
 import com.zebra.rfid.api3.HANDHELD_TRIGGER_EVENT_TYPE;
@@ -76,11 +63,14 @@ import com.zebra.rfid.api3.TriggerInfo;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 
 public class ConteoRfid extends PBase  {
@@ -114,11 +104,7 @@ public class ConteoRfid extends PBase  {
     public ArrayList<clsClasses.clsInventario_ciego_rfid> dvalues_rfid = new ArrayList<clsClasses.clsInventario_ciego_rfid>();
     ArrayList<String> codigos = new ArrayList<String>();
     ArrayList<String> lista_limpia = new ArrayList<String>();
-    //ArrayList<Map.Entry<String, Integer>> lista_limpia2 = new ArrayList<Map.Entry<String, Integer>>();
 
-
-    /*********************************************/
-    /*********  elementos para guardar ***********/
     private String Ubic, Cod, tipoArt, barra;
     private Double canti;
     String currentTime;
@@ -130,14 +116,9 @@ public class ConteoRfid extends PBase  {
     public static BEEPER_VOLUME beeperVolume = BEEPER_VOLUME.HIGH_BEEP;
     public static BEEPER_VOLUME sledBeeperVolume = BEEPER_VOLUME.HIGH_BEEP;
 
-
-
     public Timer tbeep;
-    /**
-     * method to start a timer task to beep for locate functionality and configure the ON OFF duration.
-     */
-    public Timer locatebeep;
 
+    public Timer locatebeep;
 
     //for beep and LED
     private boolean beepON = false;
@@ -147,125 +128,83 @@ public class ConteoRfid extends PBase  {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_conteo_rfid);
+
         textView = findViewById(R.id.TagText);
         pbar = findViewById(R.id.progressBar);
 
         codigos.clear();
         dvalues_rfid.clear();
 
-
-        /************************************************/
-        /******** variables y constantes rfid **********/
-
         if (readers == null) {
             readers = new Readers(this, ENUM_TRANSPORT.SERVICE_SERIAL);
         }
 
-
-        /*********************************************************/
-        /*********** variables para tono y volumne del scanner ***/
         int streamType = AudioManager.STREAM_DTMF;
         toneGenerator = new ToneGenerator(streamType, 90);
 
+        // Refactor moderno usando ExecutorService y Handler para evitar AsyncTask
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        Handler handler = new Handler(Looper.getMainLooper());
 
-        new AsyncTask<Void, Void, Boolean>() {
-            @Override
-            protected Boolean doInBackground(Void... voids) {
-                try {
-                    if (readers != null ) {
-                        if (readers.GetAvailableRFIDReaderList() != null) {
-                            availableRFIDReaderList = readers.GetAvailableRFIDReaderList();
-                            if (availableRFIDReaderList.size() != 0) {
-                                // get first reader from list
-                                readerDevice = availableRFIDReaderList.get(0);
-                                reader = readerDevice.getRFIDReader();
-                                if (!reader.isConnected()  && gl != null) {
-                                    // Establish connection to the RFID Reader
-                                    reader.connect();
-                                    ConfigureReader();
-                                    return true;
-                                }
-                                else
-                                {
-                                    return false;
-                                }
-                            }
+        executor.execute(() -> {
+            boolean conectado = false;
+            try {
+                if (readers != null) {
+                    List<ReaderDevice> lista = readers.GetAvailableRFIDReaderList();
+                    if (lista != null && !lista.isEmpty()) {
+                        availableRFIDReaderList = new ArrayList<>(lista);
+                        readerDevice = lista.get(0);
+                        reader = readerDevice.getRFIDReader();
+                        if (!reader.isConnected() && gl != null) {
+                            reader.connect();
+                            ConfigureReader();
+                            conectado = true;
                         }
                     }
-                } catch (InvalidUsageException e) {
-                    e.printStackTrace();
-                } catch (OperationFailureException e) {
-                    e.printStackTrace();
-                    Log.d(TAG, "OperationFailureException " + e.getVendorMessage());
                 }
-                return false;
+            } catch (InvalidUsageException | OperationFailureException e) {
+                e.printStackTrace();
+                Log.d(TAG, "Error de conexión: " + e.getMessage());
             }
 
-            @Override
-            protected void onPostExecute(Boolean aBoolean)
-            {
-                super.onPostExecute(aBoolean);
-                if (aBoolean) {
-                    //Toast.makeText(getApplicationContext(), "Reader Connected", Toast.LENGTH_LONG).show();
+            boolean finalConectado = conectado;
+            handler.post(() -> {
+                if (finalConectado) {
                     textView.setText("Lectura RFID lista.");
-                }
-                else{
+                } else {
                     textView.setText("Se ha perdido la comunicación al RFID.");
                 }
-            }
-        }.execute();
+            });
+        });
 
-
-        /*************************************************************/
-        /********** variables y constantes de grid *******************/
-
-        try{
-
+        // Bloque UI y lógica
+        try {
             super.InitBase(savedInstanceState);
-            addlog("ConteoRfid",""+du.getActDateTime(),gl.nombreusuario);
+            addlog("ConteoRfid", du.getActDateTime().toString(), gl.nombreusuario);
 
-            lvConteoRFID = (ListView) findViewById(R.id.lvConteoRFID);
-            txtBarra = (EditText) findViewById(R.id.txtBarra);
-            txtUbic = (EditText) findViewById(R.id.txtNombre);
-            regs = (TextView) findViewById(R.id.txtRegs);
-            cb = (CheckBox) findViewById(R.id.cbConsolidar);
+            lvConteoRFID = findViewById(R.id.lvConteoRFID);
+            txtBarra = findViewById(R.id.txtBarra);
+            txtUbic = findViewById(R.id.txtNombre);
+            regs = findViewById(R.id.txtRegs);
+            cb = findViewById(R.id.cbConsolidar);
 
-            /*************************************************/
-            /**** obtengo la data del registro handheld ******/
             regHH = new clsRegistro_handheldObj(this, Con, db);
             regHH.fill();
             gl.IDregistro = regHH.first().id_registro;
 
+            if (gl.tipoInv == 1) scod = " INVENTARIO_CIEGO";
+            if (gl.tipoInv == 2 || gl.tipoInv == 3) scod = " INVENTARIO_DETALLE";
+            if (gl.tipoInv == 5) scod = " INVENTARIO_CIEGO_RFID";
 
-            if(gl.tipoInv==1) scod = " INVENTARIO_CIEGO";
-            if(gl.tipoInv==2 || gl.tipoInv==3) scod = " INVENTARIO_DETALLE";
-            if(gl.tipoInv==5) scod = " INVENTARIO_CIEGO_RFID";
-
-
-            if(scod != null ){
-                //showData(scod);
-                pbar.setVisibility(View.INVISIBLE);
-            }
-            else{
-                pbar.setVisibility(View.INVISIBLE);
-            }
-
+            pbar.setVisibility(View.INVISIBLE);
             lvConteoRFID.setFocusable(true);
 
-            //scod ="INVENTARIO_CIEGO";
-            //setHandlers();
-
-
-        }catch (Exception e){
+        } catch (Exception e) {
             msgbox(new Object() {}.getClass().getEnclosingMethod().getName() + " . " + e.getMessage());
             addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
         }
     }
-
-    /*********************************************************************/
-    /************** configuración RFID  **********************************/
 
     @Override
     public void onBackPressed() {
@@ -290,7 +229,6 @@ public class ConteoRfid extends PBase  {
                 reader.Config.setStartTrigger(triggerInfo.StartTrigger);
                 reader.Config.setStopTrigger(triggerInfo.StopTrigger);
                 System.out.println("\nReader ID: "+ reader.ReaderCapabilities.ReaderID.getID());
-                //textView.setText("\nReader ID: "+ reader.ReaderCapabilities.ReaderID.getID());
 
             } catch (InvalidUsageException e) {
                 e.printStackTrace();
@@ -318,124 +256,149 @@ public class ConteoRfid extends PBase  {
 
     public class EventHandler implements RfidEventsListener {
 
-        @SuppressLint("WrongViewCast")
+        private final ExecutorService executor = Executors.newSingleThreadExecutor();
+        private final Handler handler = new Handler(Looper.getMainLooper());
+
         @Override
         public void eventReadNotify(RfidReadEvents e) {
-
             TagData[] myTags = reader.Actions.getReadTags(30);
-            //TagDataArray myTags = reader.Actions.getReadTagsEx(30);
 
             if (myTags != null) {
+                for (TagData tag : myTags) {
+                    Log.d(TAG, "Tag ID " + tag.getTagID());
 
-                for (int index = 0; index < myTags.length; index++) {
-                    Log.d(TAG, "Tag ID " + myTags[index].getTagID());
-                    //Log.d(TAG, "Tag evento " + e);
-                   final String tag = myTags[index].getTagID();
-                   final int tag_ = index;
+                    if (tag.getOpCode() == ACCESS_OPERATION_CODE.ACCESS_OPERATION_READ &&
+                            tag.getOpStatus() == ACCESS_OPERATION_STATUS.ACCESS_SUCCESS &&
+                            !tag.getMemoryBankData().isEmpty()) {
+                        Log.d(TAG, "Mem Bank Data " + tag.getMemoryBankData());
+                    }
 
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-
-                            //FUNCION QUE GUARDA TAG EN TIEMPO REAL A LA MEMORIA INTERNA
-                              //insertaConteo(tag);
-
-                            //new MatchingTagsResponseHandlerTask(myTags[tag_]).execute();
-
-                            new ResponseHandlerTask(myTags[tag_]).execute();
-
-                            /*if(!codigos.contains(tag)){
-
-                                clsClasses.clsInventario_ciego_rfid items_nuevo= new clsClasses.clsInventario_ciego_rfid();
-                                items_nuevo.codigo_barra = tag;
-                                items_nuevo.ubicacion = "1";
-                                items_nuevo.cantidad = 1;
-                                //items_nuevo.id_inventario_enc=1;
-                                //items_nuevo.eliminado = 0;
-                                //items_nuevo.comunicado = "";
-                                codigos.add(items_nuevo.codigo_barra);
-                                dvalues_rfid.add(items_nuevo);
-                                dadapter_rfid = new LA_RFID(getApplicationContext(), dvalues_rfid);
-                                lvConteoRFID.setAdapter(dadapter_rfid);
-                            }*/
+                    // Procesar el tag en un hilo separado
+                    executor.execute(() -> {
+                        try {
+                            insertaConteo(tag.getTagID());
+                            procesarTag(tag);
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                            addlog("eventReadNotify", ex.getMessage(), "procesarTag error");
                         }
                     });
-
-                    if (myTags[index].getOpCode() == ACCESS_OPERATION_CODE.ACCESS_OPERATION_READ && myTags[index].getOpStatus() == ACCESS_OPERATION_STATUS.ACCESS_SUCCESS)
-                    {
-                        if (myTags[index].getMemoryBankData().length() > 0) {
-                            Log.d(TAG, " Mem Bank Data " + myTags[index].getMemoryBankData());
-
-                        }
-                    }
                 }
-
             }
         }
+
 
         @Override
         public void eventStatusNotify(RfidStatusEvents e) {
-
             Log.d(TAG, "Status Notification: " + e.StatusEventData.getStatusEventType());
-            if (e.StatusEventData.getStatusEventType() == STATUS_EVENT_TYPE.HANDHELD_TRIGGER_EVENT)
-            {
-                if (e.StatusEventData.HandheldTriggerEventData.getHandheldEvent() == HANDHELD_TRIGGER_EVENT_TYPE.HANDHELD_TRIGGER_PRESSED)
-                {
-                    new AsyncTask<Void, Void, Void>() {
-                        @Override
-                        protected Void doInBackground(Void... voids) {
-                            try {
-                                reader.Actions.Inventory.perform();
 
-                            } catch (InvalidUsageException e) {
-                                e.printStackTrace();
-                                addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"failed_triger_rfid"+ currentTime );
-                            } catch (OperationFailureException e)
-                            {
-                                e.printStackTrace();
-                                addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"failed_triger_rfid"+ currentTime );
-                            }
-                            return null;
+            if (e.StatusEventData.getStatusEventType() == STATUS_EVENT_TYPE.HANDHELD_TRIGGER_EVENT) {
+                HANDHELD_TRIGGER_EVENT_TYPE tipo = e.StatusEventData.HandheldTriggerEventData.getHandheldEvent();
+
+                if (tipo == HANDHELD_TRIGGER_EVENT_TYPE.HANDHELD_TRIGGER_PRESSED) {
+                    executor.execute(() -> {
+                        try {
+                            reader.Actions.Inventory.perform();
+                        } catch (InvalidUsageException | OperationFailureException ex) {
+                            ex.printStackTrace();
+                            addlog("HANDHELD_TRIGGER_PRESSED", ex.getMessage(), "failed_trigger_rfid " + currentTime);
                         }
-                    }.execute();
+                    });
                 }
 
-                if (e.StatusEventData.HandheldTriggerEventData.getHandheldEvent() == HANDHELD_TRIGGER_EVENT_TYPE.HANDHELD_TRIGGER_RELEASED)
-                {
-                    new AsyncTask<Void, Void, Void>() {
-                        @Override
-                        protected Void doInBackground(Void... voids) {
-                            try {
-                                reader.Actions.Inventory.stop();
-                                Log.d(TAG, "termina lectura: ");
-                            }
-                            catch (InvalidUsageException e)
-                            {
-                                e.printStackTrace();
-                            }
-                            catch (OperationFailureException e)
-                            {
-                                e.printStackTrace();
-                            }
-                            return null;
+                if (tipo == HANDHELD_TRIGGER_EVENT_TYPE.HANDHELD_TRIGGER_RELEASED) {
+                    executor.execute(() -> {
+                        try {
+                            reader.Actions.Inventory.stop();
+                            Log.d(TAG, "termina lectura: ");
+                        } catch (InvalidUsageException | OperationFailureException ex) {
+                            ex.printStackTrace();
                         }
-                    }.execute();
-
+                    });
                 }
 
-                   runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-
-                        GuardarLista(scod);
-                        showData(scod);
-                    }
+                // Actualización de UI después del trigger
+                handler.post(() -> {
+                    GuardarLista(scod);
+                    showData(scod);
                 });
+            }
+        }
+    }
 
+    private void procesarTag(TagData tagData) {
+        InventoryListItem inventoryItem = null;
+        InventoryListItem oldObject = null;
+        String memoryBank = null;
+        String memoryBankData = null;
+        boolean added = false;
+
+        try {
+            String tagID = tagData.getTagID();
+
+            if (inventoryList.containsKey(tagID)) {
+                int index = inventoryList.get(tagID);
+                if (index >= 0) {
+                    oldObject = tagsReadInventory.get(index);
+                    int tagSeenCount = tagData.getTagSeenCount();
+                    TOTAL_TAGS += tagSeenCount > 0 ? tagSeenCount : 1;
+
+                    if (tagSeenCount > 0) {
+                        oldObject.incrementCountWithTagSeenCount(tagSeenCount);
+                    } else {
+                        oldObject.incrementCount();
+                    }
+
+                    if (tagData.getOpCode() != null &&
+                            tagData.getOpCode() == ACCESS_OPERATION_CODE.ACCESS_OPERATION_READ) {
+                        memoryBankData = tagData.getMemoryBankData();
+                    }
+
+                    if (oldObject.getMemoryBankData() == null ||
+                            !oldObject.getMemoryBankData().equalsIgnoreCase(memoryBankData)) {
+                        oldObject.setMemoryBankData(memoryBankData);
+                    }
+
+                    if (pc) oldObject.setPC(Integer.toHexString(tagData.getPC()));
+                    if (phase) oldObject.setPhase(Integer.toString(tagData.getPhase()));
+                    if (channelIndex) oldObject.setChannelIndex(Integer.toString(tagData.getChannelIndex()));
+                    if (rssi) oldObject.setRSSI(Integer.toString(tagData.getPeakRSSI()));
+                }
+            } else {
+                int tagSeenCount = tagData.getTagSeenCount();
+                TOTAL_TAGS += tagSeenCount > 0 ? tagSeenCount : 1;
+
+                inventoryItem = new InventoryListItem(tagID, tagSeenCount > 0 ? tagSeenCount : 1,
+                        null, null, null, null, null, null);
+
+                added = tagsReadInventory.add(inventoryItem);
+
+                if (added) {
+                    inventoryList.put(tagID, UNIQUE_TAGS);
+                    if (tagData.getOpCode() != null &&
+                            tagData.getOpCode() == ACCESS_OPERATION_CODE.ACCESS_OPERATION_READ) {
+                        memoryBank = tagData.getMemoryBank().toString();
+                        memoryBankData = tagData.getMemoryBankData();
+                    }
+
+                    oldObject = tagsReadInventory.get(UNIQUE_TAGS);
+                    oldObject.setMemoryBankData(memoryBankData);
+                    oldObject.setMemoryBank(memoryBank);
+
+                    if (pc) oldObject.setPC(Integer.toHexString(tagData.getPC()));
+                    if (phase) oldObject.setPhase(Integer.toString(tagData.getPhase()));
+                    if (channelIndex) oldObject.setChannelIndex(Integer.toString(tagData.getChannelIndex()));
+                    if (rssi) oldObject.setRSSI(Integer.toString(tagData.getPeakRSSI()));
+
+                    UNIQUE_TAGS++;
+                }
             }
 
-        }
+            startbeepingTimer();
 
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void insertaConteo(String tag){
@@ -549,26 +512,16 @@ public class ConteoRfid extends PBase  {
 
     private void msgAskExit(String msg) {
         AlertDialog.Builder dialog = new AlertDialog.Builder(this);
-
         dialog.setCancelable(false);
         dialog.setTitle("Tom");
         dialog.setMessage("¿"+msg+"?");
-
-        dialog.setPositiveButton("Si", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                CerrarRFIF();
-                finish();
-            }
+        dialog.setPositiveButton("Si", (dialog1, which) -> {
+            CerrarRFIF();
+            finish();
         });
-
-        dialog.setNegativeButton("No", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-
-            }
+        dialog.setNegativeButton("No", (dialog2, which) -> {
         });
-
         dialog.show();
-
     }
 
     public void doExit(View view) {
@@ -661,22 +614,19 @@ public class ConteoRfid extends PBase  {
                 ;
             });
 
-            lvConteoRFID.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-                @Override
-                public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+            lvConteoRFID.setOnItemLongClickListener((parent, view, position, id) -> {
 
-                    try {
-                        Object lvObj = lvConteoRFID.getItemAtPosition(position);
-                        String item = (String) lvObj;
+                try {
+                    Object lvObj = lvConteoRFID.getItemAtPosition(position);
+                    String item = (String) lvObj;
 
-                        adapter.setSelectedIndex(position);
-                        msgbox(item);
-                    } catch (Exception e) {
-                        addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"");
-                        msgbox("Error setHandler: "+e);
-                    }
-                    return true;
+                    adapter.setSelectedIndex(position);
+                    msgbox(item);
+                } catch (Exception e) {
+                    addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"");
+                    msgbox("Error setHandler: "+e);
                 }
+                return true;
             });
 
             txtBarra.addTextChangedListener(new TextWatcher() {
@@ -825,7 +775,6 @@ public class ConteoRfid extends PBase  {
                             = entrySet.toArray(
                             new Map.Entry[entrySet.size()]);
 
-
                     //GT16052022: itero la lista final que se usó en memoria
                     for (int x = 0; x < inventoryList.size(); x++) {
 
@@ -867,7 +816,6 @@ public class ConteoRfid extends PBase  {
                                     /*sql="update Inventario_ciego_rfid set cantidad = cantidad + 1 WHERE CODIGO_BARRA = '"+ barra + "' ";*/
                                     //sql = "update Inventario_ciego set cantidad = cantidad + 1 WHERE CODIGO_BARRA = '" + barra + "' ";
                                     //db.execSQL(sql);
-
                                 }
 
                             } catch (Exception e) {
@@ -917,288 +865,14 @@ public class ConteoRfid extends PBase  {
 
     private void msgAskContinue(String msg) {
         AlertDialog.Builder dialog = new AlertDialog.Builder(this);
-
         dialog.setCancelable(false);
         dialog.setTitle("Tom");
         dialog.setMessage(msg);
-
-        dialog.setPositiveButton("Si", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                ComWS();
-            }
+        dialog.setPositiveButton("Si", (dialog1, which) -> ComWS());
+        dialog.setNegativeButton("No", (dialog2, which) -> {
         });
-
-        dialog.setNegativeButton("No", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-
-            }
-        });
-
         dialog.show();
-
     }
-
-    private class MatchingTagsResponseHandlerTask extends AsyncTask<Void, Void, Boolean> {
-
-        private TagData tagData;
-        private InventoryListItem inventoryItem;
-        private InventoryListItem oldObject;
-        private String memoryBank;
-        private String memoryBankData;
-
-        public MatchingTagsResponseHandlerTask(TagData tagData) {
-            this.tagData = tagData;
-        }
-
-        @Override
-        protected Boolean doInBackground(Void... voids) {
-
-            runOnUiThread(new Runnable() {
-                @SuppressLint("WrongConstant")
-                @Override
-                public void run() {
-                    boolean added = false;
-
-                    try {
-                        if (inventoryList.containsKey(tagData.getTagID())) {
-                            inventoryItem = new InventoryListItem(tagData.getTagID(), 1, null, null, null, null, null, null);
-                            int index = inventoryList.get(tagData.getTagID());
-                            if (index >= 0) {
-                                if (tagListMap.containsKey(tagData.getTagID()))
-                                    tagsReadInventory.get(index).setTagStatus("MATCH");
-                                else
-                                    tagsReadInventory.get(index).setTagStatus("UNKNOWN");
-                                TOTAL_TAGS++;
-                                //Tag is already present. Update the fields and increment the count
-                                if (tagData.getOpCode() != null)
-                                    if (tagData.getOpCode().toString().equalsIgnoreCase("ACCESS_OPERATION_READ")) {
-                                        memoryBank = tagData.getMemoryBank().toString();
-                                        memoryBankData = tagData.getMemoryBankData().toString();
-                                    }
-                                if (memoryBankId == 1) {  //matching tags
-                                    if (tagListMap.containsKey(tagData.getTagID()) && !matchingTagsList.contains(tagsReadInventory.get(index))) {
-                                        matchingTagsList.add(tagsReadInventory.get(index));
-                                        tagsReadForSearch.add(tagsReadInventory.get(index));
-                                        added = true;
-                                    }
-                                } else if (memoryBankId == 2 && tagListMap.containsKey(tagData.getTagID())) {
-                                    if (missingTagsList.contains(tagsReadInventory.get(index))) {
-                                        missingTagsList.remove(tagsReadInventory.get(index));
-                                        tagsReadForSearch.remove(tagsReadInventory.get(index));
-                                        added = true;
-                                    }
-                                }
-                                oldObject = tagsReadInventory.get(index);
-                                if (oldObject.getCount() == 0) {
-                                    missedTags--;
-                                    matchingTags++;
-                                    UNIQUE_TAGS++;
-                                }
-                                oldObject.incrementCount();
-                                if (oldObject.getMemoryBankData() != null && !oldObject.getMemoryBankData().equalsIgnoreCase(memoryBankData))
-                                    oldObject.setMemoryBankData(memoryBankData);
-                                //oldObject.setEPCId(inventoryItem.getEPCId());
-                                oldObject.setPC(Integer.toString(tagData.getPC()));
-                                oldObject.setPhase(Integer.toString(tagData.getPhase()));
-                                oldObject.setChannelIndex(Integer.toString(tagData.getChannelIndex()));
-                                oldObject.setRSSI(Integer.toString(tagData.getPeakRSSI()));
-                            }
-
-                        } else {
-                            //Tag is encountered for the first time. Add it.
-                            if (inventoryMode == 0 || (inventoryMode == 1 && UNIQUE_TAGS_CSV <= Constants.UNIQUE_TAG_LIMIT)) {
-                                int tagSeenCount = tagData.getTagSeenCount();
-                                if (tagSeenCount != 0) {
-                                    TOTAL_TAGS += tagSeenCount;
-                                    inventoryItem = new InventoryListItem(tagData.getTagID(), tagSeenCount, null, null, null, null, null, null);
-                                } else {
-                                    TOTAL_TAGS++;
-                                    inventoryItem = new InventoryListItem(tagData.getTagID(), 1, null, null, null, null, null, null);
-                                }
-                                if (tagListMap.containsKey(tagData.getTagID()))
-                                    inventoryItem.setTagStatus("MATCH");
-                                else
-                                    inventoryItem.setTagStatus("UNKNOWN");
-                                if (memoryBankId == 1)
-                                    tagsReadInventory.add(inventoryItem);
-                                else if (memoryBankId == 3) {
-                                    inventoryItem.setTagDetails("unknown");
-                                    added = tagsReadInventory.add(inventoryItem);
-                                    unknownTagsList.add(inventoryItem);
-                                    tagsReadForSearch.add(inventoryItem);
-                                } else {
-                                    if (inventoryItem.getTagDetails() == null) {
-                                        inventoryItem.setTagDetails("unknown");
-                                    }
-                                    added = tagsReadInventory.add(inventoryItem);
-                                    if (memoryBankId != 2)
-                                        tagsReadForSearch.add(inventoryItem);
-                                }
-                                if (added || memoryBankId == 1) {
-                                    inventoryList.put(tagData.getTagID(), UNIQUE_TAGS_CSV);
-                                    if (tagData.getOpCode() != null)
-                                        if (tagData.getOpCode().toString().equalsIgnoreCase("ACCESS_OPERATION_READ")) {
-                                            memoryBank = tagData.getMemoryBank().toString();
-                                            memoryBankData = tagData.getMemoryBankData().toString();
-                                        }
-                                    oldObject = tagsReadInventory.get(UNIQUE_TAGS_CSV);
-                                    oldObject.setMemoryBankData(memoryBankData);
-                                    oldObject.setMemoryBank(memoryBank);
-                                    oldObject.setPC(Integer.toString(tagData.getPC()));
-                                    oldObject.setPhase(Integer.toString(tagData.getPhase()));
-                                    oldObject.setChannelIndex(Integer.toString(tagData.getChannelIndex()));
-                                    oldObject.setRSSI(Integer.toString(tagData.getPeakRSSI()));
-                                    UNIQUE_TAGS++;
-                                    UNIQUE_TAGS_CSV++;
-                                }
-                            }
-                        }
-
-                        // beep on each tag read
-                        //startbeepingTimer();
-
-                    } catch (IndexOutOfBoundsException e) {
-                        addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(),"error_lectura " +TAG);
-                        oldObject = null;
-                        added = false;
-                    } catch (Exception e) {
-                        addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(),"error_lectura " +TAG);
-                        oldObject = null;
-                        added = false;
-                    }
-                    tagData = null;
-                    inventoryItem = null;
-                    memoryBank = null;
-                    memoryBankData = null;
-                }
-            });
-            return true;
-
-        }
-    }
-
-
-    /**
-     * Async Task, which will handle tag data response from reader. This task is used to check whether tag is in inventory list or not.
-     * If tag is not in the list then it will add the tag data to inventory list. If tag is there in inventory list then it will update the tag details in inventory list.
-     */
-    @SuppressLint("StaticFieldLeak")
-    public class ResponseHandlerTask extends AsyncTask<Void, Void, Boolean> {
-        private TagData tagData;
-        private InventoryListItem inventoryItem;
-        private InventoryListItem oldObject;
-        //private Fragment fragment;
-        private String memoryBank;
-        private String memoryBankData;
-
-        ResponseHandlerTask(TagData tagData) {
-            this.tagData = tagData;
-            //this.fragment = fragment;
-        }
-
-        @Override
-        protected Boolean doInBackground(Void... voids) {
-            boolean added = false;
-            try {
-                if (inventoryList.containsKey(tagData.getTagID())) {
-                    inventoryItem = new InventoryListItem(tagData.getTagID(), 1, null, null, null, null, null, null);
-                    int index = inventoryList.get(tagData.getTagID());
-                    if (index >= 0) {
-                        //Tag is already present. Update the fields and increment the count
-                        if (tagData.getOpCode() != null)
-                            if (tagData.getOpCode().toString().equalsIgnoreCase("ACCESS_OPERATION_READ")) {
-                                memoryBank = tagData.getMemoryBank().toString();
-                                memoryBankData = tagData.getMemoryBankData().toString();
-                            }
-                        oldObject = tagsReadInventory.get(index);
-                        int tagSeenCount = 0;
-                        if (Integer.toString(tagData.getTagSeenCount()) != null)
-                            tagSeenCount = tagData.getTagSeenCount();
-                        if (tagSeenCount != 0) {
-                            TOTAL_TAGS += tagSeenCount;
-                            oldObject.incrementCountWithTagSeenCount(tagSeenCount);
-                        } else {
-                            TOTAL_TAGS++;
-                            oldObject.incrementCount();
-                        }
-                        if (oldObject.getMemoryBankData() != null && !oldObject.getMemoryBankData().equalsIgnoreCase(memoryBankData))
-                            oldObject.setMemoryBankData(memoryBankData);
-                        if (pc)
-                            oldObject.setPC(Integer.toHexString(tagData.getPC()));
-                        if (phase)
-                            oldObject.setPhase(Integer.toString(tagData.getPhase()));
-                        if (channelIndex)
-                            oldObject.setChannelIndex(Integer.toString(tagData.getChannelIndex()));
-                        if (rssi)
-                            oldObject.setRSSI(Integer.toString(tagData.getPeakRSSI()));
-
-                    }
-                } else {
-                    //Tag is encountered for the first time. Add it.
-                    if (inventoryMode == 0 || (inventoryMode == 1 && UNIQUE_TAGS <= Constants.UNIQUE_TAG_LIMIT)) {
-                        int tagSeenCount = 0;
-                        if (Integer.toString(tagData.getTagSeenCount()) != null)
-                            tagSeenCount = tagData.getTagSeenCount();
-                        if (tagSeenCount != 0) {
-                            TOTAL_TAGS += tagSeenCount;
-                            inventoryItem = new InventoryListItem(tagData.getTagID(), tagSeenCount, null, null, null, null, null, null);
-                        } else {
-                            TOTAL_TAGS++;
-                            inventoryItem = new InventoryListItem(tagData.getTagID(), 1, null, null, null, null, null, null);
-                        }
-                        added = tagsReadInventory.add(inventoryItem);
-                        if (added) {
-                            inventoryList.put(tagData.getTagID(), UNIQUE_TAGS);
-                            if (tagData.getOpCode() != null)
-                                if (tagData.getOpCode().toString().equalsIgnoreCase("ACCESS_OPERATION_READ")) {
-                                    memoryBank = tagData.getMemoryBank().toString();
-                                    memoryBankData = tagData.getMemoryBankData().toString();
-
-                                }
-                            oldObject = tagsReadInventory.get(UNIQUE_TAGS);
-                            oldObject.setMemoryBankData(memoryBankData);
-                            oldObject.setMemoryBank(memoryBank);
-                            if (pc)
-                                oldObject.setPC(Integer.toHexString(tagData.getPC()));
-                            if (phase)
-                                oldObject.setPhase(Integer.toString(tagData.getPhase()));
-                            if (channelIndex)
-                                oldObject.setChannelIndex(Integer.toString(tagData.getChannelIndex()));
-                            if (rssi)
-                                oldObject.setRSSI(Integer.toString(tagData.getPeakRSSI()));
-                            UNIQUE_TAGS++;
-
-                        }
-                    }
-                }
-                // beep on each tag read
-                startbeepingTimer();
-            } catch (IndexOutOfBoundsException e) {
-                //logAsMessage(TYPE_ERROR, TAG, e.getMessage());
-                oldObject = null;
-                added = false;
-            } catch (Exception e) {
-                // logAsMessage(TYPE_ERROR, TAG, e.getMessage());
-                oldObject = null;
-                added = false;
-            }
-            inventoryItem = null;
-            memoryBank = null;
-            memoryBankData = null;
-            return added;
-        }
-
-
-
-        @Override
-        protected void onPostExecute(Boolean result) {
-            cancel(true);
-/*            if (oldObject != null && fragment instanceof ResponseHandlerInterfaces.ResponseTagHandler)
-                ((ResponseHandlerInterfaces.ResponseTagHandler) fragment).handleTagResponse(oldObject, result);*/
-            oldObject = null;
-        }
-    }
-
 
     public void startbeepingTimer() {
 
@@ -1240,68 +914,50 @@ public class ConteoRfid extends PBase  {
         }
     }
 
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private final Handler handler = new Handler(Looper.getMainLooper());
+
     @Override
     protected void onResume() {
-        //super.onRestart();
         super.onResume();
 
         try {
-
             if (readers == null) {
                 readers = new Readers(this, ENUM_TRANSPORT.SERVICE_SERIAL);
             }
 
-            new AsyncTask<Void, Void, Boolean>() {
-                @Override
-                protected Boolean doInBackground(Void... voids) {
-                    try {
-                        if (readers != null) {
-                            if (readers.GetAvailableRFIDReaderList() != null) {
-                                availableRFIDReaderList = readers.GetAvailableRFIDReaderList();
-                                if (availableRFIDReaderList.size() != 0) {
-                                    // get first reader from list
-                                    readerDevice = availableRFIDReaderList.get(0);
-                                    reader = readerDevice.getRFIDReader();
-                                    if (!reader.isConnected() && gl != null) {
-                                        // Establish connection to the RFID Reader
-                                        reader.connect();
-                                        ConfigureReader();
-                                        return true;
-                                    } else {
-                                        return false;
-                                    }
-                                }
-                            }
+            executor.execute(() -> {
+                boolean conectado = false;
+                try {
+                    List<ReaderDevice> lista = readers.GetAvailableRFIDReaderList();
+                    if (lista != null && !lista.isEmpty()) {
+                        availableRFIDReaderList = new ArrayList<>(lista);
+                        readerDevice = lista.get(0);
+                        reader = readerDevice.getRFIDReader();
+                        if (!reader.isConnected() && gl != null) {
+                            reader.connect();
+                            ConfigureReader();
+                            conectado = true;
                         }
-                    } catch (InvalidUsageException e) {
-                        e.printStackTrace();
-                    } catch (OperationFailureException e) {
-                        e.printStackTrace();
-                        Log.d(TAG, "OperationFailureException " + e.getVendorMessage());
                     }
-                    return false;
+                } catch (InvalidUsageException | OperationFailureException e) {
+                    e.printStackTrace();
+                    Log.d(TAG, "Error conexión RFID: " + e.getMessage());
                 }
 
-                @Override
-                protected void onPostExecute(Boolean aBoolean) {
-                    super.onPostExecute(aBoolean);
-                    if (aBoolean) {
-                        //Toast.makeText(getApplicationContext(), "Reader Connected", Toast.LENGTH_LONG).show();
+                boolean finalConectado = conectado;
+                handler.post(() -> {
+                    if (finalConectado) {
                         textView.setText("Lectura RFID lista.");
                     } else {
                         textView.setText("Se ha perdido la comunicación al RFID.");
                     }
-                }
-            }.execute();
-
+                });
+            });
 
         } catch (Exception e) {
-            addlog(new Object() {
-            }.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
+            addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "onResume error");
         }
-
     }
-
-
 
 }

@@ -1,26 +1,11 @@
 package com.dts.tomweb;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.Html;
-import android.text.Spanned;
-import android.view.Gravity;
-import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
-
-import android.widget.LinearLayout;
-import android.widget.PopupWindow;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import com.dts.classes.clsInventario_Rfid;
 import com.dts.classes.clsInventario_encabezadoObj;
-
 import com.dts.base.clsClasses;
-import com.dts.tomweb.Conteo_RFID.Ingreso_rfid;
 import com.dts.tomweb.Conteo_RFID.Inventario_rfid;
 
 public class Inventario extends PBase {
@@ -75,25 +60,12 @@ public class Inventario extends PBase {
 
     public void doNext(View view) {
 
-        //GT 11082021 este mensaje valida si, se requiere un inv con RFID o uno manual
-        //msgAskContinue("Conteo de inventario");
-
-        //GT 14032025: no preguntar, ir directo al inventario por rfid
         if(gl.rfid_activo) {
             startActivity(new Intent(this, Inventario_rfid.class));
         }else{
             toastlong("RFID no detectado: valide si esta conectado a la pistola, y con carga en la bateria.");
         }
 
-
-    }
-
-    private void setHandlers(){
-        try{
-
-        }catch (Exception e){
-
-        }
     }
 
     //endregion
@@ -103,7 +75,7 @@ public class Inventario extends PBase {
     public void Filltxt(){
 
         clsInventario_encabezadoObj invEnc = new clsInventario_encabezadoObj(this, Con, db);
-        clsClasses.clsInventario_encabezado item=clsCls.new clsInventario_encabezado();
+        clsClasses.clsInventario_encabezado item;
 
         String sfecha;
 
@@ -174,67 +146,4 @@ public class Inventario extends PBase {
             msgbox(""+e);
         }
     }
-
-    private void alertDialog() {
-        AlertDialog.Builder dialog=new AlertDialog.Builder(this);
-        dialog.setMessage("Seleccione una opción");
-        dialog.setTitle("Conteo de inventario");
-        dialog.setPositiveButton("Inv. RFID",
-                (dialog1, which) -> {
-                    Toast.makeText(getApplicationContext(),"Inventario por RFID",Toast.LENGTH_LONG).show();
-                    //startActivity(new Intent(getApplicationContext(), ConteoRfid.class));
-                    startActivity(new Intent(getApplicationContext(), Inventario_rfid.class));
-                });
-        dialog.setNegativeButton("Inv. Manual", (dialog12, which) -> {
-            Toast.makeText(getApplicationContext(),"Inventario manual", Toast.LENGTH_LONG).show();
-            startActivity(new Intent(getApplicationContext(), Conteo.class));
-        });
-        AlertDialog alertDialog=dialog.create();
-        alertDialog.show();
-    }
-
-
-    private void msgAskContinue(String msg) {
-        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
-
-        dialog.setCancelable(false);
-        dialog.setTitle("Tom");
-        dialog.setMessage(msg);
-
-        dialog.setPositiveButton("Inv. RFID", (dialog1, which) -> {
-
-            //#GT16052022_1144: desde login se valida la conexión al RFID, para que no se cargue layout sin el dispositivo.
-            if(gl.rfid_activo) {
-                Toast.makeText(getApplicationContext(), "Inventario por RFID", Toast.LENGTH_LONG).show();
-                //startActivity(new Intent(getApplicationContext(), ConteoRfid.class));
-                startActivity(new Intent(getApplicationContext(), Inventario_rfid.class));
-            }else{
-                toastlong("RFID no detectado: valide si esta conectado a la pistola, y con carga en la bateria.");
-            }
-
-        });
-
-        dialog.setNegativeButton("Inv. Manual", (dialog12, which) -> {
-            Toast.makeText(getApplicationContext(),"Inventario manual", Toast.LENGTH_LONG).show();
-            startActivity(new Intent(getApplicationContext(), Conteo.class));
-        });
-
-        dialog.show();
-
-    }
-
-    //endregion
-
-    //region Aux
-
-
-    //endregion
-
-    //region Dialogs
-
-    //endregion
-
-    //region Activity Events
-    //endregion
-
 }

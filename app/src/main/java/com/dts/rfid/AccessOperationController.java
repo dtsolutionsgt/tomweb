@@ -1,15 +1,6 @@
 package com.dts.rfid;
 
-import android.os.AsyncTask;
-
-import com.zebra.rfid.api3.Antennas;
-import com.zebra.rfid.api3.InvalidUsageException;
-import com.zebra.rfid.api3.LOCK_DATA_FIELD;
-import com.zebra.rfid.api3.LOCK_PRIVILEGE;
 import com.zebra.rfid.api3.MEMORY_BANK;
-import com.zebra.rfid.api3.OperationFailureException;
-import com.zebra.rfid.api3.TagAccess;
-import com.zebra.rfid.api3.TagData;
 
 public class AccessOperationController {
 

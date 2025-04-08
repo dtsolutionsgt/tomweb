@@ -75,18 +75,15 @@ public class clsInventario_ciegoObj {
     private void addItem(clsClasses.clsInventario_ciego item) {
 
         ins.init("Inventario_ciego");
-
         ins.add("id_inventario_enc",item.id_inventario_enc);
         ins.add("codigo_barra",item.codigo_barra);
         ins.add("cantidad",item.cantidad);
-        //ins.add("id",item.id);
         ins.add("comunicado",item.comunicado);
         ins.add("ubicacion",item.ubicacion);
         ins.add("id_operador",item.id_operador);
         ins.add("fecha",item.fecha);
         ins.add("Id_registro",item.id_registro);
         ins.add("eliminado",item.eliminado);
-
         db.execSQL(ins.sql());
 
     }
@@ -94,7 +91,6 @@ public class clsInventario_ciegoObj {
     private void updateItem(clsClasses.clsInventario_ciego item) {
 
         upd.init("Inventario_ciego");
-
         upd.add("id_inventario_enc",item.id_inventario_enc);
         upd.add("codigo_barra",item.codigo_barra);
         upd.add("cantidad",item.cantidad);
@@ -104,9 +100,7 @@ public class clsInventario_ciegoObj {
         upd.add("fecha",item.fecha);
         upd.add("Id_registro",item.id_registro);
         upd.add("eliminado",item.eliminado);
-
         upd.Where("(id="+item.id+")");
-
         db.execSQL(upd.sql());
 
         //Toast toast= Toast.makeText(cont,upd.sql(), Toast.LENGTH_LONG);toast.show();
@@ -124,6 +118,7 @@ public class clsInventario_ciegoObj {
     }
 
     private void fillItems(String sq) {
+
         Cursor dt;
         clsClasses.clsInventario_ciego item;
 
@@ -147,7 +142,6 @@ public class clsInventario_ciegoObj {
             item.fecha=dt.getString(7);
             item.id_registro=dt.getInt(8);
             item.eliminado=dt.getInt(9);
-
             items.add(item);
 
             dt.moveToNext();
@@ -175,7 +169,6 @@ public class clsInventario_ciegoObj {
     public String addItemSql(clsClasses.clsInventario_ciego item) {
 
         ins.init("Inventario_ciego");
-
         ins.add("id_inventario_enc",item.id_inventario_enc);
         ins.add("codigo_barra",item.codigo_barra);
         ins.add("cantidad",item.cantidad);
@@ -194,7 +187,6 @@ public class clsInventario_ciegoObj {
     public String updateItemSql(clsClasses.clsInventario_ciego item) {
 
         upd.init("Inventario_ciego");
-
         upd.add("id_inventario_enc",item.id_inventario_enc);
         upd.add("codigo_barra",item.codigo_barra);
         upd.add("cantidad",item.cantidad);
@@ -204,7 +196,6 @@ public class clsInventario_ciegoObj {
         upd.add("fecha",item.fecha);
         upd.add("Id_registro",item.id_registro);
         upd.add("eliminado",item.eliminado);
-
         upd.Where("(id="+item.id+")");
 
         return upd.sql();
@@ -212,5 +203,18 @@ public class clsInventario_ciegoObj {
         //Toast toast= Toast.makeText(cont,upd.sql(), Toast.LENGTH_LONG);toast.show();
 
     }
+    public boolean existsByCodigoBarra(String codigoBarra) {
+        String sql = "SELECT COUNT(*) FROM Inventario_ciego WHERE codigo_barra = ?";
+        Cursor cursor = db.rawQuery(sql, new String[]{codigoBarra});
+        boolean exists = false;
 
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                exists = cursor.getInt(0) > 0;
+            }
+            cursor.close();
+        }
+
+        return exists;
+    }
 }

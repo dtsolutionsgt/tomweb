@@ -1,6 +1,8 @@
 package com.dts.classes;
 
 import java.util.ArrayList;
+import java.util.List;
+
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -80,7 +82,6 @@ public class clsInventario_detalleObj {
     private void addItem(clsClasses.clsInventario_detalle item) {
 
         ins.init("Inventario_detalle");
-
         //ins.add("id_inventario_det",item.id_inventario_det);
         ins.add("id_inventario_enc",item.id_inventario_enc);
         ins.add("id_articulo",item.id_articulo);
@@ -92,7 +93,6 @@ public class clsInventario_detalleObj {
         ins.add("fecha",item.fecha);
         ins.add("Id_registro",item.id_registro);
         ins.add("eliminado",item.eliminado);
-
         db.execSQL(ins.sql());
 
     }
@@ -100,7 +100,6 @@ public class clsInventario_detalleObj {
     private void updateItem(clsClasses.clsInventario_detalle item) {
 
         upd.init("Inventario_detalle");
-
         upd.add("id_inventario_enc",item.id_inventario_enc);
         upd.add("id_articulo",item.id_articulo);
         upd.add("ubicacion",item.ubicacion);
@@ -111,9 +110,7 @@ public class clsInventario_detalleObj {
         upd.add("fecha",item.fecha);
         upd.add("Id_registro",item.id_registro);
         upd.add("eliminado",item.eliminado);
-
         upd.Where("(id_inventario_det="+item.id_inventario_det+")");
-
         db.execSQL(upd.sql());
 
         //Toast toast= Toast.makeText(cont,upd.sql(), Toast.LENGTH_LONG);toast.show();
@@ -149,7 +146,6 @@ public class clsInventario_detalleObj {
         while (!dt.isAfterLast()) {
 
             item = clsCls.new clsInventario_detalle();
-
             item.id_inventario_det=dt.getInt(0);
             item.id_inventario_enc=dt.getInt(1);
             item.id_articulo=dt.getString(2);
@@ -161,7 +157,6 @@ public class clsInventario_detalleObj {
             item.fecha=dt.getString(8);
             item.id_registro=dt.getInt(9);
             item.eliminado=dt.getInt(10);
-
             items.add(item);
 
             dt.moveToNext();
@@ -189,7 +184,6 @@ public class clsInventario_detalleObj {
     public String addItemSql(clsClasses.clsInventario_detalle item) {
 
         ins.init("Inventario_detalle");
-
         ins.add("id_inventario_det",item.id_inventario_det);
         ins.add("id_inventario_enc",item.id_inventario_enc);
         ins.add("id_articulo",item.id_articulo);
@@ -201,7 +195,6 @@ public class clsInventario_detalleObj {
         ins.add("fecha",item.fecha);
         ins.add("Id_registro",item.id_registro);
         ins.add("eliminado",item.eliminado);
-
         return ins.sql();
 
     }
@@ -209,7 +202,6 @@ public class clsInventario_detalleObj {
     public String updateItemSql(clsClasses.clsInventario_detalle item) {
 
         upd.init("Inventario_detalle");
-
         upd.add("id_inventario_enc",item.id_inventario_enc);
         upd.add("id_articulo",item.id_articulo);
         upd.add("ubicacion",item.ubicacion);
@@ -220,7 +212,6 @@ public class clsInventario_detalleObj {
         upd.add("fecha",item.fecha);
         upd.add("Id_registro",item.id_registro);
         upd.add("eliminado",item.eliminado);
-
         upd.Where("(id_inventario_det="+item.id_inventario_det+")");
 
         return upd.sql();
@@ -229,5 +220,39 @@ public class clsInventario_detalleObj {
 
     }
 
-}
+    public boolean existsByCodigoBarra(String codigoBarra) {
+        String sql = "SELECT COUNT(*) FROM Inventario_detalle WHERE codigo_barra = ?";
+        Cursor cursor = db.rawQuery(sql, new String[]{codigoBarra});
+        boolean exists = false;
 
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                exists = cursor.getInt(0) > 0;
+            }
+            cursor.close();
+        }
+
+        return exists;
+    }
+    public List<String> buscarDuplicadosPorCodigoBarra() {
+        List<String> duplicados = new ArrayList<>();
+        String sql = "SELECT codigo_barra, COUNT(*) as cantidad " +
+                "FROM Inventario_detalle " +
+                "GROUP BY codigo_barra " +
+                "HAVING COUNT(*) > 1";
+
+        Cursor cursor = db.rawQuery(sql, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                String codigo = cursor.getString(0);
+                duplicados.add(codigo);
+            } while (cursor.moveToNext());
+        }
+
+        if (cursor != null) cursor.close();
+
+        return duplicados;
+    }
+
+}

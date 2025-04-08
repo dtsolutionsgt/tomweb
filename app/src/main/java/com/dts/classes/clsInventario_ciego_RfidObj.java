@@ -76,7 +76,6 @@ public class clsInventario_ciego_RfidObj {
     private void addItem(clsClasses.clsInventario_ciego_rfid item) {
 
         ins.init("Inventario_ciego_rfid");
-
         ins.add("id_inventario_enc",item.id_inventario_enc);
         ins.add("codigo_barra",item.codigo_barra);
         ins.add("cantidad",item.cantidad);
@@ -88,7 +87,6 @@ public class clsInventario_ciego_RfidObj {
         ins.add("hora",item.hora);
         ins.add("Id_registro",item.id_registro);
         ins.add("eliminado",item.eliminado);
-
         db.execSQL(ins.sql());
 
     }
@@ -96,7 +94,6 @@ public class clsInventario_ciego_RfidObj {
     private void updateItem(clsClasses.clsInventario_ciego_rfid item) {
 
         upd.init("Inventario_ciego_rfid");
-
         upd.add("id_inventario_enc",item.id_inventario_enc);
         upd.add("codigo_barra",item.codigo_barra);
         upd.add("cantidad",item.cantidad);
@@ -107,9 +104,7 @@ public class clsInventario_ciego_RfidObj {
         upd.add("hora",item.hora);
         upd.add("Id_registro",item.id_registro);
         upd.add("eliminado",item.eliminado);
-
         upd.Where("(id="+item.id+")");
-
         db.execSQL(upd.sql());
 
         //Toast toast= Toast.makeText(cont,upd.sql(), Toast.LENGTH_LONG);toast.show();
@@ -139,7 +134,6 @@ public class clsInventario_ciego_RfidObj {
         while (!dt.isAfterLast()) {
 
             item = new clsClasses.clsInventario_ciego_rfid();
-
             item.id_inventario_enc=dt.getInt(0);
             item.codigo_barra=dt.getString(1);
             item.cantidad=dt.getDouble(2);
@@ -151,7 +145,6 @@ public class clsInventario_ciego_RfidObj {
             item.hora=dt.getString(8);
             item.id_registro=dt.getInt(9);
             item.eliminado=dt.getInt(10);
-
             items.add(item);
 
             dt.moveToNext();
@@ -179,7 +172,6 @@ public class clsInventario_ciego_RfidObj {
     public String addItemSql(clsClasses.clsInventario_ciego_rfid item) {
 
         ins.init("Inventario_ciego_rfid");
-
         ins.add("id_inventario_enc",item.id_inventario_enc);
         ins.add("codigo_barra",item.codigo_barra);
         ins.add("cantidad",item.cantidad);
@@ -191,7 +183,6 @@ public class clsInventario_ciego_RfidObj {
         ins.add("hora",item.hora);
         ins.add("Id_registro",item.id_registro);
         ins.add("eliminado",item.eliminado);
-
         return ins.sql();
 
     }
@@ -199,7 +190,6 @@ public class clsInventario_ciego_RfidObj {
     public String updateItemSql(clsClasses.clsInventario_ciego_rfid item) {
 
         upd.init("Inventario_ciego_rfid");
-
         upd.add("id_inventario_enc",item.id_inventario_enc);
         upd.add("codigo_barra",item.codigo_barra);
         upd.add("cantidad",item.cantidad);
@@ -210,9 +200,7 @@ public class clsInventario_ciego_RfidObj {
         upd.add("hora",item.hora);
         upd.add("Id_registro",item.id_registro);
         upd.add("eliminado",item.eliminado);
-
         upd.Where("(id="+item.id+")");
-
         return upd.sql();
 
         //Toast toast= Toast.makeText(cont,upd.sql(), Toast.LENGTH_LONG);toast.show();

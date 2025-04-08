@@ -1,20 +1,7 @@
 package com.dts.rfid;
 
-import android.os.AsyncTask;
-import android.util.Log;
-
-import com.zebra.rfid.api3.Antennas;
-import com.zebra.rfid.api3.DYNAMIC_POWER_OPTIMIZATION;
-import com.zebra.rfid.api3.ENUM_TRIGGER_MODE;
-import com.zebra.rfid.api3.INVENTORY_STATE;
 import com.zebra.rfid.api3.InvalidUsageException;
-import com.zebra.rfid.api3.OperationFailureException;
-import com.zebra.rfid.api3.RFIDResults;
 import com.zebra.rfid.api3.ReaderDevice;
-import com.zebra.rfid.api3.RfidEventsListener;
-import com.zebra.rfid.api3.SESSION;
-import com.zebra.rfid.api3.VersionInfo;
-
 import java.util.ArrayList;
 
 public class ConnectionController {

@@ -292,6 +292,7 @@ public class Conteo extends PBase {
     //region Main
 
     public void insertaConteo(){
+
         clsInventario_ciegoObj InvCiego = new clsInventario_ciegoObj(this, Con, db);
         clsClasses.clsInventario_ciego item= new clsClasses.clsInventario_ciego();
         clsInventario_detalleObj InvDet = new clsInventario_detalleObj(this, Con, db);
@@ -376,7 +377,6 @@ public class Conteo extends PBase {
                 item.fecha = ffe;
                 item.id_registro = gl.IDregistro;
                 item.eliminado = 0;
-
                 InvCiego.add(item);
 
             }else if(gl.tipoInv==2 || gl.tipoInv==3){
@@ -391,7 +391,6 @@ public class Conteo extends PBase {
                 itemDeta.fecha = ffe;
                 itemDeta.id_registro = gl.IDregistro;
                 itemDeta.eliminado = 0;
-
                 InvDet.add(itemDeta);
 
             }else if(gl.tipoInv==5){

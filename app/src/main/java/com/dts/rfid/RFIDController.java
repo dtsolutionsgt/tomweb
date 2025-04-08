@@ -1,8 +1,5 @@
 package com.dts.rfid;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
-
-import android.app.Application;
 import android.bluetooth.BluetoothDevice;
 import android.media.ToneGenerator;
 import android.os.AsyncTask;
@@ -11,17 +8,11 @@ import com.zebra.rfid.api3.Antennas;
 import com.zebra.rfid.api3.BEEPER_VOLUME;
 import com.zebra.rfid.api3.DYNAMIC_POWER_OPTIMIZATION;
 import com.zebra.rfid.api3.Events;
-import com.zebra.rfid.api3.InvalidUsageException;
-import com.zebra.rfid.api3.LOCK_DATA_FIELD;
-import com.zebra.rfid.api3.LOCK_PRIVILEGE;
-import com.zebra.rfid.api3.OperationFailureException;
 import com.zebra.rfid.api3.PreFilters;
-import com.zebra.rfid.api3.RFIDReader;
 import com.zebra.rfid.api3.RFModeTable;
 import com.zebra.rfid.api3.ReaderDevice;
 import com.zebra.rfid.api3.Readers;
 import com.zebra.rfid.api3.RegulatoryConfig;
-import com.zebra.rfid.api3.RfidEventsListener;
 import com.zebra.rfid.api3.START_TRIGGER_TYPE;
 import com.zebra.rfid.api3.StartTrigger;
 import com.zebra.rfid.api3.StopTrigger;
@@ -29,7 +20,6 @@ import com.zebra.rfid.api3.TAG_FIELD;
 import com.zebra.rfid.api3.TagStorageSettings;
 import com.zebra.rfid.api3.UNIQUE_TAG_REPORT_SETTING;
 
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 
@@ -137,11 +127,6 @@ public class RFIDController {
 
     private AccessOperationController accessOperationController = new AccessOperationController();
     private InventoryController inventoryController = new InventoryController();
-    //private ConnectionController connectionController = new ConnectionController();
-    //private LocationingController locationingController = new LocationingController();
-
-
-
 
     public void updateTagIDs() {
         //inventoryController.updateTagIDs();

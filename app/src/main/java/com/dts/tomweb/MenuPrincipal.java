@@ -30,8 +30,7 @@ public class MenuPrincipal extends PBase {
 
         super.InitBase(savedInstanceState);
 
-        //listView = (ListView) findViewById(R.id.listView1);
-        lblTitle = (TextView) findViewById(R.id.Productos);lblTitle.setText(gl.nombreusuario);
+        lblTitle = findViewById(R.id.Productos);lblTitle.setText(gl.nombreusuario);
 
     }
 
@@ -65,24 +64,16 @@ public class MenuPrincipal extends PBase {
 
     private void msgAskExit(String msg) {
         AlertDialog.Builder dialog = new AlertDialog.Builder(this);
-
         dialog.setCancelable(false);
         dialog.setTitle("Tom");
         dialog.setMessage("¿" + msg + "?");
-
-        dialog.setPositiveButton("Si", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                gl.exitapp=true;
-                finito();
-            }
+        dialog.setPositiveButton("Si", (dialog1, which) -> {
+            gl.exitapp = true;
+            finito();
         });
-
-        dialog.setNegativeButton("No", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {}
+        dialog.setNegativeButton("No", (dialog2, which) -> {
         });
-
         dialog.show();
-
     }
 
     //endregion

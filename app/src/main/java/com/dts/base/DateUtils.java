@@ -325,7 +325,7 @@ public class DateUtils {
 		return ff;
 	}
 
-	public long getActDateTime(){
+	public Long getActDateTime(){
 		int cyear,cmonth,cday,ch,cm; 
 		long f;
 
