@@ -227,7 +227,7 @@ public class Inventario_rfid extends PBase{
                     Log.d(TAG, "Mem Bank Data: " + tag.getMemoryBankData());
                 }
 
-                executor.execute(() -> procesarTag(tagFinal, tagId));
+                executor.execute(() -> procesarTag(tagId,tagFinal));
             }
         }
 
@@ -283,7 +283,7 @@ public class Inventario_rfid extends PBase{
 
         private void agregarAlAdapter(String tagId, String tagFinal) {
             clsInventario_Rfid registro = new clsInventario_Rfid();
-            registro.tag = tagId;
+            registro.tag = tagFinal;
             registro.descripcion = "tag: " + tagFinal;
             registro.ubicacion = "bodega";
             registro.cantidad = 1;
@@ -323,7 +323,7 @@ public class Inventario_rfid extends PBase{
                             Log.d(TAG, "Lectura detenida.");
 
                             // Validar duplicados al finalizar
-                            handler.post(() -> buscarDuplicadosPorCodigoBarra());
+                            //handler.post(() -> buscarDuplicadosPorCodigoBarra());
                         } catch (InvalidUsageException | OperationFailureException ex) {
                             ex.printStackTrace();
                         }
