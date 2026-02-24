@@ -2,7 +2,7 @@ package com.dts.base;
 
 public class clsClasses {
 
-    public class clsArticulo {
+    public static class clsArticulo {
         public String id_articulo;
         public int id_empresa;
         public String codigo_barra;
@@ -11,18 +11,18 @@ public class clsClasses {
         public String tipo_conteo;
     }
 
-    public class clsArticulo_codigo_barra {
+    public static class clsArticulo_codigo_barra {
         public int id_empresa;
         public String id_articulo;
         public String codigo_barra;
     }
 
-    public class clsEstado_inventario {
+    public static class clsEstado_inventario {
         public int id_estado;
         public String nombre;
     }
 
-    public class clsEstatus_handheld {
+    public static class clsEstatus_handheld {
         public int id;
         public String nombre;
     }
@@ -54,7 +54,7 @@ public class clsClasses {
         public int eliminado;
     }
 
-    public class clsInventario_detalle {
+    public static class clsInventario_detalle {
         public int id_inventario_det;
         public int id_inventario_enc;
         public String id_articulo;
@@ -68,7 +68,7 @@ public class clsClasses {
         public int eliminado;
     }
 
-    public class clsInventario_encabezado {
+    public static class clsInventario_encabezado {
         public int id_inventario_enc;
         public String id_estado;
         public int id_empresa;
@@ -79,12 +79,12 @@ public class clsClasses {
         public int tipo_inventario;
     }
 
-    public class clsInventario_operador {
+    public static class clsInventario_operador {
         public int id_inventario_enc;
         public int id_operador;
     }
 
-    public class clsInventario_teorico {
+    public static class clsInventario_teorico {
         public int id_empresa;
         public String id_articulo;
         public String descripcion;
@@ -95,7 +95,7 @@ public class clsClasses {
         public int id_inventario_enc;
     }
 
-    public class clsOperadores {
+    public static class clsOperadores {
         public int id_operador;
         public int id_empresa;
         public String codigo;
@@ -103,7 +103,7 @@ public class clsClasses {
         public String nombre;
     }
 
-    public class clsRegistro_handheld {
+    public static class clsRegistro_handheld {
         public int id_registro;
         public int id_empresa;
         public String fecha_registro;
@@ -113,14 +113,7 @@ public class clsClasses {
         public String descripcion;
     }
 
-
-
-
-
-
-    //************************************
-
-    public class clsUsuario {
+    public static class clsUsuario {
         public int id;
         public String nombre;
         public int activo;
@@ -129,14 +122,13 @@ public class clsClasses {
         public int rol;
     }
 
-    public class clsRol {
-        public int  id;
+    public static class clsRol {
+        public int id;
         public String nombre;
     }
 
-    public class clsMenu {
-        public int  id;
+    public static class clsMenu {
+        public int id;
         public String nombre;
     }
-
 }

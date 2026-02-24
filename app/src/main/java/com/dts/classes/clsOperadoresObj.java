@@ -128,7 +128,7 @@ public class clsOperadoresObj {
 
         while (!dt.isAfterLast()) {
 
-            item = clsCls.new clsOperadores();
+            item = new clsClasses.clsOperadores();
 
             item.id_operador = dt.getInt(0);
             item.id_empresa = dt.getInt(1);
@@ -140,7 +140,7 @@ public class clsOperadoresObj {
 
             dt.moveToNext();
         }
-        if (dt!=null) dt.close();
+        dt.close();
 
     }
 

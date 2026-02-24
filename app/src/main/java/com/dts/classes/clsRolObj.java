@@ -120,18 +120,13 @@ public class clsRolObj {
         if (dt.getCount() > 0) dt.moveToFirst();
 
         while (!dt.isAfterLast()) {
-
-            item = clsCls.new clsRol();
-
+            item = new clsClasses.clsRol();
             item.id = dt.getInt(0);
             item.nombre = dt.getString(1);
-
             items.add(item);
-
             dt.moveToNext();
         }
-        if (dt!=null) dt.close();
-
+        dt.close();
     }
 
     public int newID(String idsql) {

@@ -125,7 +125,7 @@ public class clsInventario_teoricoObj {
 
         while (!dt.isAfterLast()) {
 
-            item = clsCls.new clsInventario_teorico();
+            item = new clsClasses.clsInventario_teorico();
             item.id_empresa=dt.getInt(0);
             item.id_articulo=dt.getString(1);
             item.descripcion=dt.getString(2);

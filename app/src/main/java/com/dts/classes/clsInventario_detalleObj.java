@@ -6,10 +6,8 @@ import java.util.List;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-
 import com.dts.base.BaseDatos;
 import com.dts.base.clsClasses;
-
 
 public class clsInventario_detalleObj {
 
@@ -82,7 +80,6 @@ public class clsInventario_detalleObj {
     private void addItem(clsClasses.clsInventario_detalle item) {
 
         ins.init("Inventario_detalle");
-        //ins.add("id_inventario_det",item.id_inventario_det);
         ins.add("id_inventario_enc",item.id_inventario_enc);
         ins.add("id_articulo",item.id_articulo);
         ins.add("ubicacion",item.ubicacion);
@@ -112,8 +109,6 @@ public class clsInventario_detalleObj {
         upd.add("eliminado",item.eliminado);
         upd.Where("(id_inventario_det="+item.id_inventario_det+")");
         db.execSQL(upd.sql());
-
-        //Toast toast= Toast.makeText(cont,upd.sql(), Toast.LENGTH_LONG);toast.show();
 
     }
 
@@ -145,7 +140,7 @@ public class clsInventario_detalleObj {
 
         while (!dt.isAfterLast()) {
 
-            item = clsCls.new clsInventario_detalle();
+            item = new clsClasses.clsInventario_detalle();
             item.id_inventario_det=dt.getInt(0);
             item.id_inventario_enc=dt.getInt(1);
             item.id_articulo=dt.getString(2);
@@ -161,7 +156,7 @@ public class clsInventario_detalleObj {
 
             dt.moveToNext();
         }
-        if (dt!=null) dt.close();
+        dt.close();
 
     }
 
@@ -173,7 +168,7 @@ public class clsInventario_detalleObj {
             dt=Con.OpenDT(idsql);
             dt.moveToFirst();
             nid=dt.getInt(0)+1;
-            if (dt!=null) dt.close();
+            dt.close();
         } catch (Exception e) {
             nid=1;
         }
@@ -202,21 +197,19 @@ public class clsInventario_detalleObj {
     public String updateItemSql(clsClasses.clsInventario_detalle item) {
 
         upd.init("Inventario_detalle");
-        upd.add("id_inventario_enc",item.id_inventario_enc);
-        upd.add("id_articulo",item.id_articulo);
-        upd.add("ubicacion",item.ubicacion);
-        upd.add("cantidad",item.cantidad);
-        upd.add("codigo_barra",item.codigo_barra);
-        upd.add("comunicado",item.comunicado);
-        upd.add("id_operador",item.id_operador);
-        upd.add("fecha",item.fecha);
-        upd.add("Id_registro",item.id_registro);
-        upd.add("eliminado",item.eliminado);
-        upd.Where("(id_inventario_det="+item.id_inventario_det+")");
+        upd.add("id_inventario_enc", item.id_inventario_enc);
+        upd.add("id_articulo", item.id_articulo);
+        upd.add("ubicacion", item.ubicacion);
+        upd.add("cantidad", item.cantidad);
+        upd.add("codigo_barra", item.codigo_barra);
+        upd.add("comunicado", item.comunicado);
+        upd.add("id_operador", item.id_operador);
+        upd.add("fecha", item.fecha);
+        upd.add("Id_registro", item.id_registro);
+        upd.add("eliminado", item.eliminado);
+        upd.Where("(id_inventario_det=" + item.id_inventario_det + ")");
 
         return upd.sql();
-
-        //Toast toast= Toast.makeText(cont,upd.sql(), Toast.LENGTH_LONG);toast.show();
 
     }
 
@@ -250,7 +243,7 @@ public class clsInventario_detalleObj {
             } while (cursor.moveToNext());
         }
 
-        if (cursor != null) cursor.close();
+        cursor.close();
 
         return duplicados;
     }

@@ -23,7 +23,7 @@ public class Usuario extends PBase {
 
     private clsUsuarioObj users;
     private clsRolObj roles;
-    private clsClasses.clsUsuario item=clsCls.new clsUsuario();
+    private clsClasses.clsUsuario item=new clsClasses.clsUsuario();
 
     private int userid,rolid;
 

@@ -25,16 +25,6 @@ public class inventario_rfid_adapter extends RecyclerView.Adapter<inventario_rfi
         this.items = items;
     }
 
-    public void refreshItems(List<clsInventario_Rfid> newItems) {
-        this.items = newItems;
-        notifyDataSetChanged();
-    }
-
-    public void setSelectedIndex(int index) {
-        selectedIndex = index;
-        notifyDataSetChanged();
-    }
-
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {

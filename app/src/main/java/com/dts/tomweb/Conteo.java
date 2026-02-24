@@ -1,20 +1,14 @@
 package com.dts.tomweb;
 
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.RestrictionEntry;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -25,12 +19,10 @@ import com.dts.classes.clsInventario_detalleObj;
 import com.dts.classes.clsInventario_teoricoObj;
 import com.dts.classes.clsRegistro_handheldObj;
 import com.dts.classes.clsInventario_ciego_RfidObj;
-import org.w3c.dom.Text;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Locale;
 import java.util.Objects;
 import java.util.TimeZone;
 
@@ -296,7 +288,7 @@ public class Conteo extends PBase {
         clsInventario_ciegoObj InvCiego = new clsInventario_ciegoObj(this, Con, db);
         clsClasses.clsInventario_ciego item= new clsClasses.clsInventario_ciego();
         clsInventario_detalleObj InvDet = new clsInventario_detalleObj(this, Con, db);
-        clsClasses.clsInventario_detalle itemDeta=clsCls.new clsInventario_detalle();
+        clsClasses.clsInventario_detalle itemDeta=new clsClasses.clsInventario_detalle();
         clsRegistro_handheldObj regHH = new clsRegistro_handheldObj(this, Con, db);
         clsInventario_ciego_RfidObj InvCiegoRfid = new clsInventario_ciego_RfidObj(this,Con,db);
         clsClasses.clsInventario_ciego_rfid item_rfid = new clsClasses.clsInventario_ciego_rfid();

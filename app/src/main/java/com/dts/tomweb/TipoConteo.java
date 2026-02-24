@@ -49,9 +49,9 @@ public class TipoConteo extends PBase {
 
     public void addProd(View view){
         clsInventario_teoricoObj teo = new clsInventario_teoricoObj(this, Con, db);
-        clsClasses.clsInventario_teorico itemt=clsCls.new clsInventario_teorico();
+        clsClasses.clsInventario_teorico itemt= new clsClasses.clsInventario_teorico();
         clsArticuloObj art = new clsArticuloObj(this, Con, db);
-        clsClasses.clsArticulo item=clsCls.new clsArticulo();
+        clsClasses.clsArticulo item=new clsClasses.clsArticulo();
 
         try{
 

@@ -77,10 +77,8 @@ public class clsEstatus_handheldObj {
     private void addItem(clsClasses.clsEstatus_handheld item) {
 
         ins.init("Estatus_handheld");
-
         ins.add("id", item.id);
         ins.add("nombre", item.nombre);
-
         db.execSQL(ins.sql());
 
     }
@@ -88,14 +86,9 @@ public class clsEstatus_handheldObj {
     private void updateItem(clsClasses.clsEstatus_handheld item) {
 
         upd.init("Estatus_handheld");
-
         upd.add("nombre", item.nombre);
-
         upd.Where("(id=" + item.id + ")");
-
         db.execSQL(upd.sql());
-
-        //Toast toast= Toast.makeText(cont,upd.sql(), Toast.LENGTH_LONG);toast.show();
 
     }
 
@@ -121,16 +114,13 @@ public class clsEstatus_handheldObj {
 
         while (!dt.isAfterLast()) {
 
-            item = clsCls.new clsEstatus_handheld();
-
+            item = new clsClasses.clsEstatus_handheld();
             item.id = dt.getInt(0);
             item.nombre = dt.getString(1);
-
             items.add(item);
-
             dt.moveToNext();
         }
-        if (dt!=null) dt.close();
+        dt.close();
 
     }
 
@@ -153,7 +143,6 @@ public class clsEstatus_handheldObj {
     public String addItemSql(clsClasses.clsEstatus_handheld item) {
 
         ins.init("Estatus_handheld");
-
         ins.add("id", item.id);
         ins.add("nombre", item.nombre);
 
@@ -164,15 +153,9 @@ public class clsEstatus_handheldObj {
     public String updateItemSql(clsClasses.clsEstatus_handheld item) {
 
         upd.init("Estatus_handheld");
-
         upd.add("nombre", item.nombre);
-
         upd.Where("(id=" + item.id + ")");
-
         return upd.sql();
-
-        //Toast toast= Toast.makeText(cont,upd.sql(), Toast.LENGTH_LONG);toast.show();
-
     }
 
 }

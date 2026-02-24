@@ -75,14 +75,12 @@ public class clsArticuloObj {
     private void addItem(clsClasses.clsArticulo item) {
 
         ins.init("Articulo");
-
         ins.add("id_articulo",item.id_articulo);
         ins.add("id_empresa",item.id_empresa);
         ins.add("codigo_barra",item.codigo_barra);
         ins.add("descripcion",item.descripcion);
         ins.add("costo",item.costo);
         ins.add("tipo_conteo",item.tipo_conteo);
-
         db.execSQL(ins.sql());
 
     }
@@ -90,18 +88,13 @@ public class clsArticuloObj {
     private void updateItem(clsClasses.clsArticulo item) {
 
         upd.init("Articulo");
-
         upd.add("id_empresa",item.id_empresa);
         upd.add("codigo_barra",item.codigo_barra);
         upd.add("descripcion",item.descripcion);
         upd.add("costo",item.costo);
         upd.add("tipo_conteo",item.tipo_conteo);
-
         upd.Where("(id_articulo='"+item.id_articulo+"')");
-
         db.execSQL(upd.sql());
-
-        //Toast toast= Toast.makeText(cont,upd.sql(), Toast.LENGTH_LONG);toast.show();
 
     }
 
@@ -127,20 +120,17 @@ public class clsArticuloObj {
 
         while (!dt.isAfterLast()) {
 
-            item = clsCls.new clsArticulo();
-
+            item = new clsClasses.clsArticulo();
             item.id_articulo=dt.getString(0);
             item.id_empresa=dt.getInt(1);
             item.codigo_barra=dt.getString(2);
             item.descripcion=dt.getString(3);
             item.costo=dt.getDouble(4);
             item.tipo_conteo=dt.getString(5);
-
             items.add(item);
-
             dt.moveToNext();
         }
-        if (dt!=null) dt.close();
+        dt.close();
 
     }
 
@@ -163,14 +153,12 @@ public class clsArticuloObj {
     public String addItemSql(clsClasses.clsArticulo item) {
 
         ins.init("Articulo");
-
         ins.add("id_articulo",item.id_articulo);
         ins.add("id_empresa",item.id_empresa);
         ins.add("codigo_barra",item.codigo_barra);
         ins.add("descripcion",item.descripcion);
         ins.add("costo",item.costo);
         ins.add("tipo_conteo",item.tipo_conteo);
-
         return ins.sql();
 
     }
@@ -178,20 +166,14 @@ public class clsArticuloObj {
     public String updateItemSql(clsClasses.clsArticulo item) {
 
         upd.init("Articulo");
-
         upd.add("id_empresa",item.id_empresa);
         upd.add("codigo_barra",item.codigo_barra);
         upd.add("descripcion",item.descripcion);
         upd.add("costo",item.costo);
         upd.add("tipo_conteo",item.tipo_conteo);
-
         upd.Where("(id_articulo='"+item.id_articulo+"')");
 
         return upd.sql();
-
-        //Toast toast= Toast.makeText(cont,upd.sql(), Toast.LENGTH_LONG);toast.show();
-
     }
-
 }
 

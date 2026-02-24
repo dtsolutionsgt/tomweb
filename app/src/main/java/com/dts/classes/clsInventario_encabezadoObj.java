@@ -131,8 +131,7 @@ public class clsInventario_encabezadoObj {
 
         while (!dt.isAfterLast()) {
 
-            item = clsCls.new clsInventario_encabezado();
-
+            item = new clsClasses.clsInventario_encabezado();
             item.id_inventario_enc=dt.getInt(0);
             item.id_estado=dt.getString(1);
             item.id_empresa=dt.getInt(2);
@@ -141,12 +140,10 @@ public class clsInventario_encabezadoObj {
             item.nombre=dt.getString(5);
             item.id_usuario=dt.getInt(6);
             item.tipo_inventario=dt.getInt(7);
-
             items.add(item);
-
             dt.moveToNext();
         }
-        if (dt!=null) dt.close();
+        dt.close();
 
     }
 
@@ -158,7 +155,7 @@ public class clsInventario_encabezadoObj {
             dt=Con.OpenDT(idsql);
             dt.moveToFirst();
             nid=dt.getInt(0)+1;
-            if (dt!=null) dt.close();
+            dt.close();
         } catch (Exception e) {
             nid=1;
         }
@@ -169,7 +166,6 @@ public class clsInventario_encabezadoObj {
     public String addItemSql(clsClasses.clsInventario_encabezado item) {
 
         ins.init("Inventario_encabezado");
-
         ins.add("id_inventario_enc",item.id_inventario_enc);
         ins.add("id_estado",item.id_estado);
         ins.add("id_empresa",item.id_empresa);
@@ -186,7 +182,6 @@ public class clsInventario_encabezadoObj {
     public String updateItemSql(clsClasses.clsInventario_encabezado item) {
 
         upd.init("Inventario_encabezado");
-
         upd.add("id_estado",item.id_estado);
         upd.add("id_empresa",item.id_empresa);
         upd.add("fecha_inicio",item.fecha_inicio);
@@ -194,12 +189,8 @@ public class clsInventario_encabezadoObj {
         upd.add("nombre",item.nombre);
         upd.add("id_usuario",item.id_usuario);
         upd.add("tipo_inventario",item.tipo_inventario);
-
         upd.Where("(id_inventario_enc="+item.id_inventario_enc+")");
-
         return upd.sql();
-
-        //Toast toast= Toast.makeText(cont,upd.sql(), Toast.LENGTH_LONG);toast.show();
 
     }
 

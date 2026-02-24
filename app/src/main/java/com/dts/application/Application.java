@@ -23,19 +23,22 @@ import com.zebra.rfid.api3.UNIQUE_TAG_REPORT_SETTING;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicInteger;
+
 
 public class Application extends android.app.Application {
 
     public static RFIDReader mConnectedReader;
 
     //Variable to keep track of the unique tags seen
-    public static volatile int UNIQUE_TAGS = 0;
+    public static final AtomicInteger UNIQUE_TAGS = new AtomicInteger(0);
 
     //Variable to keep track of the unique tags when matching tags CSV is enabled. (value=UNIQUE_TAGS+missing tags).
     public static volatile int UNIQUE_TAGS_CSV = 0;
 
     //variable to keep track of the total tags seen
-    public static volatile int TOTAL_TAGS = 0;
+    public static final AtomicInteger TOTAL_TAGS = new AtomicInteger(0);
+
     //Arraylist to keeptrack of the tagIDs to act as adapter for autocomplete text views
     public static ArrayList<String> tagIDs;
     //variable to store the tag read rate
@@ -186,73 +189,5 @@ public class Application extends android.app.Application {
         }*/
     }
 
-    //clear saved data
-    public static void reset() {
-
-        UNIQUE_TAGS = 0;
-        UNIQUE_TAGS_CSV = 0;
-        TOTAL_TAGS = 0;
-        TAG_READ_RATE = 0;
-        mRRStartedTime = 0;
-        missedTags = 0;
-        matchingTags = 0;
-
-        if (tagsReadInventory != null)
-            tagsReadInventory.clear();
-        if (tagIDs != null)
-            tagIDs.clear();
-
-        if (Application.TAG_LIST_MATCH_MODE) {
-            Application.matchingTagsList.clear();
-            Application.missingTagsList.clear();
-            Application.unknownTagsList.clear();
-            Application.tagsReadForSearch.clear();
-        }
-
-        mIsInventoryRunning = false;
-        inventoryMode = 0;
-        memoryBankId = -1;
-        if (inventoryList != null)
-            inventoryList.clear();
-
-        mConnectedDevice = null;
-
-        INTENT_ID = 100;
-        antennaPowerLevel = null;
-
-        //Triggers
-        settings_startTrigger = null;
-        settings_startTrigger = null;
-
-        //Beeper
-        beeperVolume = BEEPER_VOLUME.HIGH_BEEP;
-
-        accessControlTag = null;
-        isAccessCriteriaRead = false;
-
-        // reader settings
-        regulatory = null;
-        regionNotSet = false;
-
-        //preFilters = null;
-        preFilterIndex = -1;
-        PreFilterTag = "";
-        PreFilterTagID = "";
-
-        settings_startTrigger = null;
-        settings_stopTrigger = null;
-
-        if (versionInfo != null)
-            versionInfo.clear();
-
-        BatteryData = null;
-
-        isLocatingTag = false;
-        TagProximityPercent = -1;
-        locateTag = null;
-        is_disconnection_requested = false;
-        is_connection_requested = false;
-        readers = null;
-    }
 
 }

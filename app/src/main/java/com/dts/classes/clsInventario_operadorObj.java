@@ -76,10 +76,8 @@ public class clsInventario_operadorObj {
     private void addItem(clsClasses.clsInventario_operador item) {
 
         ins.init("Inventario_operador");
-
         ins.add("id_inventario_enc",item.id_inventario_enc);
         ins.add("id_operador",item.id_operador);
-
         db.execSQL(ins.sql());
 
     }
@@ -87,14 +85,8 @@ public class clsInventario_operadorObj {
     private void updateItem(clsClasses.clsInventario_operador item) {
 
         upd.init("Inventario_operador");
-
-
         upd.Where("(id_inventario_enc="+item.id_inventario_enc+") AND (id_operador="+item.id_operador+")");
-
         db.execSQL(upd.sql());
-
-        //Toast toast= Toast.makeText(cont,upd.sql(), Toast.LENGTH_LONG);toast.show();
-
     }
 
     private void deleteItem(clsClasses.clsInventario_operador item) {
@@ -119,16 +111,14 @@ public class clsInventario_operadorObj {
 
         while (!dt.isAfterLast()) {
 
-            item = clsCls.new clsInventario_operador();
-
+            item = new clsClasses.clsInventario_operador();
             item.id_inventario_enc=dt.getInt(0);
             item.id_operador=dt.getInt(1);
-
             items.add(item);
 
             dt.moveToNext();
         }
-        if (dt!=null) dt.close();
+        dt.close();
 
     }
 
@@ -140,7 +130,7 @@ public class clsInventario_operadorObj {
             dt=Con.OpenDT(idsql);
             dt.moveToFirst();
             nid=dt.getInt(0)+1;
-            if (dt!=null) dt.close();
+            dt.close();
         } catch (Exception e) {
             nid=1;
         }
@@ -151,10 +141,8 @@ public class clsInventario_operadorObj {
     public String addItemSql(clsClasses.clsInventario_operador item) {
 
         ins.init("Inventario_operador");
-
         ins.add("id_inventario_enc",item.id_inventario_enc);
         ins.add("id_operador",item.id_operador);
-
         return ins.sql();
 
     }
@@ -162,13 +150,8 @@ public class clsInventario_operadorObj {
     public String updateItemSql(clsClasses.clsInventario_operador item) {
 
         upd.init("Inventario_operador");
-
-
         upd.Where("(id_inventario_enc="+item.id_inventario_enc+") AND (id_operador="+item.id_operador+")");
-
         return upd.sql();
-
-        //Toast toast= Toast.makeText(cont,upd.sql(), Toast.LENGTH_LONG);toast.show();
 
     }
 

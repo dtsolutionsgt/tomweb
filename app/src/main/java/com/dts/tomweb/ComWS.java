@@ -3,7 +3,6 @@ package com.dts.tomweb;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -16,7 +15,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.dts.base.BaseDatos;
-import com.dts.base.DateUtils;
 import com.dts.base.clsDataBuilder;
 import com.dts.classes.clsInventario_ciego_RfidObj;
 import com.dts.classes.clsInventario_ciegoObj;
@@ -49,8 +47,6 @@ public class ComWS extends PBase {
     private ArrayList<String> results=new ArrayList<String>();
 
     private clsDataBuilder dbld;
-    private DateUtils DU;
-    private String jsonWS;
 
     // Web Service -
 
@@ -975,10 +971,7 @@ public class ComWS extends PBase {
         clsInventario_ciegoObj invCiego = new clsInventario_ciegoObj(this, Con, db);
         clsInventario_ciego_RfidObj invCiegoRfid = new clsInventario_ciego_RfidObj(this, Con, db);
         clsInventario_detalleObj invDet = new clsInventario_detalleObj(this, Con, db);
-        Cursor dt;
-        String ss;
-        String tn;
-        Integer count,rg;
+        Integer count;
 
         if(gl.validaLicDB==0){
             msgbox("Base de datos vacia, recibir datos");
@@ -1015,12 +1008,11 @@ public class ComWS extends PBase {
             if(!ftflag){
                 relRec.setVisibility(View.INVISIBLE);
                 relEnv.setVisibility(View.VISIBLE);
-                ret = true;
             }else {
                 relRec.setVisibility(View.VISIBLE);
                 relEnv.setVisibility(View.INVISIBLE);
-                ret =  true;
             }
+            ret = true;
 
         }
     }

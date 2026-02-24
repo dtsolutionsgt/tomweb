@@ -103,8 +103,6 @@ public class clsInventario_ciegoObj {
         upd.Where("(id="+item.id+")");
         db.execSQL(upd.sql());
 
-        //Toast toast= Toast.makeText(cont,upd.sql(), Toast.LENGTH_LONG);toast.show();
-
     }
 
     private void deleteItem(clsClasses.clsInventario_ciego item) {
@@ -131,7 +129,6 @@ public class clsInventario_ciegoObj {
         while (!dt.isAfterLast()) {
 
             item = new clsClasses.clsInventario_ciego();
-
             item.id_inventario_enc=dt.getInt(0);
             item.codigo_barra=dt.getString(1);
             item.cantidad=dt.getDouble(2);
@@ -146,7 +143,7 @@ public class clsInventario_ciegoObj {
 
             dt.moveToNext();
         }
-        if (dt!=null) dt.close();
+        dt.close();
 
     }
 
@@ -200,8 +197,6 @@ public class clsInventario_ciegoObj {
 
         return upd.sql();
 
-        //Toast toast= Toast.makeText(cont,upd.sql(), Toast.LENGTH_LONG);toast.show();
-
     }
     public boolean existsByCodigoBarra(String codigoBarra) {
         String sql = "SELECT COUNT(*) FROM Inventario_ciego WHERE codigo_barra = ?";
@@ -214,7 +209,6 @@ public class clsInventario_ciegoObj {
             }
             cursor.close();
         }
-
         return exists;
     }
 }

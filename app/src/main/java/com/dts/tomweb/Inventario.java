@@ -8,6 +8,8 @@ import com.dts.classes.clsInventario_encabezadoObj;
 import com.dts.base.clsClasses;
 import com.dts.tomweb.Conteo_RFID.Inventario_rfid;
 
+import java.util.Objects;
+
 public class Inventario extends PBase {
 
     private TextView Correlativo, Empresa, Estado, FechaInv, Descrip, TipoInv;
@@ -133,16 +135,17 @@ public class Inventario extends PBase {
             gl.idInvEnc=item.id_inventario_enc;
             gl.empresa=item.id_empresa;
 
-            Correlativo.setText(Integer.toString(gl.idInvEnc));
-            Empresa.setText(Integer.toString(gl.empresa));
-            Estado.setText(estado);
-            FechaInv.setText(sfecha);
-            Descrip.setText(item.nombre);
-            TipoInv.setText(tipoinv);
+            Correlativo.setText(String.valueOf(gl.idInvEnc));
+            Empresa.setText(String.valueOf(gl.empresa));
+            Estado.setText(String.valueOf(estado));
+            FechaInv.setText(String.valueOf(sfecha));
+            Descrip.setText(String.valueOf(item.nombre));
+            TipoInv.setText(String.valueOf(tipoinv));
 
 
         }catch (Exception e){
-            addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
+            addlog(Objects.requireNonNull(new Object() {
+            }.getClass().getEnclosingMethod()).getName(), e.getMessage(), "");
             msgbox(""+e);
         }
     }

@@ -3,12 +3,13 @@ package com.dts.tomweb;
 import static com.dts.application.Application.inventoryList;
 import static com.dts.application.Application.tagsReadInventory;
 import static com.dts.application.Application.UNIQUE_TAGS;
-import static com.dts.application.Application.TOTAL_TAGS;
 import static com.dts.rfid.RFIDController.channelIndex;
 import static com.dts.rfid.RFIDController.pc;
 import static com.dts.rfid.RFIDController.phase;
 import static com.dts.rfid.RFIDController.rssi;
 import static com.dts.rfid.RFIDController.toneGenerator;
+import static com.zebra.rfid.api3.HANDHELD_TRIGGER_EVENT_TYPE.HANDHELD_TRIGGER_PRESSED;
+import static com.zebra.rfid.api3.HANDHELD_TRIGGER_EVENT_TYPE.HANDHELD_TRIGGER_RELEASED;
 
 
 import android.app.AlertDialog;
@@ -19,14 +20,8 @@ import android.media.ToneGenerator;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
-import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -35,11 +30,8 @@ import android.widget.Toast;
 import com.dts.base.clsClasses;
 import com.dts.classes.clsInventario_ciegoObj;
 import com.dts.classes.clsInventario_detalleObj;
-import com.dts.classes.clsRegistro_handheldObj;
 import com.dts.inventory.InventoryListItem;
 import com.dts.listadapt.LA_RFID;
-import com.dts.listadapt.LA_Tablas;
-import com.dts.listadapt.LA_Tablas2;
 import com.zebra.rfid.api3.ACCESS_OPERATION_CODE;
 import com.zebra.rfid.api3.ACCESS_OPERATION_STATUS;
 import com.zebra.rfid.api3.BEEPER_VOLUME;
@@ -47,6 +39,7 @@ import com.zebra.rfid.api3.ENUM_TRANSPORT;
 import com.zebra.rfid.api3.ENUM_TRIGGER_MODE;
 import com.zebra.rfid.api3.HANDHELD_TRIGGER_EVENT_TYPE;
 import com.zebra.rfid.api3.InvalidUsageException;
+import com.zebra.rfid.api3.MEMORY_BANK;
 import com.zebra.rfid.api3.OperationFailureException;
 import com.zebra.rfid.api3.RFIDReader;
 import com.zebra.rfid.api3.ReaderDevice;
@@ -66,177 +59,166 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
+import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-
 public class ConteoRfid extends PBase  {
 
     private ListView lvConteoRFID;
     private ProgressBar pbar;
-    private EditText txtBarra;
-    private EditText txtUbic;
     private TextView regs;
-    private CheckBox cb;
 
-    private LA_Tablas adapter;
-    private LA_Tablas2 dadapter;
     private LA_RFID dadapter_rfid;
-    private LA_RFID dadapter_rfid2;
-
-    private int cw;
-    private String scod;
-    private boolean consol;
-    private Integer result=0;
 
     /*********elementos de RFID ************/
-    public static Readers readers;
+    public Readers readers;
     private static ArrayList<ReaderDevice> availableRFIDReaderList;
     private static ReaderDevice readerDevice;
     private static RFIDReader reader;
-    private static String TAG = "DEMO";
+    private static final String TAG = "DEMO";
     TextView textView;
     private EventHandler eventHandler;
 
-    public ArrayList<clsClasses.clsInventario_ciego_rfid> dvalues_rfid = new ArrayList<clsClasses.clsInventario_ciego_rfid>();
-    ArrayList<String> codigos = new ArrayList<String>();
-    ArrayList<String> lista_limpia = new ArrayList<String>();
+    public ArrayList<clsClasses.clsInventario_ciego_rfid> dvalues_rfid = new ArrayList<>();
+    ArrayList<String> codigos = new ArrayList<>();
+    ArrayList<String> lista_limpia = new ArrayList<>();
 
-    private String Ubic, Cod, tipoArt, barra;
-    private Double canti;
     String currentTime;
-    clsRegistro_handheldObj regHH;
 
     Integer contador = 0;
 
     //Beeper
     public static BEEPER_VOLUME beeperVolume = BEEPER_VOLUME.HIGH_BEEP;
-    public static BEEPER_VOLUME sledBeeperVolume = BEEPER_VOLUME.HIGH_BEEP;
 
     public Timer tbeep;
 
-    public Timer locatebeep;
-
     //for beep and LED
     private boolean beepON = false;
-    private boolean beepONLocate = false;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_conteo_rfid);
 
+        inicializarUI();
+        inicializarVariables();
+        inicializarReader();
+    }
+
+    private void inicializarUI() {
         textView = findViewById(R.id.TagText);
         pbar = findViewById(R.id.progressBar);
+        textView.setText(R.string.rfid_iniciando);
+        lvConteoRFID = findViewById(R.id.lvConteoRFID);
+        regs = findViewById(R.id.txtRegs);
+    }
 
+    private void inicializarVariables() {
         codigos.clear();
         dvalues_rfid.clear();
-
-        if (readers == null) {
-            readers = new Readers(this, ENUM_TRANSPORT.SERVICE_SERIAL);
-        }
 
         int streamType = AudioManager.STREAM_DTMF;
         toneGenerator = new ToneGenerator(streamType, 90);
 
-        // Refactor moderno usando ExecutorService y Handler para evitar AsyncTask
+        if (readers == null) {
+            readers = new Readers(this, ENUM_TRANSPORT.SERVICE_SERIAL);
+        }
+    }
+
+    private void inicializarReader() {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         Handler handler = new Handler(Looper.getMainLooper());
 
         executor.execute(() -> {
             boolean conectado = false;
+
             try {
-                if (readers != null) {
-                    List<ReaderDevice> lista = readers.GetAvailableRFIDReaderList();
-                    if (lista != null && !lista.isEmpty()) {
-                        availableRFIDReaderList = new ArrayList<>(lista);
-                        readerDevice = lista.get(0);
-                        reader = readerDevice.getRFIDReader();
-                        if (!reader.isConnected() && gl != null) {
-                            reader.connect();
-                            ConfigureReader();
-                            conectado = true;
-                        }
+                List<ReaderDevice> dispositivos = readers.GetAvailableRFIDReaderList();
+
+                if (dispositivos == null || dispositivos.isEmpty()) {
+                    Log.w(TAG, "No se encontraron lectores RFID.");
+                } else {
+                    availableRFIDReaderList = new ArrayList<>(dispositivos);
+
+                    // Logging de los lectores disponibles
+                    for (ReaderDevice dev : availableRFIDReaderList) {
+                        Log.d(TAG, "Lector disponible: " + dev.getName());
+                    }
+
+                    readerDevice = availableRFIDReaderList.get(0);
+                    reader = readerDevice.getRFIDReader();
+
+                    if (reader != null && !reader.isConnected()) {
+                        reader.connect();
+                        ConfigureReader();
+                        conectado = true;
                     }
                 }
-            } catch (InvalidUsageException | OperationFailureException e) {
-                e.printStackTrace();
-                Log.d(TAG, "Error de conexión: " + e.getMessage());
+
+            } catch (InvalidUsageException ex) {
+                logRfidError("Uso inválido al conectar lector RFID", ex);
+            } catch (OperationFailureException ex) {
+                logRfidError("Fallo en operación al conectar lector RFID", ex);
+            } catch (Exception ex) {
+                logRfidError("Error inesperado al conectar lector RFID", ex);
             }
 
-            boolean finalConectado = conectado;
-            handler.post(() -> {
-                if (finalConectado) {
-                    textView.setText("Lectura RFID lista.");
-                } else {
-                    textView.setText("Se ha perdido la comunicación al RFID.");
-                }
-            });
+            final boolean estadoConexion = conectado;
+            handler.post(() -> textView.setText(estadoConexion ? R.string.lectura_rfid_lista : R.string.con_perdida_rfid));
         });
-
-        // Bloque UI y lógica
-        try {
-            super.InitBase(savedInstanceState);
-            addlog("ConteoRfid", du.getActDateTime().toString(), gl.nombreusuario);
-
-            lvConteoRFID = findViewById(R.id.lvConteoRFID);
-            txtBarra = findViewById(R.id.txtBarra);
-            txtUbic = findViewById(R.id.txtNombre);
-            regs = findViewById(R.id.txtRegs);
-            cb = findViewById(R.id.cbConsolidar);
-
-            regHH = new clsRegistro_handheldObj(this, Con, db);
-            regHH.fill();
-            gl.IDregistro = regHH.first().id_registro;
-
-            if (gl.tipoInv == 1) scod = " INVENTARIO_CIEGO";
-            if (gl.tipoInv == 2 || gl.tipoInv == 3) scod = " INVENTARIO_DETALLE";
-            if (gl.tipoInv == 5) scod = " INVENTARIO_CIEGO_RFID";
-
-            pbar.setVisibility(View.INVISIBLE);
-            lvConteoRFID.setFocusable(true);
-
-        } catch (Exception e) {
-            msgbox(new Object() {}.getClass().getEnclosingMethod().getName() + " . " + e.getMessage());
-            addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
-        }
     }
+
+
+    private void logRfidError(String message, Exception e) {
+        Log.e(getString(R.string.rfid_conteo), message + " [" + e.getClass().getSimpleName() + "]: " + e.getMessage(), e);
+        new Handler(Looper.getMainLooper()).post(() ->
+                Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show()
+        );
+    }
+
 
     @Override
     public void onBackPressed() {
-        msgAskExit("Salir de RFID?");
+        msgAskExit(getString(R.string.salir_de_rfid));
     }
 
     private void ConfigureReader() {
-        if (reader.isConnected()) {
+        if (reader == null || !reader.isConnected()) {
+            Log.w("RFID_CONTEO", "No se puede configurar: lector no conectado.");
+            return;
+        }
 
-            TriggerInfo triggerInfo = new TriggerInfo();
-            triggerInfo.StartTrigger.setTriggerType(START_TRIGGER_TYPE.START_TRIGGER_TYPE_IMMEDIATE);
-            triggerInfo.StopTrigger.setTriggerType(STOP_TRIGGER_TYPE.STOP_TRIGGER_TYPE_IMMEDIATE);
-            try {
-                // receive events from reader
-                if (eventHandler == null)
-                    eventHandler = new EventHandler();
-                reader.Events.addEventsListener(eventHandler);
-                reader.Events.setHandheldEvent(true);
-                reader.Events.setTagReadEvent(true);
-                reader.Events.setAttachTagDataWithReadEvent(false);
-                reader.Config.setTriggerMode(ENUM_TRIGGER_MODE.RFID_MODE, true);
-                reader.Config.setStartTrigger(triggerInfo.StartTrigger);
-                reader.Config.setStopTrigger(triggerInfo.StopTrigger);
-                System.out.println("\nReader ID: "+ reader.ReaderCapabilities.ReaderID.getID());
+        TriggerInfo triggerInfo = new TriggerInfo();
+        triggerInfo.StartTrigger.setTriggerType(START_TRIGGER_TYPE.START_TRIGGER_TYPE_IMMEDIATE);
+        triggerInfo.StopTrigger.setTriggerType(STOP_TRIGGER_TYPE.STOP_TRIGGER_TYPE_IMMEDIATE);
 
-            } catch (InvalidUsageException e) {
-                e.printStackTrace();
-            } catch (OperationFailureException e) {
-                e.printStackTrace();
+        try {
+            if (eventHandler == null) {
+                eventHandler = new EventHandler();
             }
+
+            reader.Events.addEventsListener(eventHandler);
+            reader.Events.setHandheldEvent(true);
+            reader.Events.setTagReadEvent(true);
+            reader.Events.setAttachTagDataWithReadEvent(false);
+            reader.Config.setTriggerMode(ENUM_TRIGGER_MODE.RFID_MODE, true);
+            reader.Config.setStartTrigger(triggerInfo.StartTrigger);
+            reader.Config.setStopTrigger(triggerInfo.StopTrigger);
+
+            Log.d( "RFID_CONTEO", getString(R.string.lector_rfid_configurado_correctamente_id) + reader.ReaderCapabilities.ReaderID.getID());
+
+        } catch (InvalidUsageException exInvalid) {
+            logRfidError(getString(R.string.uso_inv_lido_al_configurar_lector_rfid), exInvalid);
+        } catch (OperationFailureException exFailure) {
+            logRfidError(getString(R.string.fallo_en_operaci_n_al_configurar_lector_rfid), exFailure);
+        } catch (Exception exGeneric) {
+            logRfidError(getString(R.string.error_inesperado_al_configurar_lector_rfid), exGeneric);
         }
     }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -261,253 +243,220 @@ public class ConteoRfid extends PBase  {
 
         @Override
         public void eventReadNotify(RfidReadEvents e) {
-            TagData[] myTags = reader.Actions.getReadTags(30);
+            TagData[] tags = reader.Actions.getReadTags(30);
 
-            if (myTags != null) {
-                for (TagData tag : myTags) {
-                    Log.d(TAG, "Tag ID " + tag.getTagID());
+            if (tags == null) return;
 
-                    if (tag.getOpCode() == ACCESS_OPERATION_CODE.ACCESS_OPERATION_READ &&
-                            tag.getOpStatus() == ACCESS_OPERATION_STATUS.ACCESS_SUCCESS &&
-                            !tag.getMemoryBankData().isEmpty()) {
-                        Log.d(TAG, "Mem Bank Data " + tag.getMemoryBankData());
-                    }
+            for (TagData tag : tags) {
+                Log.d(TAG, "Tag ID: " + tag.getTagID());
 
-                    // Procesar el tag en un hilo separado
-                    executor.execute(() -> {
-                        try {
-                            insertaConteo(tag.getTagID());
-                            procesarTag(tag);
-                        } catch (Exception ex) {
-                            ex.printStackTrace();
-                            addlog("eventReadNotify", ex.getMessage(), "procesarTag error");
-                        }
-                    });
+                if (tag.getOpCode() == ACCESS_OPERATION_CODE.ACCESS_OPERATION_READ &&
+                        tag.getOpStatus() == ACCESS_OPERATION_STATUS.ACCESS_SUCCESS &&
+                        !tag.getMemoryBankData().isEmpty()) {
+
+                    Log.d(TAG, "Mem Bank Data: " + tag.getMemoryBankData());
                 }
+
+                executor.execute(() -> procesarLectura(tag));
             }
         }
 
+        private void procesarLectura(TagData tag) {
+            try {
+                insertaConteo(tag.getTagID());
+                procesarTag(tag);
+            } catch (Exception ex) {
+                logError("procesarLectura", ex, "procesarTag error");
+            }
+        }
 
         @Override
         public void eventStatusNotify(RfidStatusEvents e) {
-            Log.d(TAG, "Status Notification: " + e.StatusEventData.getStatusEventType());
+            STATUS_EVENT_TYPE tipoEvento = e.StatusEventData.getStatusEventType();
 
-            if (e.StatusEventData.getStatusEventType() == STATUS_EVENT_TYPE.HANDHELD_TRIGGER_EVENT) {
+            Log.d(TAG, "Status Notification: " + tipoEvento);
+
+            if (tipoEvento == STATUS_EVENT_TYPE.HANDHELD_TRIGGER_EVENT) {
                 HANDHELD_TRIGGER_EVENT_TYPE tipo = e.StatusEventData.HandheldTriggerEventData.getHandheldEvent();
 
-                if (tipo == HANDHELD_TRIGGER_EVENT_TYPE.HANDHELD_TRIGGER_PRESSED) {
-                    executor.execute(() -> {
-                        try {
-                            reader.Actions.Inventory.perform();
-                        } catch (InvalidUsageException | OperationFailureException ex) {
-                            ex.printStackTrace();
-                            addlog("HANDHELD_TRIGGER_PRESSED", ex.getMessage(), "failed_trigger_rfid " + currentTime);
-                        }
-                    });
+                if (tipo.equals(HANDHELD_TRIGGER_PRESSED)) {
+                    executor.execute(this::iniciarLectura);
+                } else if (tipo.equals(HANDHELD_TRIGGER_RELEASED)) {
+                    executor.execute(this::detenerLectura);
                 }
 
-                if (tipo == HANDHELD_TRIGGER_EVENT_TYPE.HANDHELD_TRIGGER_RELEASED) {
-                    executor.execute(() -> {
-                        try {
-                            reader.Actions.Inventory.stop();
-                            Log.d(TAG, "termina lectura: ");
-                        } catch (InvalidUsageException | OperationFailureException ex) {
-                            ex.printStackTrace();
-                        }
-                    });
-                }
-
-                // Actualización de UI después del trigger
                 handler.post(() -> {
-                    GuardarLista(scod);
-                    showData(scod);
+                    GuardarLista();
+                    showData();
                 });
             }
+        }
+
+        private void iniciarLectura() {
+            try {
+                reader.Actions.Inventory.perform();
+            } catch (InvalidUsageException | OperationFailureException ex) {
+                logError(getString(R.string.iniciarlectura), ex, getString(R.string.failed_trigger_rfid) + currentTime);
+            }
+        }
+
+        private void detenerLectura() {
+            try {
+                reader.Actions.Inventory.stop();
+                Log.d(TAG, getString(R.string.lectura_rfid_detenida));
+            } catch (InvalidUsageException | OperationFailureException ex) {
+                logError(getString(R.string.detenerlectura), ex, getString(R.string.stop_trigger_error));
+            }
+        }
+
+        private void logError(String origen, Exception ex, String contexto) {
+            Log.e(TAG, "[" + origen + "] " + contexto + ": " + ex.getMessage(), ex);
+            addlog(origen, ex.getMessage(), contexto);
         }
     }
 
     private void procesarTag(TagData tagData) {
-        InventoryListItem inventoryItem = null;
-        InventoryListItem oldObject = null;
-        String memoryBank = null;
-        String memoryBankData = null;
-        boolean added = false;
+        if (tagData == null || tagData.getTagID() == null) {
+            Log.w(TAG, getString(R.string.tagdata_nulo_o_sin_id_ignorado));
+            return;
+        }
 
         try {
             String tagID = tagData.getTagID();
+            int seenCount = Math.max(tagData.getTagSeenCount(), 1);
+            com.dts.application.Application.TOTAL_TAGS.addAndGet(seenCount);
 
-            if (inventoryList.containsKey(tagID)) {
-                int index = inventoryList.get(tagID);
-                if (index >= 0) {
-                    oldObject = tagsReadInventory.get(index);
-                    int tagSeenCount = tagData.getTagSeenCount();
-                    TOTAL_TAGS += tagSeenCount > 0 ? tagSeenCount : 1;
+            boolean isExisting = inventoryList.containsKey(tagID);
+            InventoryListItem item;
 
-                    if (tagSeenCount > 0) {
-                        oldObject.incrementCountWithTagSeenCount(tagSeenCount);
-                    } else {
-                        oldObject.incrementCount();
-                    }
-
-                    if (tagData.getOpCode() != null &&
-                            tagData.getOpCode() == ACCESS_OPERATION_CODE.ACCESS_OPERATION_READ) {
-                        memoryBankData = tagData.getMemoryBankData();
-                    }
-
-                    if (oldObject.getMemoryBankData() == null ||
-                            !oldObject.getMemoryBankData().equalsIgnoreCase(memoryBankData)) {
-                        oldObject.setMemoryBankData(memoryBankData);
-                    }
-
-                    if (pc) oldObject.setPC(Integer.toHexString(tagData.getPC()));
-                    if (phase) oldObject.setPhase(Integer.toString(tagData.getPhase()));
-                    if (channelIndex) oldObject.setChannelIndex(Integer.toString(tagData.getChannelIndex()));
-                    if (rssi) oldObject.setRSSI(Integer.toString(tagData.getPeakRSSI()));
+            if (isExisting) {
+                Integer indexObj = inventoryList.get(tagID);
+                if (indexObj == null || indexObj < 0 || indexObj >= tagsReadInventory.size()) {
+                    Log.w(TAG, getString(R.string.ndice_inv_lido_o_nulo_en_tagsreadinventory_para_tag) + tagID);
+                    return;
                 }
+                int index = indexObj;
+
+                tagsReadInventory.size();
+
+                item = tagsReadInventory.get(index);
+                item.incrementCountWithTagSeenCount(seenCount);
+
             } else {
-                int tagSeenCount = tagData.getTagSeenCount();
-                TOTAL_TAGS += tagSeenCount > 0 ? tagSeenCount : 1;
-
-                inventoryItem = new InventoryListItem(tagID, tagSeenCount > 0 ? tagSeenCount : 1,
-                        null, null, null, null, null, null);
-
-                added = tagsReadInventory.add(inventoryItem);
-
-                if (added) {
-                    inventoryList.put(tagID, UNIQUE_TAGS);
-                    if (tagData.getOpCode() != null &&
-                            tagData.getOpCode() == ACCESS_OPERATION_CODE.ACCESS_OPERATION_READ) {
-                        memoryBank = tagData.getMemoryBank().toString();
-                        memoryBankData = tagData.getMemoryBankData();
-                    }
-
-                    oldObject = tagsReadInventory.get(UNIQUE_TAGS);
-                    oldObject.setMemoryBankData(memoryBankData);
-                    oldObject.setMemoryBank(memoryBank);
-
-                    if (pc) oldObject.setPC(Integer.toHexString(tagData.getPC()));
-                    if (phase) oldObject.setPhase(Integer.toString(tagData.getPhase()));
-                    if (channelIndex) oldObject.setChannelIndex(Integer.toString(tagData.getChannelIndex()));
-                    if (rssi) oldObject.setRSSI(Integer.toString(tagData.getPeakRSSI()));
-
-                    UNIQUE_TAGS++;
+                item = new InventoryListItem(tagID, seenCount, null, null, null, null, null, null);
+                if (!tagsReadInventory.add(item)) {
+                    Log.w(TAG, getString(R.string.no_se_pudo_agregar_nuevo_tag) + tagID);
+                    return;
                 }
+
+                inventoryList.put(tagID, UNIQUE_TAGS.incrementAndGet());
             }
+
+            if (tagData.getOpCode() == ACCESS_OPERATION_CODE.ACCESS_OPERATION_READ) {
+                item.setMemoryBankData(safeString(tagData.getMemoryBankData()));
+                item.setMemoryBank(safeEnum(tagData.getMemoryBank()));
+            }
+
+            if (pc) item.setPC(Integer.toHexString(tagData.getPC()));
+            if (phase) item.setPhase(Integer.toString(tagData.getPhase()));
+            if (channelIndex) item.setChannelIndex(Integer.toString(tagData.getChannelIndex()));
+            if (rssi) item.setRSSI(Integer.toString(tagData.getPeakRSSI()));
 
             startbeepingTimer();
 
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception ex) {
+            Log.e(TAG, getString(R.string.error_procesando_tag) + ex.getMessage(), ex);
+            addlog(getString(R.string.procesartag), ex.getMessage(), getString(R.string.tagid) + tagData.getTagID());
         }
     }
 
-    public void insertaConteo(String tag){
+    private String safeString(String value) {
+        return value != null ? value : "";
+    }
 
-        //clsInventario_ciego_RfidObj InvCiegoRfid = new clsInventario_ciego_RfidObj(this, Con, db);
-        //clsRegistro_handheldObj regHH = new clsRegistro_handheldObj(this, Con, db);
-        //clsClasses.clsInventario_ciego_rfid item= new clsClasses.clsInventario_ciego_rfid();
+    private String safeEnum(MEMORY_BANK value) {
+        return value != null ? value.toString() : "";
+    }
 
-        /********** data de un inventario que no es ciego *************************************/
-        clsInventario_detalleObj InvDet = new clsInventario_detalleObj(this, Con, db);
-        clsClasses.clsInventario_detalle itemDeta= clsCls.new clsInventario_detalle();
+    public void insertaConteo(String tagId) {
+        if (tagId == null || tagId.trim().isEmpty()) {
+            Log.w(TAG, getString(R.string.id_de_tag_nulo_o_vac_o_no_se_inserta_conteo));
+            return;
+        }
 
-        /********** objetos de un inventario que es ciego o usa rfid *************************/
-        clsInventario_ciegoObj InvCiego = new clsInventario_ciegoObj(this, Con, db);
-        clsClasses.clsInventario_ciego items;
-
-        Long sfecha;
-        String  ff,ffe, ss;
-        Integer rg;
-        Cod = tag;
-        Integer cant = 1;
-        Cursor dt;
+        final String ubicacion = "1";
+        double cantidadReal;
 
         currentTime = new SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(new Date());
 
-        try{
+        clsInventario_detalleObj invDetalleObj = new clsInventario_detalleObj(this, Con, db);
+        clsInventario_ciegoObj invCiegoObj = new clsInventario_ciegoObj(this, Con, db);
+        clsClasses.clsInventario_detalle detalle = new clsClasses.clsInventario_detalle();
+        clsClasses.clsInventario_ciego ciego = new clsClasses.clsInventario_ciego();
 
-            /******lo valido en el oncreate, aca se repetiria n veces y lo manejara lento -- ****/
-            //regHH.fill();
-            //gl.IDregistro = regHH.first().id_registro;
-            Ubic = "1";
-            items = new clsClasses.clsInventario_ciego();
+        try {
+            String sqlConsulta = "SELECT CODIGO_BARRA FROM INVENTARIO_CIEGO WHERE CODIGO_BARRA = '" + tagId + "'";
+            Cursor cursor = Con.OpenDT(sqlConsulta);
+            int existe = (cursor != null) ? cursor.getCount() : 0;
 
-            //ss="SELECT CODIGO_BARRA FROM INVENTARIO_CIEGO WHERE ID_INVENTARIO_ENC="+ gl.idInvEnc +" AND ELIMINADO = 0 AND CODIGO_BARRA=" + '"+ barra + "';
-            ss= "SELECT CODIGO_BARRA FROM INVENTARIO_CIEGO WHERE CODIGO_BARRA = '"+ Cod + "' ";
+            cantidadReal = 1;
 
-            dt=Con.OpenDT(ss);
-            rg = dt.getCount();
+            String fechaCorta = obtenerFechaCorta();
 
-            sfecha=du.getActDate();
-            ff = "20"+sfecha;
-            ffe= ff.substring(0,8);
-
-            if(gl.tipoInv!=1){
-                if(tipoArt.equals("S")){
-                    canti = 1.0;
-                }else {
-                   canti = Double.parseDouble(String.valueOf(cant));
-                }
-            }else {
-
-                canti = Double.parseDouble(String.valueOf(cant));
-            }
-
-            if(canti==0){
-                msgbox("Ingrese una cantidad mayor a 0");
-                return;
-            }
-
-            if(gl.tipoInv==0) {
-
-                barra = Cod;
-                items.id_inventario_enc = gl.idInvEnc;
-                items.codigo_barra = barra;
-                items.cantidad= canti;
-                items.comunicado = "N";
-                items.ubicacion = Ubic;
-                items.id_operador = gl.userid;
-                //items.fecha = ffe + " " + currentTime;
-                items.fecha = ffe;
-                items.id_registro = gl.IDregistro;
-                items.eliminado = 0;
+            if (gl.tipoInv == 0) {
+                // Inventario Ciego
+                ciego.id_inventario_enc = gl.idInvEnc;
+                ciego.codigo_barra = tagId;
+                ciego.cantidad = cantidadReal;
+                ciego.comunicado = "N";
+                ciego.ubicacion = ubicacion;
+                ciego.id_operador = gl.userid;
+                ciego.fecha = fechaCorta;
+                ciego.id_registro = gl.IDregistro;
+                ciego.eliminado = 0;
 
                 try {
-
-                    if(rg == 0){
-                        //InvCiegoRfid.add(item);
-                        InvCiego.add(items);
+                    if (existe == 0) {
+                        invCiegoObj.add(ciego);
+                    } else {
+                        String sqlUpdate = "UPDATE Inventario_ciego SET cantidad = cantidad + 1 WHERE CODIGO_BARRA = '" + tagId + "'";
+                        db.execSQL(sqlUpdate);
                     }
-                    else {
-                        /*sql="update Inventario_ciego_rfid set cantidad = cantidad + 1 WHERE CODIGO_BARRA = '"+ barra + "' ";*/
-                        sql="update Inventario_ciego set cantidad = cantidad + 1 WHERE CODIGO_BARRA = '"+ barra + "' ";
-                        db.execSQL(sql);
-                    }
-
                 } catch (Exception e) {
-                    addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "error_insert_inv_ciego " + du.getActDate());
-                    msgbox("Error: "+e.getMessage());
+                    logError(getString(R.string.insertaconteo), e, getString(R.string.error_insertando_actualizando_inventario_ciego));
+                    msgbox(getString(R.string.error_al_registrar_el_conteo) + e.getMessage());
                 }
 
-            }else if(gl.tipoInv==2 || gl.tipoInv==3){
+            } else if (gl.tipoInv == 2 || gl.tipoInv == 3) {
+                // Inventario Detalle
+                detalle.id_inventario_enc = gl.idInvEnc;
+                detalle.id_articulo = tagId;
+                detalle.codigo_barra = tagId;
+                detalle.ubicacion = ubicacion;
+                detalle.cantidad = cantidadReal;
+                detalle.comunicado = "N";
+                detalle.id_operador = gl.userid;
+                detalle.fecha = fechaCorta;
+                detalle.id_registro = gl.IDregistro;
+                detalle.eliminado = 0;
 
-                itemDeta.id_inventario_enc= gl.idInvEnc;
-                itemDeta.id_articulo = Cod;
-                itemDeta.ubicacion = Ubic;
-                itemDeta.cantidad = canti;
-                itemDeta.codigo_barra = barra;
-                itemDeta.comunicado = "N";
-                itemDeta.id_operador = gl.userid;
-                itemDeta.fecha = ffe;
-                itemDeta.id_registro = gl.IDregistro;
-                itemDeta.eliminado =0;
-                InvDet.add(itemDeta);
+                invDetalleObj.add(detalle);
             }
 
-        }catch (Exception e){
-            addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "error_insert_conteo " + du.getActDate());
-            msgbox("Error: "+e);
+        } catch (Exception e) {
+            logError(getString(R.string.insertaconteo), e, getString(R.string.error_general_durante_inserci_n_de_conteo));
+            msgbox(getString(R.string.error_inesperado) + e.getMessage());
         }
+    }
+
+    private String obtenerFechaCorta() {
+        String fechaRaw = "20" + du.getActDate();
+        return fechaRaw.length() >= 8 ? fechaRaw.substring(0, 8) : fechaRaw;
+    }
+
+    private void logError(String origen, Exception e, String contexto) {
+        Log.e(TAG, "[" + origen + "] " + contexto + ": " + e.getMessage(), e);
+        addlog(origen, e.getMessage(), contexto + " - " + du.getActDate());
     }
 
     private void msgAskExit(String msg) {
@@ -529,42 +478,34 @@ public class ConteoRfid extends PBase  {
         finish();
     }
 
-    public void CerrarRFIF(){
+    public void CerrarRFIF() {
         try {
-            if (reader != null)
-            {
+            if (reader != null) {
                 reader.Events.removeEventsListener(eventHandler);
                 reader.disconnect();
-                Toast.makeText(getApplicationContext(), "RFID Desconectado.", Toast.LENGTH_LONG).show();
+
+                mostrarToastSeguro();
+
                 reader = null;
-                readers.Dispose();
-                readers = null;
 
+                if (readers != null) {
+                    readers.Dispose();
+                    readers = null;
+                }
+
+                Log.d(TAG, "Lector RFID desconectado correctamente.");
             }
+        } catch (InvalidUsageException ex) {
+            logError("CerrarRFIF", ex, "ERROR_RFID_DISCONNECT_1");
+        } catch (OperationFailureException ex) {
+            logError("CerrarRFIF", ex, "ERROR_RFID_DISCONNECT_2");
+        } catch (Exception ex) {
+            logError("CerrarRFIF", ex, "ERROR_RFID_DISCONNECT_3");
         }
-        catch (InvalidUsageException e)
-        {
-            e.printStackTrace();
-            addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"ERROR_RFID_DISCONNECT_1 " + du.getActDate() );
-        }
-        catch (OperationFailureException e)
-        {
-            e.printStackTrace();
-            addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"ERROR_RFID_DISCONNECT_2 " + du.getActDate() );
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-            addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"ERROR_RFID_DISCONNECT_3"+ du.getActDate() );
-        }
-
-        //finish();
     }
 
 
-    /*************************************************/
     /********** configuración del grid ***************/
-
     public void doHelp(View view) {
         String tx;
 
@@ -577,261 +518,116 @@ public class ConteoRfid extends PBase  {
             PopUp(tx);
 
         }catch (Exception e){
-            addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
+            addlog(Objects.requireNonNull(new Object() {
+            }.getClass().getEnclosingMethod()).getName(), e.getMessage(), "");
         }
 
 
     }
 
-    private void setHandlers(){
+    private void showData() {
+        if (contador > 0) return;
 
-        try{
+        try {
+            dvalues_rfid.clear();
+            lvConteoRFID.setAdapter(null);
 
-            cb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    if (cb.isChecked()==true) consol = true; showData(scod);
-                    if (cb.isChecked()==false) consol = false; showData(scod);
-                }
-            });
+            String tabla = "INVENTARIO_CIEGO";
+            String consulta = "SELECT CODIGO_BARRA, UBICACION, CANTIDAD FROM " + tabla +
+                    " WHERE ID_INVENTARIO_ENC=" + gl.idInvEnc + " AND ELIMINADO = 0";
 
-            lvConteoRFID.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            Cursor cursor = Con.OpenDT(consulta);
 
-                    try {
-                        Object lvObj = lvConteoRFID.getItemAtPosition(position);
-                        String item = (String) lvObj;
+            if (cursor != null) {
+                int totalRegistros = cursor.getCount();
+                contador = totalRegistros;
 
-                        dadapter.setSelectedIndex(position);
-                        toast(item);
-                    } catch (Exception e) {
-                        addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"");
-                        msgbox("Error setHandler: "+e);
+                if (totalRegistros > 0) {
+                    regs.setText(String.valueOf(totalRegistros));
+
+                    while (cursor.moveToNext()) {
+                        clsClasses.clsInventario_ciego_rfid item = new clsClasses.clsInventario_ciego_rfid();
+                        item.codigo_barra = cursor.getString(0);
+                        item.ubicacion = cursor.getString(1);
+                        item.cantidad = Double.parseDouble(cursor.getString(2));
+                        dvalues_rfid.add(item);
                     }
                 }
 
-                ;
-            });
-
-            lvConteoRFID.setOnItemLongClickListener((parent, view, position, id) -> {
-
-                try {
-                    Object lvObj = lvConteoRFID.getItemAtPosition(position);
-                    String item = (String) lvObj;
-
-                    adapter.setSelectedIndex(position);
-                    msgbox(item);
-                } catch (Exception e) {
-                    addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"");
-                    msgbox("Error setHandler: "+e);
-                }
-                return true;
-            });
-
-            txtBarra.addTextChangedListener(new TextWatcher() {
-
-                public void afterTextChanged(Editable s) {
-                }
-
-                public void beforeTextChanged(CharSequence s, int start,int count, int after) {
-                }
-
-                public void onTextChanged(CharSequence s, int start,int before, int count) {
-                    showData(scod);
-                }
-
-            });
-
-            txtUbic.addTextChangedListener(new TextWatcher() {
-
-                public void afterTextChanged(Editable s) {
-                }
-
-                public void beforeTextChanged(CharSequence s, int start,int count, int after) {
-                }
-
-                public void onTextChanged(CharSequence s, int start,int before, int count) {
-                    showData(scod);
-                }
-
-            });
-        }catch (Exception e){
-            addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"");
-            msgbox("Error setHandler: "+e);
-        }
-
-    }
-
-
-    private void showData(String tn) {
-        Cursor dt;
-        String ss = "";
-        int cc,rg;
-        //currentTime = new SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(new Date());
-        new clsClasses.clsInventario_ciego_rfid();
-        clsClasses.clsInventario_ciego_rfid items;
-
-        try {
-
-            if (contador == 0){
-
-                dvalues_rfid.clear();
-                lvConteoRFID.setAdapter(null);
-
-
-            tn ="INVENTARIO_CIEGO";
-
-            tn = tn +" WHERE ID_INVENTARIO_ENC="+ gl.idInvEnc +" AND ELIMINADO = 0";
-            ss="SELECT CODIGO_BARRA, UBICACION, CANTIDAD FROM "+ tn;
-
-            dt=Con.OpenDT(ss);
-            rg = dt.getCount();
-            contador = dt.getCount();
-            if(rg>0){
-                regs.setText(""+rg);
+                cursor.close();
             }
 
-            dt.moveToFirst();
-            while (!dt.isAfterLast()) {
-                items= new clsClasses.clsInventario_ciego_rfid();
-                items.codigo_barra = dt.getString(0);
-                items.ubicacion = dt.getString(1);
-                items.cantidad = Double.parseDouble(dt.getString(2));
-                dvalues_rfid.add(items);
-                dt.moveToNext();
-            }
-
-            if (dt!=null) dt.close();
-
-            dadapter_rfid= new LA_RFID(this,dvalues_rfid);
+            dadapter_rfid = new LA_RFID(this, dvalues_rfid);
             lvConteoRFID.setAdapter(dadapter_rfid);
             pbar.setVisibility(View.INVISIBLE);
 
-
-            }
-
-
-        } catch (Exception e) {
-            addlog(new Object(){}.getClass().getEnclosingMethod().getName(),e.getMessage(),"ERROR_SHOWDATA_RFID " + du.getActDate());
-            msgbox("showData: "+e.getMessage());
+        } catch (Exception ex) {
+            logError("showData", ex, "ERROR_SHOWDATA_RFID");
+            msgbox("Error en showData: " + ex.getMessage());
         }
-
-
     }
 
-    private void GuardarLista(String tn){
 
+    private void GuardarLista() {
+        if (gl.tipoInv != 1) return;
 
-            /********** data de un inventario que no es ciego *************************************/
-            //clsInventario_detalleObj InvDet = new clsInventario_detalleObj(this, Con, db);
-            //clsClasses.clsInventario_detalle itemDeta= clsCls.new clsInventario_detalle();
+        clsInventario_ciegoObj invCiego = new clsInventario_ciegoObj(this, Con, db);
+        String ubicacion = "1";
+        String fechaFormateada = obtenerFechaFormateada();
 
-            /********** objetos de un inventario que es ciego o usa rfid *************************/
-            clsInventario_ciegoObj InvCiego = new clsInventario_ciegoObj(this, Con, db);
-            clsClasses.clsInventario_ciego items;
-            clsClasses.clsInventario_ciego_rfid item_rfid;
+        try {
+            List<Map.Entry<String, Integer>> entradaLista = new ArrayList<>(inventoryList.entrySet());
 
-            Long sfecha;
-            String  ff,ffe, ss;
-            Integer rg;
-            //Cod = "dsd";  //TAG
-            Integer cant = 1;
-            Cursor dt;
+            for (Map.Entry<String, Integer> entrada : entradaLista) {
+                String codigoBarra = entrada.getKey();
 
-            currentTime = new SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(new Date());
-            sfecha=du.getActDate();
-            ff = "20"+sfecha;
-            ffe= ff.substring(0,8);
+                if (lista_limpia.contains(codigoBarra)) continue;
+                lista_limpia.add(codigoBarra);
 
-            try{
+                if (!existeEnInventarioCiego(codigoBarra)) {
+                    clsClasses.clsInventario_ciego itemCiego = construirItemInventarioCiego(codigoBarra, ubicacion, fechaFormateada);
+                    clsClasses.clsInventario_ciego_rfid itemRfid = new clsClasses.clsInventario_ciego_rfid();
+                    itemRfid.codigo_barra = codigoBarra;
+                    dvalues_rfid.add(itemRfid);
 
-                /******lo valido en el oncreate, aca se repetiria n veces y lo manejara lento ****/
-                //regHH.fill();
-                //gl.IDregistro = regHH.first().id_registro;
-                Ubic = "1";
-                items = new clsClasses.clsInventario_ciego();
-
-                if(gl.tipoInv!=1){
-                    /*if(tipoArt.equals("S")){
-                        canti = 1.0;
-                    }else {
-                        canti = Double.parseDouble(String.valueOf(cant));
-                    }*/
-                    canti = 1.0;
-
-                }else {
-
-                    canti = Double.parseDouble(String.valueOf(cant));
-                }
-
-
-                if(gl.tipoInv==1) {
-
-                    Set<Map.Entry<String, Integer>> entrySet
-                            = inventoryList.entrySet();
-
-                    Map.Entry<Integer, String>[] entryArray
-                            = entrySet.toArray(
-                            new Map.Entry[entrySet.size()]);
-
-                    //GT16052022: itero la lista final que se usó en memoria
-                    for (int x = 0; x < inventoryList.size(); x++) {
-
-                        String p_codigo_barra ="";
-                        p_codigo_barra = String.valueOf(entryArray[x].getKey());
-
-                        if (!lista_limpia.contains(p_codigo_barra)){
-
-                            lista_limpia.add(p_codigo_barra);
-
-                            ss= "SELECT CODIGO_BARRA FROM INVENTARIO_CIEGO WHERE CODIGO_BARRA = '"+ p_codigo_barra + "' ";
-                            dt=Con.OpenDT(ss);
-                            rg = dt.getCount();
-
-                            barra = p_codigo_barra;
-                            items.id_inventario_enc = gl.idInvEnc;
-                            items.codigo_barra = barra;
-                            //items.cantidad = canti;
-                            //items.cantidad = p.cantidad;
-                            items.cantidad = 1;
-                            items.comunicado = "N";
-                            items.ubicacion = Ubic;
-                            items.id_operador = gl.userid;
-                            //items.fecha = ffe + " " + currentTime;
-                            items.fecha = ffe;
-                            items.id_registro = gl.IDregistro;
-                            items.eliminado = 0;
-
-
-                            item_rfid = new clsClasses.clsInventario_ciego_rfid();
-                            item_rfid.codigo_barra =  p_codigo_barra;
-                            dvalues_rfid.add(item_rfid);
-
-                            try {
-
-                                if (rg == 0) {
-                                    InvCiego.add(items);
-                                } else {
-                                    /*sql="update Inventario_ciego_rfid set cantidad = cantidad + 1 WHERE CODIGO_BARRA = '"+ barra + "' ";*/
-                                    //sql = "update Inventario_ciego set cantidad = cantidad + 1 WHERE CODIGO_BARRA = '" + barra + "' ";
-                                    //db.execSQL(sql);
-                                }
-
-                            } catch (Exception e) {
-                                addlog(new Object() {
-                                }.getClass().getEnclosingMethod().getName(), e.getMessage(), "error_insert_inv_ciego " + du.getActDate());
-                                msgbox("Error: " + e.getMessage());
-                            }
-                        }
-
+                    try {
+                        invCiego.add(itemCiego);
+                    } catch (Exception ex) {
+                        logError("guardarLista/add", ex, "error_insert_inv_ciego");
+                        msgbox("Error al insertar: " + ex.getMessage());
                     }
                 }
+            }
 
-        }catch (Exception e){
-            addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "error_insert_inv_ciego " + du.getActDate());
-            //msgbox("Error: "+e.getMessage());
+        } catch (Exception ex) {
+            logError("guardarLista", ex, "error_insert_inv_ciego");
         }
+    }
+
+    private boolean existeEnInventarioCiego(String codigoBarra) {
+        String consulta = "SELECT CODIGO_BARRA FROM INVENTARIO_CIEGO WHERE CODIGO_BARRA = '" + codigoBarra + "'";
+        Cursor cursor = Con.OpenDT(consulta);
+        return cursor != null && cursor.getCount() > 0;
+    }
+
+    private clsClasses.clsInventario_ciego construirItemInventarioCiego(String codigoBarra, String ubicacion, String fecha) {
+        clsClasses.clsInventario_ciego item = new clsClasses.clsInventario_ciego();
+        item.id_inventario_enc = gl.idInvEnc;
+        item.codigo_barra = codigoBarra;
+        item.cantidad = 1.0;
+        item.comunicado = "N";
+        item.ubicacion = ubicacion;
+        item.id_operador = gl.userid;
+        item.fecha = fecha;
+        item.id_registro = gl.IDregistro;
+        item.eliminado = 0;
+        return item;
+    }
+
+    private String obtenerFechaFormateada() {
+        long fechaNum = du.getActDate();
+        String fecha = "20" + fechaNum;
+        return fecha.length() >= 8 ? fecha.substring(0, 8) : fecha;
     }
 
     public void getCampos(){
@@ -839,22 +635,20 @@ public class ConteoRfid extends PBase  {
 
             if(dadapter_rfid != null){
 
-                Integer registros = dadapter_rfid.getCount();
+                int registros = dadapter_rfid.getCount();
 
                 if(registros <=0){
-                    msgAskContinue("No hay data con rfid registrada, ¿Seguro que desea continuar?");
-                    result = 1; return;
+                    msgAskContinue();
                 }else{
-
                     CerrarRFIF();
                     ComWS();
                 }
             }else{
                 msgbox("No hay data que sincronizar");
             }
-
         }catch (Exception e){
-            addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
+            addlog(Objects.requireNonNull(new Object() {
+            }.getClass().getEnclosingMethod()).getName(), e.getMessage(), "");
             msgbox("Error getCampos: "+e);
         }
     }
@@ -863,11 +657,11 @@ public class ConteoRfid extends PBase  {
         startActivity(new Intent(this, ComWS.class));
     }
 
-    private void msgAskContinue(String msg) {
+    private void msgAskContinue() {
         AlertDialog.Builder dialog = new AlertDialog.Builder(this);
         dialog.setCancelable(false);
         dialog.setTitle("Tom");
-        dialog.setMessage(msg);
+        dialog.setMessage("No hay data con rfid registrada, ¿Continuar?");
         dialog.setPositiveButton("Si", (dialog1, which) -> ComWS());
         dialog.setNegativeButton("No", (dialog2, which) -> {
         });
@@ -926,38 +720,48 @@ public class ConteoRfid extends PBase  {
                 readers = new Readers(this, ENUM_TRANSPORT.SERVICE_SERIAL);
             }
 
-            executor.execute(() -> {
-                boolean conectado = false;
-                try {
-                    List<ReaderDevice> lista = readers.GetAvailableRFIDReaderList();
-                    if (lista != null && !lista.isEmpty()) {
-                        availableRFIDReaderList = new ArrayList<>(lista);
-                        readerDevice = lista.get(0);
-                        reader = readerDevice.getRFIDReader();
-                        if (!reader.isConnected() && gl != null) {
-                            reader.connect();
-                            ConfigureReader();
-                            conectado = true;
-                        }
-                    }
-                } catch (InvalidUsageException | OperationFailureException e) {
-                    e.printStackTrace();
-                    Log.d(TAG, "Error conexión RFID: " + e.getMessage());
-                }
+            conectarLectorRfid();
 
-                boolean finalConectado = conectado;
-                handler.post(() -> {
-                    if (finalConectado) {
-                        textView.setText("Lectura RFID lista.");
-                    } else {
-                        textView.setText("Se ha perdido la comunicación al RFID.");
-                    }
-                });
-            });
-
-        } catch (Exception e) {
-            addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "onResume error");
+        } catch (Exception ex) {
+            logError("onResume", ex, "Error general en onResume");
         }
     }
+    private void conectarLectorRfid() {
+        executor.execute(() -> {
+            boolean conectado = false;
 
+            try {
+                List<ReaderDevice> lista = readers.GetAvailableRFIDReaderList();
+
+                if (lista != null && !lista.isEmpty()) {
+                    availableRFIDReaderList = new ArrayList<>(lista);
+                    readerDevice = lista.get(0);
+                    reader = readerDevice.getRFIDReader();
+
+                    if (reader != null && !reader.isConnected() && gl != null) {
+                        reader.connect();
+                        ConfigureReader();
+                        conectado = true;
+                    }
+                } else {
+                    Log.w(TAG, "No hay lectores RFID disponibles.");
+                }
+
+            } catch (InvalidUsageException | OperationFailureException ex) {
+                logError("conectarLectorRfid", ex, "Error conectando lector RFID");
+            } catch (Exception ex) {
+                logError("conectarLectorRfid", ex, "Error inesperado");
+            }
+
+            boolean estadoFinal = conectado;
+            handler.post(() -> textView.setText(estadoFinal
+                    ? R.string.lectura_rfid_lista
+                    : R.string.se_ha_perdido_la_comunicaci_n_al_rfid));
+        });
+    }
+    private void mostrarToastSeguro() {
+        new Handler(Looper.getMainLooper()).post(() ->
+                Toast.makeText(this, R.string.rfid_desconectado, Toast.LENGTH_LONG).show()
+        );
+    }
 }

@@ -130,7 +130,7 @@ public class clsRegistro_handheldObj {
 
         while (!dt.isAfterLast()) {
 
-            item = clsCls.new clsRegistro_handheld();
+            item = new clsClasses.clsRegistro_handheld();
 
             item.id_registro = dt.getInt(0);
             item.id_empresa = dt.getInt(1);

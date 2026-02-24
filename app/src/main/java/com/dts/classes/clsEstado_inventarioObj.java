@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-
 import com.dts.base.BaseDatos;
 import com.dts.base.clsClasses;
 
@@ -77,10 +76,8 @@ public class clsEstado_inventarioObj {
     private void addItem(clsClasses.clsEstado_inventario item) {
 
         ins.init("Estado_inventario");
-
         ins.add("Id_estado", item.id_estado);
         ins.add("nombre", item.nombre);
-
         db.execSQL(ins.sql());
 
     }
@@ -88,14 +85,9 @@ public class clsEstado_inventarioObj {
     private void updateItem(clsClasses.clsEstado_inventario item) {
 
         upd.init("Estado_inventario");
-
         upd.add("nombre", item.nombre);
-
         upd.Where("(Id_estado=" + item.id_estado + ")");
-
         db.execSQL(upd.sql());
-
-        //Toast toast= Toast.makeText(cont,upd.sql(), Toast.LENGTH_LONG);toast.show();
 
     }
 
@@ -120,17 +112,13 @@ public class clsEstado_inventarioObj {
         if (dt.getCount() > 0) dt.moveToFirst();
 
         while (!dt.isAfterLast()) {
-
-            item = clsCls.new clsEstado_inventario();
-
+            item = new clsClasses.clsEstado_inventario();
             item.id_estado = dt.getInt(0);
             item.nombre = dt.getString(1);
-
             items.add(item);
-
             dt.moveToNext();
         }
-        if (dt!=null) dt.close();
+        dt.close();
 
     }
 
@@ -142,7 +130,7 @@ public class clsEstado_inventarioObj {
             dt = Con.OpenDT(idsql);
             dt.moveToFirst();
             nid = dt.getInt(0) + 1;
-            if (dt!=null) dt.close();
+            dt.close();
         } catch (Exception e) {
             nid = 1;
         }
@@ -153,10 +141,8 @@ public class clsEstado_inventarioObj {
     public String addItemSql(clsClasses.clsEstado_inventario item) {
 
         ins.init("Estado_inventario");
-
         ins.add("Id_estado", item.id_estado);
         ins.add("nombre", item.nombre);
-
         return ins.sql();
 
     }
@@ -164,14 +150,9 @@ public class clsEstado_inventarioObj {
     public String updateItemSql(clsClasses.clsEstado_inventario item) {
 
         upd.init("Estado_inventario");
-
         upd.add("nombre", item.nombre);
-
         upd.Where("(Id_estado=" + item.id_estado + ")");
-
         return upd.sql();
-
-        //Toast toast= Toast.makeText(cont,upd.sql(), Toast.LENGTH_LONG);toast.show();
 
     }
 

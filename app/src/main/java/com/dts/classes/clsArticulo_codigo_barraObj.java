@@ -91,15 +91,10 @@ public class clsArticulo_codigo_barraObj {
     private void updateItem(clsClasses.clsArticulo_codigo_barra item) {
 
         upd.init("Articulo_codigo_barra");
-
         upd.add("id_articulo", item.id_articulo);
         upd.add("codigo_barra", item.codigo_barra);
-
         upd.Where("(id_empresa=" + item.id_empresa + ")");
-
         db.execSQL(upd.sql());
-
-        //Toast toast= Toast.makeText(cont,upd.sql(), Toast.LENGTH_LONG);toast.show();
 
     }
 
@@ -125,18 +120,15 @@ public class clsArticulo_codigo_barraObj {
 
         while (!dt.isAfterLast()) {
 
-            item = clsCls.new clsArticulo_codigo_barra();
-
+            item = new clsClasses.clsArticulo_codigo_barra();
             item.id_empresa = dt.getInt(0);
             item.id_articulo = dt.getString(1);
             item.codigo_barra = dt.getString(2);
-
             items.add(item);
-
             dt.moveToNext();
         }
 
-        if (dt!=null) dt.close();
+        dt.close();
 
     }
 
@@ -148,7 +140,7 @@ public class clsArticulo_codigo_barraObj {
             dt = Con.OpenDT(idsql);
             dt.moveToFirst();
             nid = dt.getInt(0) + 1;
-            if (dt!=null) dt.close();
+            dt.close();
         } catch (Exception e) {
             nid = 1;
         }
@@ -160,11 +152,9 @@ public class clsArticulo_codigo_barraObj {
     public String addItemSql(clsClasses.clsArticulo_codigo_barra item) {
 
         ins.init("Articulo_codigo_barra");
-
         ins.add("id_empresa", item.id_empresa);
         ins.add("id_articulo", item.id_articulo);
         ins.add("codigo_barra", item.codigo_barra);
-
         return ins.sql();
 
     }
@@ -172,15 +162,11 @@ public class clsArticulo_codigo_barraObj {
     public String updateItemSql(clsClasses.clsArticulo_codigo_barra item) {
 
         upd.init("Articulo_codigo_barra");
-
         upd.add("id_articulo", item.id_articulo);
         upd.add("codigo_barra", item.codigo_barra);
-
         upd.Where("(id_empresa=" + item.id_empresa + ")");
 
         return upd.sql();
-
-        //Toast toast= Toast.makeText(cont,upd.sql(), Toast.LENGTH_LONG);toast.show();
 
     }
 

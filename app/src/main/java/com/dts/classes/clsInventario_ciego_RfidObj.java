@@ -3,7 +3,6 @@ package com.dts.classes;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-
 import com.dts.base.BaseDatos;
 import com.dts.base.clsClasses;
 
@@ -18,12 +17,11 @@ public class clsInventario_ciego_RfidObj {
     private SQLiteDatabase db;
     public BaseDatos.Insert ins;
     public BaseDatos.Update upd;
-    private clsClasses clsCls = new clsClasses();
     public clsClasses.clsInventario_ciego_rfid item;
 
     private String sel="SELECT * FROM Inventario_ciego_rfid";
     private String sql;
-    public ArrayList<clsClasses.clsInventario_ciego_rfid> items= new ArrayList<clsClasses.clsInventario_ciego_rfid>();
+    public ArrayList<clsClasses.clsInventario_ciego_rfid> items= new ArrayList<>();
 
     public clsInventario_ciego_RfidObj(Context context, BaseDatos dbconnection, SQLiteDatabase dbase) {
         cont=context;
@@ -71,15 +69,12 @@ public class clsInventario_ciego_RfidObj {
         return items.get(0);
     }
 
-
-
     private void addItem(clsClasses.clsInventario_ciego_rfid item) {
 
         ins.init("Inventario_ciego_rfid");
         ins.add("id_inventario_enc",item.id_inventario_enc);
         ins.add("codigo_barra",item.codigo_barra);
         ins.add("cantidad",item.cantidad);
-        //ins.add("id",item.id);
         ins.add("comunicado",item.comunicado);
         ins.add("ubicacion",item.ubicacion);
         ins.add("id_operador",item.id_operador);
@@ -106,8 +101,6 @@ public class clsInventario_ciego_RfidObj {
         upd.add("eliminado",item.eliminado);
         upd.Where("(id="+item.id+")");
         db.execSQL(upd.sql());
-
-        //Toast toast= Toast.makeText(cont,upd.sql(), Toast.LENGTH_LONG);toast.show();
 
     }
 
@@ -149,7 +142,7 @@ public class clsInventario_ciego_RfidObj {
 
             dt.moveToNext();
         }
-        if (dt!=null) dt.close();
+        dt.close();
 
     }
 
@@ -202,8 +195,6 @@ public class clsInventario_ciego_RfidObj {
         upd.add("eliminado",item.eliminado);
         upd.Where("(id="+item.id+")");
         return upd.sql();
-
-        //Toast toast= Toast.makeText(cont,upd.sql(), Toast.LENGTH_LONG);toast.show();
 
     }
 

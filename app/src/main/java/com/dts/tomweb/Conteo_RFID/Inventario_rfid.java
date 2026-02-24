@@ -9,20 +9,17 @@ import android.media.ToneGenerator;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.dts.adapters.inventario_rfid_adapter;
 import com.dts.base.clsClasses;
 import com.dts.classes.InventarioHelper;
-import com.dts.classes.clsArticuloObj;
 import com.dts.classes.clsInventario_Rfid;
 import com.dts.classes.clsInventario_ciegoObj;
 import com.dts.classes.clsInventario_detalleObj;
@@ -33,10 +30,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
+import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ExecutorService;
@@ -47,50 +43,35 @@ import com.zebra.rfid.api3.*;
 public class Inventario_rfid extends PBase{
 
     /*********elementos de RFID ***********************/
-    public static Readers readers;
+    public Readers readers;
     private static ArrayList<ReaderDevice> availableRFIDReaderList;
     private static ReaderDevice readerDevice;
     private static RFIDReader reader;
-    private static String TAG = "DTS";
+    private static final String TAG = "DTS";
     //Beeper
     public static BEEPER_VOLUME beeperVolume = BEEPER_VOLUME.HIGH_BEEP;
-    public static BEEPER_VOLUME sledBeeperVolume = BEEPER_VOLUME.HIGH_BEEP;
+
     public Timer tbeep;
     /**
      * method to start a timer task to beep for locate functionality and configure the ON OFF duration.
      */
-    public Timer locatebeep;
     private boolean beepON = false;
-    private boolean beepONLocate = false;
-
-
     private EventHandler eventHandler;
 
     /*****************************************************/
 
     String currentTime;
-    private TextView lblLecturas,lblTotal;
+    private TextView lblLecturas;
     private RecyclerView rcListaLecturasRfid;
-     private Button btnEnviarConteo, btnRegresar, btnListarConteo, btnLimpiarConteo;
-
+    private Button btnEnviarConteo, btnRegresar, btnListarConteo, btnLimpiarConteo;
 
     //***************** inventario demo de lecturas preexistentes ******//
-    //clsClasses.clsInventario_detalle itemDeta=clsCls.new clsInventario_detalle();
     clsInventario_detalleObj InvDet;
-    private final ArrayList<clsInventario_Rfid> Lista_Registros = new ArrayList<clsInventario_Rfid>();
 
-
-
-    //********* lecturas RFID ********************//
-    clsClasses.clsInventario_detalle inv_detalle_rfid;
-    clsInventario_Rfid Registro_Rfid = new clsInventario_Rfid();
     private List<clsInventario_Rfid> Lista_Registros_rfid = Collections.synchronizedList(new ArrayList<>());
     inventario_rfid_adapter adapter_rfid;
 
-    clsClasses.clsInventario_ciego item_ciego_rfid;
     clsInventario_ciegoObj InvCiego_rfid;
-
-    private String tipoArt;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,20 +79,27 @@ public class Inventario_rfid extends PBase{
         setContentView(R.layout.activity_inventario_rfid);
         super.InitBase(savedInstanceState);
 
-        // Objetos para insertar en las tablas SQLite
+        inicializarBaseDeDatos();
+        inicializarUI();
+        inicializarAdaptador();
+        inicializarReader();
+        cargarRegistrosPrevios();
+        setHandlers();
+    }
+
+    private void inicializarBaseDeDatos() {
         InvDet = new clsInventario_detalleObj(getApplicationContext(), Con, db);
         InvCiego_rfid = new clsInventario_ciegoObj(this, Con, db);
-
         currentTime = new SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(new Date());
+    }
 
-        // Inicializa el toneGenerator si no existe
+    private void inicializarUI() {
         if (toneGenerator == null) {
             toneGenerator = new ToneGenerator(AudioManager.STREAM_MUSIC, 100);
         }
 
-        // Configura campos visuales
         lblLecturas = findViewById(R.id.txtLecturas);
-        lblTotal = findViewById(R.id.txtTotal);
+        TextView lblTotal = findViewById(R.id.txtTotal);
         rcListaLecturasRfid = findViewById(R.id.rcListaLecturasRFID);
         rcListaLecturasRfid.setLayoutManager(new LinearLayoutManager(this));
 
@@ -120,15 +108,17 @@ public class Inventario_rfid extends PBase{
         btnListarConteo = findViewById(R.id.btnListarConteo);
         btnLimpiarConteo = findViewById(R.id.btnLimpiar);
 
-        lblLecturas.setText("Conteo: 0");
-        lblTotal.setText("Esperado: 0");
+        lblLecturas.setText(R.string.conteo_registros_cero);
+        lblTotal.setText(R.string.Esperado_cero);
+    }
 
-        // Inicializa adaptador y lista
+    private void inicializarAdaptador() {
         Lista_Registros_rfid = Collections.synchronizedList(new ArrayList<>());
         adapter_rfid = new inventario_rfid_adapter(getApplicationContext(), Lista_Registros_rfid);
         rcListaLecturasRfid.setAdapter(adapter_rfid);
+    }
 
-        // Validación del lector RFID usando Executor (no AsyncTask)
+    private void inicializarReader() {
         if (readers == null) {
             readers = new Readers(this, ENUM_TRANSPORT.SERVICE_SERIAL);
         }
@@ -151,10 +141,15 @@ public class Inventario_rfid extends PBase{
                         ConfigureReader();
                         conectado = true;
                     }
+                } else {
+                    Log.w(TAG, "No hay lectores RFID disponibles.");
                 }
-            } catch (InvalidUsageException | OperationFailureException e) {
-                e.printStackTrace();
-                Log.e(TAG, "Error conectando con lector RFID: " + e.getMessage());
+            } catch (InvalidUsageException exInvalid) {
+                logRfidError("Uso inválido al conectar lector RFID", exInvalid);
+            } catch (OperationFailureException exFailure) {
+                logRfidError("Fallo en operación al conectar lector RFID", exFailure);
+            } catch (Exception exGeneric) {
+                logRfidError("Error inesperado al conectar lector RFID", exGeneric);
             }
 
             boolean finalConectado = conectado;
@@ -166,41 +161,42 @@ public class Inventario_rfid extends PBase{
                 }
             });
         });
-
-        cargarRegistrosPrevios();
-
-        setHandlers();
     }
 
 
     private void ConfigureReader() {
-        if (reader.isConnected()) {
-            TriggerInfo triggerInfo = new TriggerInfo();
-            triggerInfo.StartTrigger.setTriggerType(START_TRIGGER_TYPE.START_TRIGGER_TYPE_IMMEDIATE);
-            triggerInfo.StopTrigger.setTriggerType(STOP_TRIGGER_TYPE.STOP_TRIGGER_TYPE_IMMEDIATE);
-            try {
-                // receive events from reader
-                if (eventHandler == null)
-                    eventHandler = new EventHandler();
-                reader.Events.addEventsListener(eventHandler);
-                // HH event
-                reader.Events.setHandheldEvent(true);
-                // tag event with tag data
-                reader.Events.setTagReadEvent(true);
-                // application will collect tag using getReadTags API
-                reader.Events.setAttachTagDataWithReadEvent(false);
-                // set trigger mode as rfid so scanner beam will not come
-                reader.Config.setTriggerMode(ENUM_TRIGGER_MODE.RFID_MODE, true);
-                // set start and stop triggers
-                reader.Config.setStartTrigger(triggerInfo.StartTrigger);
-                reader.Config.setStopTrigger(triggerInfo.StopTrigger);
-            } catch (InvalidUsageException e) {
-                e.printStackTrace();
-            } catch (OperationFailureException e) {
-                e.printStackTrace();
+        if (reader == null || !reader.isConnected()) {
+            Log.w(TAG, "Reader no está conectado, no se puede configurar.");
+            return;
+        }
+
+        TriggerInfo triggerInfo = new TriggerInfo();
+        triggerInfo.StartTrigger.setTriggerType(START_TRIGGER_TYPE.START_TRIGGER_TYPE_IMMEDIATE);
+        triggerInfo.StopTrigger.setTriggerType(STOP_TRIGGER_TYPE.STOP_TRIGGER_TYPE_IMMEDIATE);
+
+        try {
+            if (eventHandler == null) {
+                eventHandler = new EventHandler();
             }
+
+            reader.Events.addEventsListener(eventHandler);
+            reader.Events.setHandheldEvent(true);
+            reader.Events.setTagReadEvent(true);
+            reader.Events.setAttachTagDataWithReadEvent(false);
+            reader.Config.setTriggerMode(ENUM_TRIGGER_MODE.RFID_MODE, true);
+            reader.Config.setStartTrigger(triggerInfo.StartTrigger);
+            reader.Config.setStopTrigger(triggerInfo.StopTrigger);
+
+            Log.d(TAG, "Configuración del lector RFID completada.");
+        } catch (InvalidUsageException exInvalid) {
+            logRfidError("Uso inválido al configurar lector RFID", exInvalid);
+        } catch (OperationFailureException exFailure) {
+            logRfidError("Fallo en operación al configurar lector RFID", exFailure);
+        } catch (Exception exGeneric) {
+            logRfidError("Error inesperado al configurar lector RFID", exGeneric);
         }
     }
+
 
     public class EventHandler implements RfidEventsListener {
 
@@ -234,7 +230,6 @@ public class Inventario_rfid extends PBase{
         private void procesarTag(String tagId, String tagFinal) {
             synchronized (listaRegistrosSync) {
                 if (existeVisualmente(tagId) || InventarioHelper.tagExists(tagId, gl.tipoInv, InvDet, InvCiego_rfid)) return;
-
                 guardarEnBD(tagId, tagFinal);
                 agregarAlAdapter(tagId, tagFinal);
             }
@@ -253,8 +248,7 @@ public class Inventario_rfid extends PBase{
             String ffe = ff.substring(0, 8);
 
             if (gl.tipoInv == 2) {
-                tipoArt = "F";
-                clsClasses.clsInventario_detalle item = clsCls.new clsInventario_detalle();
+                clsClasses.clsInventario_detalle item = new clsClasses.clsInventario_detalle();
                 item.id_inventario_enc = gl.idInvEnc;
                 item.id_articulo = tagFinal;
                 item.ubicacion = "1";
@@ -292,11 +286,14 @@ public class Inventario_rfid extends PBase{
             handler.post(() -> {
                 synchronized (listaRegistrosSync) {
                     listaRegistrosSync.add(registro);
-                    adapter_rfid.notifyItemInserted(listaRegistrosSync.size() - 1);
-                    lblLecturas.setText("Conteo: " + adapter_rfid.getItemCount());
-                    rcListaLecturasRfid.scrollToPosition(adapter_rfid.getItemCount() - 1);
+                    int nuevoIndice = listaRegistrosSync.size() - 1;
+
+                    adapter_rfid.notifyItemInserted(nuevoIndice);
+                    lblLecturas.setText(getString(R.string.conteo_registros, adapter_rfid.getItemCount()));
+                    rcListaLecturasRfid.scrollToPosition(nuevoIndice);
                 }
             });
+
         }
 
         @Override
@@ -310,8 +307,12 @@ public class Inventario_rfid extends PBase{
                     executor.execute(() -> {
                         try {
                             reader.Actions.Inventory.perform();
-                        } catch (InvalidUsageException | OperationFailureException ex) {
-                            ex.printStackTrace();
+                        } catch (InvalidUsageException exInvalid) {
+                            logRfidError("Uso inválido al iniciar inventario", exInvalid);
+                        } catch (OperationFailureException exFailure) {
+                            logRfidError("Fallo en operación al iniciar inventario", exFailure);
+                        } catch (Exception exGeneric) {
+                            logRfidError("Error inesperado al iniciar inventario", exGeneric);
                         }
                     });
                 }
@@ -320,12 +321,13 @@ public class Inventario_rfid extends PBase{
                     executor.execute(() -> {
                         try {
                             reader.Actions.Inventory.stop();
-                            Log.d(TAG, "Lectura detenida.");
-
-                            // Validar duplicados al finalizar
-                            //handler.post(() -> buscarDuplicadosPorCodigoBarra());
-                        } catch (InvalidUsageException | OperationFailureException ex) {
-                            ex.printStackTrace();
+                            Log.d(TAG, "Lectura RFID detenida con éxito.");
+                        } catch (InvalidUsageException exInvalid) {
+                            logRfidError("Uso inválido al detener inventario", exInvalid);
+                        } catch (OperationFailureException exFailure) {
+                            logRfidError("Fallo en operación al detener inventario", exFailure);
+                        } catch (Exception exGeneric) {
+                            logRfidError("Error inesperado al detener inventario", exGeneric);
                         }
                     });
                 }
@@ -375,18 +377,17 @@ public class Inventario_rfid extends PBase{
         }
     }
 
-
     private void setHandlers() {
 
         btnEnviarConteo.setOnClickListener(v -> {
-            //gl.validaLicDB=10;
-            //ComWS();
-            toastlong("DEMO: Inventario enviado hacia wms.");
+            gl.validaLicDB=10;
+            ComWS();
+            toastlong("Realice envío de datos");
         });
 
         btnRegresar.setOnClickListener(v -> {
            //finish();
-            msgAskExit("Salir de RFID?");
+            msgAskExit();
         });
 
         btnListarConteo.setOnClickListener(v -> {
@@ -402,21 +403,40 @@ public class Inventario_rfid extends PBase{
         startActivity(new Intent(this, ComWS.class));
     }
 
-    // Método para limpiar el RecyclerView
+    // Limpia todos los datos del RecyclerView, UI y base de datos relacionada
     private void clearRecyclerView() {
-        Lista_Registros_rfid.clear(); // Limpiar la lista de datos
-        adapter_rfid.notifyDataSetChanged(); // Notificar al adapter que los datos han cambiado (se ha limpiado la lista)
-        String msgLectures = "Conteo: 0";
-        lblLecturas.setText(msgLectures);
-        InvDet.DeleteAll();
-        Log.d(TAG, "RecyclerView limpiado y conteo reiniciado.");
+        resetRfidList();
+        updateLecturaCounter();
+        clearInventoryData();
+        logClearAction();
     }
 
-    private void msgAskExit(String msg) {
+    private void resetRfidList() {
+        int itemCount = Lista_Registros_rfid.size();
+        Lista_Registros_rfid.clear();
+        if (itemCount > 0) {
+            adapter_rfid.notifyItemRangeRemoved(0, itemCount);
+        }
+    }
+
+    private void updateLecturaCounter() {
+        lblLecturas.setText(getString(R.string.conteo_registros, adapter_rfid.getItemCount()));
+    }
+
+    private void clearInventoryData() {
+        InvDet.DeleteAll();
+    }
+
+    private void logClearAction() {
+        Log.d(TAG, "Datos del RecyclerView limpiados. Conteo reiniciado a cero.");
+    }
+
+
+    private void msgAskExit() {
         AlertDialog.Builder dialog = new AlertDialog.Builder(this);
         dialog.setCancelable(false);
         dialog.setTitle("Tom");
-        dialog.setMessage("¿" + msg + "?");
+        dialog.setMessage("¿" + "Salir de RFID?" + "?");
         dialog.setPositiveButton("Si", (dialog1, which) -> {
             CerrarRFIF();
             finish();
@@ -438,23 +458,30 @@ public class Inventario_rfid extends PBase{
         CerrarRFIF();
     }
 
-    public void CerrarRFIF(){
+    private static final String TAGCerrarenrfid = "CerrarRFIF";
+
+    public void CerrarRFIF() {
         try {
             if (reader != null) {
                 reader.Events.removeEventsListener(eventHandler);
                 reader.disconnect();
-                Toast.makeText(getApplicationContext(), "Disconnecting reader", Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), "Lector desconectado", Toast.LENGTH_SHORT).show();
                 reader = null;
                 readers.Dispose();
                 readers = null;
             }
         } catch (InvalidUsageException e) {
-            e.printStackTrace();
+            handleDisconnectionError("Uso inválido del lector", e);
         } catch (OperationFailureException e) {
-            e.printStackTrace();
+            handleDisconnectionError("Fallo en operación del lector", e);
         } catch (Exception e) {
-            e.printStackTrace();
+            handleDisconnectionError("Error desconocido al cerrar el lector", e);
         }
+    }
+
+    private void handleDisconnectionError(String userMessage, Exception e) {
+        Log.e(TAGCerrarenrfid, userMessage + ": " + e.getClass().getSimpleName() + " - " + e.getMessage(), e);
+        Toast.makeText(getApplicationContext(), userMessage, Toast.LENGTH_LONG).show();
     }
 
     public void Help(View view) {
@@ -469,78 +496,58 @@ public class Inventario_rfid extends PBase{
             PopUp(tx);
 
         }catch (Exception e){
-            addlog(new Object() {}.getClass().getEnclosingMethod().getName(), e.getMessage(), "");
+            addlog(Objects.requireNonNull(new Object() {
+            }.getClass().getEnclosingMethod()).getName(), e.getMessage(), "");
         }
 
     }
 
     private void cargarRegistrosPrevios() {
-
         Lista_Registros_rfid.clear();
 
+        List<clsInventario_Rfid> nuevosRegistros = new ArrayList<>();
+
         if (gl.tipoInv == 2) {
-
-            InvDet.fill(); // Carga desde la tabla Inventario_detalle
-
+            InvDet.fill();
             for (clsClasses.clsInventario_detalle item : InvDet.items) {
-                clsInventario_Rfid reg = new clsInventario_Rfid();
-                String tagFinal = item.codigo_barra.substring(item.codigo_barra.length() - 4);
-                reg.tag =tagFinal;
-                reg.descripcion = "tag " + tagFinal;
-                reg.ubicacion = item.ubicacion;
-                reg.cantidad = (int) item.cantidad;
-                reg.producto = "producto: " + item.codigo_barra;
-                Lista_Registros_rfid.add(reg);
+                nuevosRegistros.add(mapearItemRfid(item.codigo_barra, item.ubicacion, item.cantidad));
             }
-
         } else if (gl.tipoInv == 1) {
-
-            InvCiego_rfid.fill(); // Carga desde la tabla Inventario_ciego
-
+            InvCiego_rfid.fill();
             for (clsClasses.clsInventario_ciego item : InvCiego_rfid.items) {
-                clsInventario_Rfid reg = new clsInventario_Rfid();
-                String tagFinal = item.codigo_barra.substring(item.codigo_barra.length() - 4);
-                reg.tag = tagFinal;
-                reg.descripcion = "tag " + tagFinal;
-                reg.ubicacion = item.ubicacion;
-                reg.cantidad = (int) item.cantidad;
-                reg.producto = "producto: " + item.codigo_barra;
-                Lista_Registros_rfid.add(reg);
+                nuevosRegistros.add(mapearItemRfid(item.codigo_barra, item.ubicacion, item.cantidad));
             }
         }
 
-        // Notificar al adaptador que los datos cambiaron
-        adapter_rfid.notifyDataSetChanged();
+        Lista_Registros_rfid.addAll(nuevosRegistros);
 
-        // Actualizar el conteo
-        lblLecturas.setText("Conteo: " + adapter_rfid.getItemCount());
+        if (!nuevosRegistros.isEmpty()) {
+            adapter_rfid.notifyItemRangeInserted(0, nuevosRegistros.size());
+        }
+        lblLecturas.setText(getString(R.string.conteo_registros, adapter_rfid.getItemCount()));
+
     }
 
-    private final Handler handler = new Handler(Looper.getMainLooper());
+    private clsInventario_Rfid mapearItemRfid(String codigoBarra, String ubicacion, double cantidad) {
+        String tagFinal = codigoBarra.length() >= 4
+                ? codigoBarra.substring(codigoBarra.length() - 4)
+                : codigoBarra;
 
-    private void buscarDuplicadosPorCodigoBarra() {
-        Map<String, Integer> conteoCodigos = new HashMap<>();
+        clsInventario_Rfid reg = new clsInventario_Rfid();
+        reg.tag = tagFinal;
+        reg.descripcion = "tag " + tagFinal;
+        reg.ubicacion = ubicacion;
+        reg.cantidad = (int) cantidad;
+        reg.producto = "producto: " + codigoBarra;
 
-        for (clsClasses.clsInventario_detalle item : InvDet.items) {
-            String codigo = item.codigo_barra;
-            if (codigo != null && !codigo.isEmpty()) {
-                conteoCodigos.put(codigo, conteoCodigos.getOrDefault(codigo, 0) + 1);
-            }
-        }
+        return reg;
+    }
 
-        List<String> duplicados = new ArrayList<>();
-        for (Map.Entry<String, Integer> entry : conteoCodigos.entrySet()) {
-            if (entry.getValue() > 1) {
-                duplicados.add(entry.getKey() + " (" + entry.getValue() + ")");
-            }
-        }
-
-        if (!duplicados.isEmpty()) {
-            String mensaje = "Duplicados encontrados:\n" + TextUtils.join("\n", duplicados);
-            handler.post(() -> Toast.makeText(getApplicationContext(), mensaje, Toast.LENGTH_LONG).show());
-        } else {
-            handler.post(() -> Toast.makeText(getApplicationContext(), "No hay duplicados en código de barra.", Toast.LENGTH_SHORT).show());
-        }
+    private void logRfidError(String message, Exception e) {
+        Log.e("RFID_TRIGGER", message + " [" + e.getClass().getSimpleName() + "]: " + e.getMessage(), e);
+        new Handler(Looper.getMainLooper()).post(() ->
+                Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show()
+        );
     }
 
 }

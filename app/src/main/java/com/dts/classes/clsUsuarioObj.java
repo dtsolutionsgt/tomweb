@@ -127,8 +127,7 @@ public class clsUsuarioObj {
 
         while (!dt.isAfterLast()) {
 
-            item = clsCls.new clsUsuario();
-
+            item = new clsClasses.clsUsuario();
             item.id=dt.getInt(0);
             item.nombre=dt.getString(1);
             item.activo=dt.getInt(2);
@@ -140,7 +139,7 @@ public class clsUsuarioObj {
 
             dt.moveToNext();
         }
-        if (dt!=null) dt.close();
+        dt.close();
 
     }
 
